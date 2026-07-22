@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gym App AI - Entrenador Personal</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Encabezado de la App -->
+    <header class="app-header">
+      <div class="brand-logo">
+        <span>GYM APP</span>
+        <span class="brand-badge">AI COACH</span>
+      </div>
+    </header>
+
+    <!-- NAVEGACIÓN FLOTANTE INFERIOR -->
+    <nav class="navigation-bar">
+      <button class="nav-tab active" onclick="cambiarPestana('chat')">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span>Chatbot</span>
+      </button>
+      <button class="nav-tab" onclick="cambiarPestana('biblioteca')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span>Biblioteca</span>
+      </button>
+      <button class="nav-tab" onclick="cambiarPestana('rutina')">
+        <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+        <span>Mi Rutina</span>
+      </button>
+    </nav>
+
+    <!-- PESTAÑA 1: CHATBOT -->
+    <section id="view-chat" class="view-section active">
+      <div class="chat-wrapper">
+        <div class="chat-history" id="chatHistory">
+          <div class="chat-message bot">
+            <div class="avatar-bot">AI</div>
+            <div class="message-content">
+              ¡Hola, Ema! Soy tu coach de entrenamiento y nutrición. ¿En qué enfocamos el entrenamiento de hoy?
+            </div>
+          </div>
+        </div>
+
+        <!-- Chips interactivos de respuesta rápida -->
+        <div class="quick-chips-container">
+          <button class="chip-button" onclick="enviarMensajeChip('Armame una rutina de tren superior de hipertrofia')">💪 Tren Superior</button>
+          <button class="chip-button" onclick="enviarMensajeChip('Armame una rutina de piernas e isquios')">🦵 Tren Inferior</button>
+          <button class="chip-button" onclick="enviarMensajeChip('¿Qué puedo comer post entreno económico en el Alto Valle?')">🥗 Dieta Económica</button>
+        </div>
+
+        <!-- Input del chat -->
+        <div class="chat-input-box">
+          <input type="text" id="chatInput" class="chat-input-field" placeholder="Escribile a tu coach..." onkeypress="detectarEnter(event)">
+          <button class="send-btn" onclick="enviarMensaje()">➤</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTAÑA 2: BIBLIOTECA DE EJERCICIOS -->
+    <section id="view-biblioteca" class="view-section">
+      <h2 class="section-title">Biblioteca de Ejercicios</h2>
+      <div class="exercise-grid" id="bibliotecaGrid">
+        
+        <!-- Tarjeta de Ejemplo (Back Squat) -->
+        <div class="exercise-card">
+          <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/dW5-C1fsMjk" allowfullscreen></iframe>
+          </div>
+          <div class="exercise-body">
+            <div class="exercise-header">
+              <span class="exercise-name">Back Squat</span>
+              <span class="muscle-badge">Cuádriceps / Glúteos</span>
+            </div>
+            <p class="exercise-instruction">Sentate hacia atrás y abajo, rotá las puntas de los pies 15° hacia afuera y empujá las rodillas lateralmente.</p>
+          </div>
+        </div>
+
+        <!-- Tarjeta de Ejemplo (Bench Press) -->
+        <div class="exercise-card">
+          <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/esQi683XR44" allowfullscreen></iframe>
+          </div>
+          <div class="exercise-body">
+            <div class="exercise-header">
+              <span class="exercise-name">Barbell Bench Press</span>
+              <span class="muscle-badge">Pecho / Tríceps</span>
+            </div>
+            <p class="exercise-instruction">Meté los codos a un ángulo de 45°, juntá las escápulas y mantenete firme en el banco.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PESTAÑA 3: MI RUTINA (EJECUCIÓN CON REGISTRO DE PESO) -->
+    <section id="view-rutina" class="view-section">
+      <h2 class="section-title">Rutina de Hoy</h2>
+      <div class="exercise-grid">
+        
+        <div class="exercise-card">
+          <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/fc4_hq7tjkU" allowfullscreen></iframe>
+          </div>
+          <div class="exercise-body">
+            <div class="exercise-header">
+              <span class="exercise-name">Deadlift</span>
+              <span class="muscle-badge">4 Series x 8 Reps</span>
+            </div>
+            <p class="exercise-instruction">Tensá los dorsales, pecho arriba y sacá la tensión de la barra antes de despegarla.</p>
+            
+            <div class="routine-controls">
+              <div class="weight-input-group">
+                <span class="exercise-instruction">Peso (kg):</span>
+                <input type="number" class="weight-input" placeholder="80">
+              </div>
+              <label class="exercise-instruction" style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                Hecho <input type="checkbox" class="checkbox-custom">
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- SCRIPT DE INTERACCIÓN NAVEGADOR - API -->
+  <script>
+    // CAMBIO DE PESTAÑAS DIVERSIFICADO
+    function cambiarPestana(pestana) {
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById(`view-${pestana}`).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    function detectarEnter(e) {
+      if (e.key === 'Enter') enviarMensaje();
+    }
+
+    function enviarMensajeChip(texto) {
+      document.getElementById('chatInput').value = texto;
+      enviarMensaje();
+    }
+
+    // CONEXIÓN CON TU BACKEND EN RENDER
+    async function enviarMensaje() {
+      const input = document.getElementById('chatInput');
+      const mensaje = input.value.trim();
+      if (!mensaje) return;
+
+      const history = document.getElementById('chatHistory');
+
+      // 1. Mostrar mensaje del usuario
+      history.innerHTML += `
+        <div class="chat-message user">
+          <div class="message-content">${mensaje}</div>
+        </div>
+      `;
+      input.value = '';
+      history.scrollTop = history.scrollHeight;
+
+      // 2. Mostrar indicador de cargando
+      const loadingId = 'loading-' + Date.now();
+      history.innerHTML += `
+        <div class="chat-message bot" id="${loadingId}">
+          <div class="avatar-bot">AI</div>
+          <div class="message-content">Consultando a la ciencia... ⏳</div>
+        </div>
+      `;
+      history.scrollTop = history.scrollHeight;
+
+      try {
+        // Petición a tu Render
+        const response = await fetch('https://gym-app-backend-n7we.onrender.com/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            usuario_id: 1, // ID de usuario de prueba
+            pregunta: mensaje
+          })
+        });
+
+        const data = await response.json();
+        
+        // 3. Reemplazar mensaje con respuesta real de OpenAI
+        document.getElementById(loadingId).querySelector('.message-content').innerText = data.respuesta || "Tuvimos un problema al responder.";
+      } catch (error) {
+        document.getElementById(loadingId).querySelector('.message-content').innerText = "Ocurrió un error al conectar con el servidor.";
+      }
+      
+      history.scrollTop = history.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>
