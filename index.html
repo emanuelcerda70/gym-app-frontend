@@ -13,7 +13,6 @@
 
   <div class="app-container">
     
-    <!-- Encabezado de la App -->
     <header class="app-header">
       <div class="brand-logo">
         <span>GYM APP</span>
@@ -21,7 +20,6 @@
       </div>
     </header>
 
-    <!-- NAVEGACIÓN FLOTANTE INFERIOR -->
     <nav class="navigation-bar">
       <button class="nav-tab active" onclick="cambiarPestana('chat')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -37,7 +35,6 @@
       </button>
     </nav>
 
-    <!-- PESTAÑA 1: CHATBOT -->
     <section id="view-chat" class="view-section active">
       <div class="chat-wrapper">
         <div class="chat-history" id="chatHistory">
@@ -55,14 +52,25 @@
           <button class="chip-button" onclick="enviarMensajeChip('¿Qué puedo comer post entreno económico en el Alto Valle?')">🥗 Dieta Económica</button>
         </div>
 
-        <div class="chat-input-box">
+        <!-- ZONA DE INPUT CON CÁMARA (NUEVA FASE 3) -->
+        <div class="chat-input-box" style="position: relative; display: flex; align-items: center; gap: 8px;">
+          
+          <div id="imagePreviewContainer" style="display: none; position: absolute; top: -65px; left: 10px; background: var(--bg-card); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+            <img id="imagePreview" src="" style="height: 50px; border-radius: 4px; object-fit: cover;">
+            <button onclick="quitarImagen()" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 12px; font-weight: bold;">X</button>
+          </div>
+
+          <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="previsualizarImagen(event)">
+          <button onclick="document.getElementById('imageInput').click()" style="background: none; border: none; font-size: 24px; cursor: pointer; padding: 0; filter: grayscale(100%); opacity: 0.7; transition: 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">
+            📷
+          </button>
+
           <input type="text" id="chatInput" class="chat-input-field" placeholder="Escribile a tu coach..." onkeypress="detectarEnter(event)">
           <button class="send-btn" onclick="enviarMensaje()">➤</button>
         </div>
       </div>
     </section>
 
-    <!-- PESTAÑA 2: BIBLIOTECA DE EJERCICIOS -->
     <section id="view-biblioteca" class="view-section">
       <h2 class="section-title">Biblioteca de Ejercicios</h2>
       <div class="exercise-grid" id="bibliotecaGrid">
@@ -86,7 +94,6 @@
       <h2 class="section-title" id="tituloMiRutina">Mi Rutina</h2>
       <p id="descMiRutina" style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;"></p>
       <div class="exercise-grid" id="contenedorEjerciciosRutina">
-        <!-- Los ejercicios van a aparecer mágicamente acá -->
       </div>
     </section>
 
@@ -100,14 +107,9 @@
       document.getElementById(`view-${pestana}`).classList.add('active');
       event.currentTarget.classList.add('active');
 
-      // --- NUEVO: Disparador Automático ---
-      // Si el usuario toca "Mi Rutina", vamos a buscarla a la BD
-      if (pestana === 'rutina') {
-        cargarMiRutina();
-      }
+      if (pestana === 'rutina') cargarMiRutina();
     }
 
-    // --- NUEVO: Función para buscar y dibujar la rutina ---
     async function cargarMiRutina() {
       const contenedor = document.getElementById('contenedorEjerciciosRutina');
       const titulo = document.getElementById('tituloMiRutina');
@@ -117,11 +119,9 @@
       
       try {
         const response = await fetch('https://gym-app-backend-n7we.onrender.com/api/rutinas/1');
-        
         if (!response.ok) throw new Error("No hay rutinas");
         
         const data = await response.json();
-        
         titulo.innerText = data.nombre_rutina;
         desc.innerText = data.descripcion;
         
@@ -131,11 +131,10 @@
             <div class="exercise-card">
               <div class="exercise-body">
                 <div class="exercise-header">
-                  <span class="exercise-name" style="font-size: 18px;">${ej.nombre}</span>
+                  <span class="exercise-name" style="font-size: 18px; text-transform: capitalize;">${ej.nombre}</span>
                   <span class="muscle-badge" style="background-color: var(--primary);">${ej.series} Series x ${ej.repeticiones}</span>
                 </div>
                 <p class="exercise-instruction">Descanso: ${ej.descanso} segundos</p>
-                
                 <div class="routine-controls">
                   <div class="weight-input-group">
                     <span class="exercise-instruction">Peso (kg):</span>
@@ -149,9 +148,7 @@
             </div>
           `;
         });
-        
         contenedor.innerHTML = htmlEjercicios;
-
       } catch (error) {
         titulo.innerText = "Mi Rutina";
         desc.innerText = "";
@@ -168,21 +165,47 @@
       enviarMensaje();
     }
 
+    // --- LÓGICA DE VISIÓN Y MEMORIA ---
     let memoriaDelChat = [];
+    let imagenBase64Actual = null;
+
+    function previsualizarImagen(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imagenBase64Actual = e.target.result; 
+        document.getElementById('imagePreview').src = imagenBase64Actual;
+        document.getElementById('imagePreviewContainer').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function quitarImagen() {
+      imagenBase64Actual = null;
+      document.getElementById('imageInput').value = '';
+      document.getElementById('imagePreviewContainer').style.display = 'none';
+    }
 
     async function enviarMensaje() {
       const input = document.getElementById('chatInput');
       const mensaje = input.value.trim();
-      if (!mensaje) return;
+      
+      if (!mensaje && !imagenBase64Actual) return;
 
       const history = document.getElementById('chatHistory');
 
-      history.innerHTML += `
-        <div class="chat-message user">
-          <div class="message-content">${mensaje}</div>
-        </div>
-      `;
+      let htmlUsuario = `<div class="chat-message user"><div class="message-content">`;
+      if (imagenBase64Actual) {
+        htmlUsuario += `<img src="${imagenBase64Actual}" style="max-width: 100%; border-radius: 8px; margin-bottom: 8px; display: block;"><br>`;
+      }
+      htmlUsuario += `${mensaje}</div></div>`;
+      history.innerHTML += htmlUsuario;
+      
       input.value = '';
+      const imagenAEnviar = imagenBase64Actual;
+      quitarImagen(); 
       history.scrollTop = history.scrollHeight;
 
       const loadingId = 'loading-' + Date.now();
@@ -200,14 +223,15 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             usuario_id: 1, 
-            pregunta: mensaje,
-            historial: memoriaDelChat
+            pregunta: mensaje || "¿Qué ves en esta imagen?",
+            historial: memoriaDelChat,
+            imagen_base64: imagenAEnviar 
           })
         });
 
         const data = await response.json();
         
-        memoriaDelChat.push({ role: "user", content: mensaje });
+        memoriaDelChat.push({ role: "user", content: mensaje || "[Envió una imagen]" });
         memoriaDelChat.push({ role: "ai", content: data.respuesta || "Error" });
         
         const respuestaFormateada = data.respuesta ? data.respuesta.replace(/\n/g, '<br>') : "Tuvimos un problema al responder.";
