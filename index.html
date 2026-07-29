@@ -153,6 +153,10 @@
       enviarMensaje();
     }
 
+    // --- NUEVO: LIBRETITA DE MEMORIA DEL CHAT ---
+    // Esta variable global guarda todos los mensajes de la sesión actual
+    let memoriaDelChat = [];
+
     // CONEXIÓN CON TU BACKEND EN RENDER
     async function enviarMensaje() {
       const input = document.getElementById('chatInput');
@@ -161,7 +165,7 @@
 
       const history = document.getElementById('chatHistory');
 
-      // 1. Mostrar mensaje del usuario
+      // 1. Mostrar mensaje del usuario en la pantalla
       history.innerHTML += `
         <div class="chat-message user">
           <div class="message-content">${mensaje}</div>
@@ -181,20 +185,29 @@
       history.scrollTop = history.scrollHeight;
 
       try {
-        // Petición a tu Render
+        // --- NUEVO: PREPARAMOS EL PAQUETE CON MEMORIA ---
+        // Al enviar, adjuntamos la libreta virtual.
         const response = await fetch('https://gym-app-backend-n7we.onrender.com/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            usuario_id: 1, // ID de usuario de prueba
-            pregunta: mensaje
+            usuario_id: 1, 
+            pregunta: mensaje,
+            historial: memoriaDelChat // ¡Acá está la magia! Le mandamos el historial a Render
           })
         });
 
         const data = await response.json();
         
-        // 3. Reemplazar mensaje con respuesta real de OpenAI
-        document.getElementById(loadingId).querySelector('.message-content').innerText = data.respuesta || "Tuvimos un problema al responder.";
+        // --- NUEVO: GUARDAMOS LA CHARLA EN LA LIBRETA ---
+        // Si todo salió bien, anotamos la pregunta que hicimos y la respuesta que dio
+        memoriaDelChat.push({ role: "user", content: mensaje });
+        memoriaDelChat.push({ role: "ai", content: data.respuesta || "Error" });
+        
+        // 3. Reemplazar mensaje con respuesta real del bot
+        // Para que se vea lindo y no todo amontonado, cambiamos \n por <br>
+        const respuestaFormateada = data.respuesta ? data.respuesta.replace(/\n/g, '<br>') : "Tuvimos un problema al responder.";
+        document.getElementById(loadingId).querySelector('.message-content').innerHTML = respuestaFormateada;
       } catch (error) {
         document.getElementById(loadingId).querySelector('.message-content').innerText = "Ocurrió un error al conectar con el servidor.";
       }
