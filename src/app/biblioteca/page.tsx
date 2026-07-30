@@ -6,7 +6,7 @@ import BottomNav from "@/components/layout/BottomNav"
 import Badge from "@/components/ui/Badge"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import type { Ejercicio } from "@/types"
 
 export default function BibliotecaPage() {
@@ -15,6 +15,17 @@ export default function BibliotecaPage() {
     queryKey: ["ejercicios", busqueda],
     queryFn: () => api.ejercicios.list(busqueda || undefined),
   })
+
+  const grupos = useMemo(() => {
+    if (!ejercicios) return []
+    const map = new Map<string, Ejercicio[]>()
+    for (const ej of ejercicios) {
+      const grupo = ej.musculo_objetivo || "Sin clasificar"
+      if (!map.has(grupo)) map.set(grupo, [])
+      map.get(grupo)!.push(ej)
+    }
+    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))
+  }, [ejercicios])
 
   return (
     <AuthGuard>
@@ -35,42 +46,47 @@ export default function BibliotecaPage() {
               <div key={i} className="bg-white/5 rounded-lg h-28 animate-pulse" />
             ))}
           </div>
+        ) : grupos.length === 0 ? (
+          <p className="text-sm text-muted text-center py-8">No se encontraron ejercicios</p>
         ) : (
-          <div className="space-y-3">
-            {ejercicios?.map((ej: Ejercicio, i: number) => (
-              <div
-                key={ej.id ?? i}
-                className="bg-card-glass backdrop-blur-md border border-white/10 rounded-lg overflow-hidden flex"
-              >
-                {ej.gif_url && (
-                  <div className="w-28 shrink-0 bg-black/40 flex items-center justify-center">
-                    <img
-                      src={ej.gif_url}
-                      alt={ej.nombre}
-                      className="w-full h-full object-contain"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-                <div className="p-3 flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="text-sm font-bold capitalize truncate">{ej.nombre}</h3>
-                    {ej.musculo_objetivo && (
-                      <Badge variant="cyan" className="shrink-0">{ej.musculo_objetivo}</Badge>
-                    )}
-                  </div>
-                  {ej.equipo && (
-                    <p className="text-xs text-muted-dim mb-1">Equipo: {ej.equipo}</p>
-                  )}
-                  {ej.instrucciones && (
-                    <p className="text-xs text-muted line-clamp-2">{ej.instrucciones}</p>
-                  )}
+          <div className="space-y-6">
+            {grupos.map(([grupo, lista]) => (
+              <section key={grupo}>
+                <h3 className="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-2 px-1">
+                  {grupo}
+                </h3>
+                <div className="space-y-2">
+                  {lista.map((ej: Ejercicio, i: number) => (
+                    <div
+                      key={ej.id ?? i}
+                      className="bg-card-glass backdrop-blur-md border border-white/10 rounded-lg overflow-hidden flex"
+                    >
+                      {ej.gif_url && (
+                        <div className="w-24 shrink-0 bg-black/40 flex items-center justify-center">
+                          <img
+                            src={ej.gif_url}
+                            alt={ej.nombre}
+                            className="w-full h-full object-contain"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+                      <div className="p-3 flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h4 className="text-sm font-bold capitalize truncate">{ej.nombre}</h4>
+                          {ej.equipo && (
+                            <Badge variant="cyan" className="shrink-0">{ej.equipo}</Badge>
+                          )}
+                        </div>
+                        {ej.instrucciones && (
+                          <p className="text-xs text-muted line-clamp-2">{ej.instrucciones}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              </section>
             ))}
-            {ejercicios?.length === 0 && (
-              <p className="text-sm text-muted text-center py-8">No se encontraron ejercicios</p>
-            )}
           </div>
         )}
       </main>
