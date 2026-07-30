@@ -1,22 +1,43 @@
 "use client"
 
+import { useState } from "react"
+import Link from "next/link"
 import AuthGuard from "@/components/layout/AuthGuard"
 import Header from "@/components/layout/Header"
 import BottomNav from "@/components/layout/BottomNav"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
-import { useState, useMemo } from "react"
 import type { Ejercicio } from "@/types"
 
-const CATEGORIA = new Map<string, "Tren Superior" | "Tren Inferior">([
+const CATEGORIAS = [
+  {
+    id: "Tren Superior",
+    label: "TREN SUPERIOR",
+    emoji: "💪",
+    desc: "Pecho, Espalda, Hombros, Brazos",
+  },
+  {
+    id: "Tren Inferior",
+    label: "TREN INFERIOR",
+    emoji: "🦵",
+    desc: "Cuádriceps, Isquiotibiales, Glúteos, Gemelos",
+  },
+]
+
+const MUSCULO_CATEGORIA = new Map([
   ["Pecho", "Tren Superior"],
+  ["Pectorales", "Tren Superior"],
   ["Espalda", "Tren Superior"],
+  ["Espalda alta", "Tren Superior"],
+  ["Dorsales", "Tren Superior"],
   ["Hombros", "Tren Superior"],
   ["Bíceps", "Tren Superior"],
   ["Tríceps", "Tren Superior"],
   ["Trapecio", "Tren Superior"],
+  ["Trapecios", "Tren Superior"],
   ["Abdominales", "Tren Superior"],
   ["Lumbar", "Tren Superior"],
+  ["Espalda baja", "Tren Superior"],
   ["Antebrazos", "Tren Superior"],
   ["Cuádriceps", "Tren Inferior"],
   ["Isquiotibiales", "Tren Inferior"],
@@ -25,112 +46,142 @@ const CATEGORIA = new Map<string, "Tren Superior" | "Tren Inferior">([
 ])
 
 export default function EjerciciosPage() {
-  const [busqueda, setBusqueda] = useState("")
+  const [categoria, setCategoria] = useState<string | null>(null)
+  const [grupoSeleccionado, setGrupoSeleccionado] = useState<string | null>(null)
+
   const { data: ejercicios, isLoading } = useQuery({
-    queryKey: ["ejercicios", busqueda],
-    queryFn: () => api.ejercicios.list(busqueda || undefined),
+    queryKey: ["ejercicios", grupoSeleccionado],
+    queryFn: () => api.ejercicios.list(grupoSeleccionado || undefined),
+    enabled: !!grupoSeleccionado,
   })
 
-  const grupos = useMemo(() => {
-    if (!ejercicios) return []
+  const gruposMusculares = ejercicios
+    ? [...new Set(ejercicios.map((ej: Ejercicio) => ej.musculo_objetivo || "General"))].sort()
+    : []
 
-    const subgrupos = new Map<string, Ejercicio[]>()
-    for (const ej of ejercicios) {
-      const grupo = ej.musculo_objetivo || "General"
-      if (!subgrupos.has(grupo)) subgrupos.set(grupo, [])
-      subgrupos.get(grupo)!.push(ej)
-    }
+  if (!categoria) {
+    return (
+      <AuthGuard>
+        <Header />
+        <main className="min-h-[calc(100vh-var(--nav-height)-100px)] px-4 pt-8 pb-28 flex flex-col animate-fade-in">
+          <h2 className="text-xl font-black text-center mb-2">Ejercicios</h2>
+          <p className="text-sm text-muted text-center mb-8">Seleccioná una categoría</p>
+          <div className="flex flex-col gap-4 max-w-md mx-auto w-full">
+            {CATEGORIAS.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setCategoria(cat.id)}
+                className="group relative bg-card-glass backdrop-blur-md border border-white/10 rounded-2xl p-6 text-left hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all active:scale-[0.98]"
+              >
+                <div className="text-4xl mb-3">{cat.emoji}</div>
+                <h3 className="text-lg font-black text-white">{cat.label}</h3>
+                <p className="text-sm text-muted mt-1">{cat.desc}</p>
+                <div className="absolute right-5 top-1/2 -translate-y-1/2 text-2xl text-muted group-hover:text-emerald-400 transition-colors">
+                  →
+                </div>
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setCategoria("Otros")}
+            className="text-sm text-muted text-center mt-6 underline"
+          >
+            Ver todos los grupos
+          </button>
+        </main>
+        <BottomNav />
+      </AuthGuard>
+    )
+  }
 
-    const superior: { grupo: string; ejercicios: Ejercicio[] }[] = []
-    const inferior: { grupo: string; ejercicios: Ejercicio[] }[] = []
-    const otros: { grupo: string; ejercicios: Ejercicio[] }[] = []
+  if (!grupoSeleccionado) {
+    const grupos = categoria === "Otros"
+      ? []
+      : [...MUSCULO_CATEGORIA.entries()]
+          .filter(([, cat]) => cat === categoria)
+          .map(([musculo]) => musculo)
+          .sort()
 
-    for (const [grupo, lista] of subgrupos) {
-      const cat = CATEGORIA.get(grupo) || "Otros"
-      const entry = { grupo, ejercicios: lista }
-      if (cat === "Tren Superior") superior.push(entry)
-      else if (cat === "Tren Inferior") inferior.push(entry)
-      else otros.push(entry)
-    }
+    return (
+      <AuthGuard>
+        <Header />
+        <main className="min-h-[calc(100vh-var(--nav-height)-100px)] px-4 pt-4 pb-28 animate-fade-in">
+          <button
+            onClick={() => { setCategoria(null); setGrupoSeleccionado(null) }}
+            className="text-sm text-muted mb-4 flex items-center gap-1"
+          >
+            ← Volver
+          </button>
+          <h2 className="text-lg font-bold mb-1">
+            {categoria === "Tren Superior" ? "💪" : "🦵"} {categoria}
+          </h2>
+          <p className="text-xs text-muted mb-5">Elegí un grupo muscular</p>
 
-    const ordenar = (arr: { grupo: string; ejercicios: Ejercicio[] }[]) =>
-      arr.sort((a, b) => a.grupo.localeCompare(b.grupo))
-
-    const secciones = [
-      { categoria: "Tren Superior", items: ordenar(superior) },
-      { categoria: "Tren Inferior", items: ordenar(inferior) },
-    ]
-    if (otros.length) secciones.push({ categoria: "Otros", items: ordenar(otros) })
-
-    return secciones.filter((s) => s.items.length > 0)
-  }, [ejercicios])
+          <div className="space-y-2.5 max-w-md mx-auto">
+            {grupos.map((grupo) => (
+              <button
+                key={grupo}
+                onClick={() => setGrupoSeleccionado(grupo)}
+                className="w-full bg-card-glass backdrop-blur-md border border-white/10 rounded-xl px-4 py-3.5 text-left hover:border-emerald-500/50 transition-all active:scale-[0.98] flex items-center justify-between"
+              >
+                <span className="text-sm font-bold capitalize">{grupo}</span>
+                <span className="text-muted">→</span>
+              </button>
+            ))}
+          </div>
+        </main>
+        <BottomNav />
+      </AuthGuard>
+    )
+  }
 
   return (
     <AuthGuard>
       <Header />
-      <main className="flex flex-col min-h-[calc(100vh-var(--nav-height)-100px)] px-4 pt-4 pb-28 animate-fade-in">
-        <h2 className="text-lg font-bold mb-4">Ejercicios</h2>
+      <main className="min-h-[calc(100vh-var(--nav-height)-100px)] px-4 pt-4 pb-28 animate-fade-in">
+        <button
+          onClick={() => setGrupoSeleccionado(null)}
+          className="text-sm text-muted mb-4 flex items-center gap-1"
+        >
+          ← Volver a grupos
+        </button>
 
-        <input
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar por músculo (ej: pecho, espalda)..."
-          className="w-full bg-white/10 border border-white/10 rounded-md px-4 py-3 text-sm text-white placeholder-muted-dim outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 mb-4"
-        />
+        <h2 className="text-lg font-bold mb-1 capitalize">{grupoSeleccionado}</h2>
+        <p className="text-xs text-muted mb-4">
+          {isLoading ? "Cargando..." : `${ejercicios?.length || 0} ejercicios`}
+        </p>
 
         {isLoading ? (
-          <div className="space-y-4">
+          <div className="space-y-2.5">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white/5 rounded-lg h-24 animate-pulse" />
+              <div key={i} className="bg-white/5 rounded-lg h-16 animate-pulse" />
             ))}
           </div>
-        ) : grupos.length === 0 ? (
-          <p className="text-sm text-muted text-center py-8">No se encontraron ejercicios</p>
         ) : (
-          <div className="space-y-6">
-            {grupos.map(({ categoria, items }) => (
-              <section key={categoria}>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-base">
-                    {categoria === "Tren Superior" ? "💪" : categoria === "Tren Inferior" ? "🦵" : "📌"}
-                  </span>
-                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                    {categoria}
-                  </h3>
+          <div className="space-y-2 max-w-md mx-auto">
+            {ejercicios?.map((ej: Ejercicio) => (
+              <Link
+                key={ej.id}
+                href={`/ejercicios/${ej.id}`}
+                className="flex items-center gap-3 bg-card-glass backdrop-blur-md border border-white/10 rounded-xl p-2.5 hover:border-emerald-500/50 transition-all active:scale-[0.98]"
+              >
+                {ej.gif_url ? (
+                  <div className="w-14 h-14 rounded-lg overflow-hidden bg-black/40 shrink-0">
+                    <img src={ej.gif_url} alt="" className="w-full h-full object-contain" loading="lazy" />
+                  </div>
+                ) : (
+                  <div className="w-14 h-14 rounded-lg bg-white/5 flex items-center justify-center text-lg shrink-0">
+                    🏋️
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold capitalize truncate">{ej.nombre}</h3>
+                  {ej.equipo && (
+                    <p className="text-xs text-muted truncate">{ej.equipo}</p>
+                  )}
                 </div>
-
-                <div className="space-y-3">
-                  {items.map(({ grupo, ejercicios: lista }) => (
-                    <div key={grupo}>
-                      <h4 className="text-xs font-bold text-muted uppercase tracking-wide mb-1.5 px-1">
-                        {grupo}
-                      </h4>
-                      <div className="space-y-1.5">
-                        {lista.map((ej: Ejercicio, i: number) => (
-                          <div
-                            key={ej.id ?? i}
-                            className="bg-card-glass backdrop-blur-md border border-white/10 rounded-lg overflow-hidden flex"
-                          >
-                            {ej.gif_url && (
-                              <div className="w-20 shrink-0 bg-black/40 flex items-center justify-center">
-                                <img
-                                  src={ej.gif_url}
-                                  alt={ej.nombre}
-                                  className="w-full h-full object-contain"
-                                  loading="lazy"
-                                />
-                              </div>
-                            )}
-                            <div className="p-2.5 flex-1 min-w-0 flex items-center">
-                              <h5 className="text-sm font-medium capitalize truncate">{ej.nombre}</h5>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
+                <span className="text-muted text-lg">→</span>
+              </Link>
             ))}
           </div>
         )}

@@ -69,6 +69,8 @@ export const api = {
       const params = musculo ? `?musculo=${encodeURIComponent(musculo)}` : ""
       return request<import("@/types").Ejercicio[]>(`/api/ejercicios${params}`)
     },
+    detalle: (id: number) =>
+      request<import("@/types").Ejercicio>(`/api/ejercicios/${id}`),
   },
 
   progreso: {
