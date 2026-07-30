@@ -48,8 +48,9 @@ export interface Ejercicio {
   id?: number
   nombre: string
   musculo_objetivo?: string
-  descripcion?: string
-  grupo_muscular?: string
+  equipo?: string
+  gif_url?: string
+  instrucciones?: string
 }
 
 export interface RutinaEjercicio {
@@ -57,6 +58,7 @@ export interface RutinaEjercicio {
   series: number
   repeticiones: string
   descanso: number
+  gif_url?: string
 }
 
 export interface Rutina {
