@@ -8,53 +8,7 @@ import { api } from "@/lib/api"
 import { useState, useMemo } from "react"
 import type { Ejercicio } from "@/types"
 
-const MUSCULO_ES = new Map<string, string>([
-  ["chest", "Pecho"],
-  ["pectoral", "Pecho"],
-  ["upper chest", "Pecho"],
-  ["lower chest", "Pecho"],
-  ["back", "Espalda"],
-  ["upper back", "Espalda"],
-  ["lats", "Espalda"],
-  ["latissimus dorsi", "Espalda"],
-  ["middle back", "Espalda"],
-  ["lower back", "Lumbar"],
-  ["shoulders", "Hombros"],
-  ["shoulder", "Hombros"],
-  ["deltoids", "Hombros"],
-  ["deltoid", "Hombros"],
-  ["front deltoid", "Hombros"],
-  ["side deltoid", "Hombros"],
-  ["rear deltoid", "Hombros"],
-  ["biceps", "Bíceps"],
-  ["triceps", "Tríceps"],
-  ["traps", "Trapecio"],
-  ["trapezius", "Trapecio"],
-  ["abdominals", "Abdominales"],
-  ["abs", "Abdominales"],
-  ["abdominal", "Abdominales"],
-  ["core", "Abdominales"],
-  ["obliques", "Abdominales"],
-  ["quadriceps", "Cuádriceps"],
-  ["quads", "Cuádriceps"],
-  ["hamstrings", "Isquiotibiales"],
-  ["hamstring", "Isquiotibiales"],
-  ["glutes", "Glúteos"],
-  ["glute", "Glúteos"],
-  ["gluteal", "Glúteos"],
-  ["calves", "Gemelos"],
-  ["calf", "Gemelos"],
-  ["forearms", "Antebrazos"],
-  ["forearm", "Antebrazos"],
-  ["adductors", "Aductores"],
-  ["abductors", "Abductores"],
-  ["hip flexors", "Flexores de Cadera"],
-  ["neck", "Cuello"],
-  ["full body", "Cuerpo Completo"],
-  ["cardio", "Cardio"],
-])
-
-const GRUPO_CATEGORIA = new Map<string, "Tren Superior" | "Tren Inferior">([
+const CATEGORIA = new Map<string, "Tren Superior" | "Tren Inferior">([
   ["Pecho", "Tren Superior"],
   ["Espalda", "Tren Superior"],
   ["Hombros", "Tren Superior"],
@@ -64,23 +18,11 @@ const GRUPO_CATEGORIA = new Map<string, "Tren Superior" | "Tren Inferior">([
   ["Abdominales", "Tren Superior"],
   ["Lumbar", "Tren Superior"],
   ["Antebrazos", "Tren Superior"],
-  ["Aductores", "Tren Inferior"],
-  ["Abductores", "Tren Inferior"],
   ["Cuádriceps", "Tren Inferior"],
   ["Isquiotibiales", "Tren Inferior"],
   ["Glúteos", "Tren Inferior"],
   ["Gemelos", "Tren Inferior"],
-  ["Flexores de Cadera", "Tren Inferior"],
 ])
-
-function traducirMusculo(ing: string): string {
-  const key = ing.toLowerCase().trim()
-  return MUSCULO_ES.get(key) || ing
-}
-
-function categoriaDe(grupo: string): "Tren Superior" | "Tren Inferior" | "Otros" {
-  return GRUPO_CATEGORIA.get(grupo) || "Otros"
-}
 
 export default function EjerciciosPage() {
   const [busqueda, setBusqueda] = useState("")
@@ -94,7 +36,7 @@ export default function EjerciciosPage() {
 
     const subgrupos = new Map<string, Ejercicio[]>()
     for (const ej of ejercicios) {
-      const grupo = traducirMusculo(ej.musculo_objetivo || "Sin clasificar")
+      const grupo = ej.musculo_objetivo || "General"
       if (!subgrupos.has(grupo)) subgrupos.set(grupo, [])
       subgrupos.get(grupo)!.push(ej)
     }
@@ -104,7 +46,7 @@ export default function EjerciciosPage() {
     const otros: { grupo: string; ejercicios: Ejercicio[] }[] = []
 
     for (const [grupo, lista] of subgrupos) {
-      const cat = categoriaDe(grupo)
+      const cat = CATEGORIA.get(grupo) || "Otros"
       const entry = { grupo, ejercicios: lista }
       if (cat === "Tren Superior") superior.push(entry)
       else if (cat === "Tren Inferior") inferior.push(entry)
@@ -132,7 +74,7 @@ export default function EjerciciosPage() {
         <input
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar por músculo..."
+          placeholder="Buscar por músculo (ej: pecho, espalda)..."
           className="w-full bg-white/10 border border-white/10 rounded-md px-4 py-3 text-sm text-white placeholder-muted-dim outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 mb-4"
         />
 
