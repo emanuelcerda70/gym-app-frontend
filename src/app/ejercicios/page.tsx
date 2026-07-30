@@ -3,41 +3,55 @@
 import AuthGuard from "@/components/layout/AuthGuard"
 import Header from "@/components/layout/Header"
 import BottomNav from "@/components/layout/BottomNav"
-import Badge from "@/components/ui/Badge"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { useState, useMemo } from "react"
 import type { Ejercicio } from "@/types"
 
-const GRUPO_MUSCULAR = new Map<string, string>([
+const MUSCULO_ES = new Map<string, string>([
+  ["chest", "Pecho"],
   ["pectoral", "Pecho"],
-  ["pecho", "Pecho"],
-  ["espalda", "Espalda"],
-  ["dorsal", "Espalda"],
-  ["hombro", "Hombros"],
-  ["hombros", "Hombros"],
-  ["deltoides", "Hombros"],
+  ["upper chest", "Pecho"],
+  ["lower chest", "Pecho"],
+  ["back", "Espalda"],
+  ["upper back", "Espalda"],
+  ["lats", "Espalda"],
+  ["latissimus dorsi", "Espalda"],
+  ["middle back", "Espalda"],
+  ["lower back", "Lumbar"],
+  ["shoulders", "Hombros"],
+  ["shoulder", "Hombros"],
+  ["deltoids", "Hombros"],
+  ["deltoid", "Hombros"],
+  ["front deltoid", "Hombros"],
+  ["side deltoid", "Hombros"],
+  ["rear deltoid", "Hombros"],
   ["biceps", "Bíceps"],
   ["triceps", "Tríceps"],
-  ["trapecio", "Trapecio"],
-  ["abdominales", "Abdominales"],
+  ["traps", "Trapecio"],
+  ["trapezius", "Trapecio"],
+  ["abdominals", "Abdominales"],
+  ["abs", "Abdominales"],
   ["abdominal", "Abdominales"],
   ["core", "Abdominales"],
-  ["lumbar", "Lumbar"],
-  ["cuadriceps", "Cuádriceps"],
-  ["cuádriceps", "Cuádriceps"],
-  ["isquiotibiales", "Isquiotibiales"],
-  ["femoral", "Isquiotibiales"],
-  ["gluteo", "Glúteos"],
-  ["gluteos", "Glúteos"],
-  ["glúteos", "Glúteos"],
-  ["gemelo", "Gemelos"],
-  ["gemelos", "Gemelos"],
-  ["pantorrilla", "Gemelos"],
-  ["pantorrillas", "Gemelos"],
-  ["ante brazo", "Antebrazos"],
-  ["antebrazo", "Antebrazos"],
-  ["antebrazos", "Antebrazos"],
+  ["obliques", "Abdominales"],
+  ["quadriceps", "Cuádriceps"],
+  ["quads", "Cuádriceps"],
+  ["hamstrings", "Isquiotibiales"],
+  ["hamstring", "Isquiotibiales"],
+  ["glutes", "Glúteos"],
+  ["glute", "Glúteos"],
+  ["gluteal", "Glúteos"],
+  ["calves", "Gemelos"],
+  ["calf", "Gemelos"],
+  ["forearms", "Antebrazos"],
+  ["forearm", "Antebrazos"],
+  ["adductors", "Aductores"],
+  ["abductors", "Abductores"],
+  ["hip flexors", "Flexores de Cadera"],
+  ["neck", "Cuello"],
+  ["full body", "Cuerpo Completo"],
+  ["cardio", "Cardio"],
 ])
 
 const GRUPO_CATEGORIA = new Map<string, "Tren Superior" | "Tren Inferior">([
@@ -50,22 +64,25 @@ const GRUPO_CATEGORIA = new Map<string, "Tren Superior" | "Tren Inferior">([
   ["Abdominales", "Tren Superior"],
   ["Lumbar", "Tren Superior"],
   ["Antebrazos", "Tren Superior"],
+  ["Aductores", "Tren Inferior"],
+  ["Abductores", "Tren Inferior"],
   ["Cuádriceps", "Tren Inferior"],
   ["Isquiotibiales", "Tren Inferior"],
   ["Glúteos", "Tren Inferior"],
   ["Gemelos", "Tren Inferior"],
+  ["Flexores de Cadera", "Tren Inferior"],
 ])
 
-function normalizarMusculo(musculo: string): string {
-  const key = musculo.toLowerCase().trim()
-  return GRUPO_MUSCULAR.get(key) || musculo
+function traducirMusculo(ing: string): string {
+  const key = ing.toLowerCase().trim()
+  return MUSCULO_ES.get(key) || ing
 }
 
 function categoriaDe(grupo: string): "Tren Superior" | "Tren Inferior" | "Otros" {
   return GRUPO_CATEGORIA.get(grupo) || "Otros"
 }
 
-export default function BibliotecaPage() {
+export default function EjerciciosPage() {
   const [busqueda, setBusqueda] = useState("")
   const { data: ejercicios, isLoading } = useQuery({
     queryKey: ["ejercicios", busqueda],
@@ -77,7 +94,7 @@ export default function BibliotecaPage() {
 
     const subgrupos = new Map<string, Ejercicio[]>()
     for (const ej of ejercicios) {
-      const grupo = normalizarMusculo(ej.musculo_objetivo || "Sin clasificar")
+      const grupo = traducirMusculo(ej.musculo_objetivo || "Sin clasificar")
       if (!subgrupos.has(grupo)) subgrupos.set(grupo, [])
       subgrupos.get(grupo)!.push(ej)
     }
@@ -97,18 +114,20 @@ export default function BibliotecaPage() {
     const ordenar = (arr: { grupo: string; ejercicios: Ejercicio[] }[]) =>
       arr.sort((a, b) => a.grupo.localeCompare(b.grupo))
 
-    return [
+    const secciones = [
       { categoria: "Tren Superior", items: ordenar(superior) },
       { categoria: "Tren Inferior", items: ordenar(inferior) },
-      ...(otros.length ? [{ categoria: "Otros", items: ordenar(otros) }] : []),
-    ].filter((s) => s.items.length > 0)
+    ]
+    if (otros.length) secciones.push({ categoria: "Otros", items: ordenar(otros) })
+
+    return secciones.filter((s) => s.items.length > 0)
   }, [ejercicios])
 
   return (
     <AuthGuard>
       <Header />
       <main className="flex flex-col min-h-[calc(100vh-var(--nav-height)-100px)] px-4 pt-4 pb-28 animate-fade-in">
-        <h2 className="text-lg font-bold mb-4">Biblioteca de Ejercicios</h2>
+        <h2 className="text-lg font-bold mb-4">Ejercicios</h2>
 
         <input
           value={busqueda}
@@ -130,7 +149,7 @@ export default function BibliotecaPage() {
             {grupos.map(({ categoria, items }) => (
               <section key={categoria}>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm font-black text-emerald-400 uppercase tracking-wider">
+                  <span className="text-base">
                     {categoria === "Tren Superior" ? "💪" : categoria === "Tren Inferior" ? "🦵" : "📌"}
                   </span>
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">
@@ -141,7 +160,9 @@ export default function BibliotecaPage() {
                 <div className="space-y-3">
                   {items.map(({ grupo, ejercicios: lista }) => (
                     <div key={grupo}>
-                      <h4 className="text-xs font-bold text-muted mb-1.5 px-1">{grupo}</h4>
+                      <h4 className="text-xs font-bold text-muted uppercase tracking-wide mb-1.5 px-1">
+                        {grupo}
+                      </h4>
                       <div className="space-y-1.5">
                         {lista.map((ej: Ejercicio, i: number) => (
                           <div
