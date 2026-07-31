@@ -21,3 +21,4 @@ export function usePerfil() {
 
   return { perfil: query.data, isLoading: query.isLoading, error: query.error, actualizar: mutation.mutateAsync }
 }
+ 

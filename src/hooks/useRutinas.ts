@@ -25,3 +25,4 @@ export function useRutinas() {
 
   return { rutinaActual: actual, todas, eliminar }
 }
+ 

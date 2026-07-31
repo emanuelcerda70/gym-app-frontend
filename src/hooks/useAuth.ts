@@ -39,3 +39,4 @@ export function useAuth() {
 
   return { login, register, cerrarSesion, error, token, nombre, usuarioId }
 }
+ 

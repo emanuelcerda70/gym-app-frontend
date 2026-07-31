@@ -30,3 +30,4 @@ export default function DiagramaMuscular({ musculo }: { musculo: string }) {
     </div>
   )
 }
+ 

@@ -23,3 +23,4 @@ export default function Badge({ children, variant = "ember", className }: BadgeP
     </span>
   )
 }
+ 

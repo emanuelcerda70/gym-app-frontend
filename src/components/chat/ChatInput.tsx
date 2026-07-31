@@ -87,3 +87,4 @@ export default function ChatInput({ onSend, cargando }: Props) {
     </div>
   )
 }
+ 

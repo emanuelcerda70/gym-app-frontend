@@ -30,3 +30,4 @@ export function useCheckin() {
 
   return { historial, registrar }
 }
+ 

@@ -25,3 +25,4 @@ export default function QuickChips({ onSelect }: Props) {
     </div>
   )
 }
+ 

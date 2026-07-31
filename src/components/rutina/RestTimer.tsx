@@ -133,3 +133,4 @@ export default function RestTimer({ descansoSegundos }: Props) {
     </div>
   )
 }
+ 

@@ -28,3 +28,4 @@ export function useEjercicioCatalog() {
 
   return { catalogo: query.data ?? [], findByName, isLoading: query.isLoading }
 }
+ 

@@ -284,3 +284,4 @@ export default function PerfilPage() {
     </AuthGuard>
   )
 }
+ 

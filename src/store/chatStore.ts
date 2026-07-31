@@ -20,3 +20,4 @@ export const useChatStore = create<ChatState>((set) => ({
 
   limpiar: () => set({ mensajes: [] }),
 }))
+ 

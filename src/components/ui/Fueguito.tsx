@@ -97,3 +97,4 @@ export default function Fueguito({ racha, size = 56, flare = false, className }:
     </div>
   )
 }
+ 

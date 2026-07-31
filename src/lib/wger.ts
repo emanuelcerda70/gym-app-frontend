@@ -74,3 +74,4 @@ export function getDiagrama(musculo: string): DiagramaMuscular | null {
   const nombre = ALIASES[clave] || clave.charAt(0).toUpperCase() + clave.slice(1)
   return DIAGRAMAS_WGER[nombre] || null
 }
+ 

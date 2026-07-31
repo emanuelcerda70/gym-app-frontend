@@ -17,3 +17,4 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
 
   return <>{children}</>
 }
+ 

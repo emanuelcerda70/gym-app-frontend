@@ -125,3 +125,4 @@ export interface ChatResponse {
   pregunta: string
   respuesta: string
 }
+ 
