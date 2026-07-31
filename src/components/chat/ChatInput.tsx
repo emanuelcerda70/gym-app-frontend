@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, KeyboardEvent } from "react"
+import { cn } from "@/lib/utils"
 
 interface Props {
   onSend: (text: string, imagenBase64: string | null) => void
@@ -34,15 +35,18 @@ export default function ChatInput({ onSend, cargando }: Props) {
   return (
     <div className="relative">
       {imagen && (
-        <div className="absolute -top-16 left-2 bg-surface-secondary border border-white/10 rounded-md p-1 shadow-lg flex items-center gap-2">
-          <img src={imagen} alt="preview" className="h-10 w-auto rounded" />
-          <button onClick={() => setImagen(null)} className="bg-red-500 text-white rounded-full w-5 h-5 text-xs font-bold">
+        <div className="absolute -top-[72px] left-2 glass rounded-md p-1.5 shadow-lg flex items-center gap-2">
+          <img src={imagen} alt="preview" className="h-12 w-auto rounded" />
+          <button
+            onClick={() => setImagen(null)}
+            className="bg-red-500 text-carbon rounded-full w-5 h-5 text-xs font-bold shrink-0"
+          >
             X
           </button>
         </div>
       )}
 
-      <div className="flex items-center gap-2 bg-surface-secondary/90 border border-white/10 rounded-full px-4 py-2">
+      <div className={cn("flex items-center gap-2 glass rounded-full px-4 py-2", cargando && "opacity-60")}>
         <input
           type="file"
           accept="image/*"
@@ -50,8 +54,15 @@ export default function ChatInput({ onSend, cargando }: Props) {
           onChange={handleFile}
           className="hidden"
         />
-        <button onClick={() => fileRef.current?.click()} className="text-lg opacity-60 hover:opacity-100 transition">
-          📷
+        <button
+          onClick={() => fileRef.current?.click()}
+          className="text-ceniza hover:text-ember-soft transition-colors shrink-0"
+          aria-label="Adjuntar foto"
+        >
+          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+            <circle cx="12" cy="13" r="4" />
+          </svg>
         </button>
 
         <input
@@ -59,15 +70,18 @@ export default function ChatInput({ onSend, cargando }: Props) {
           onChange={(e) => setTexto(e.target.value)}
           onKeyDown={handleKey}
           placeholder="Escribile a tu coach..."
-          className="flex-1 bg-transparent text-sm text-white placeholder-muted-dim outline-none"
+          className="flex-1 bg-transparent text-sm text-hueso placeholder-ceniza-dim outline-none min-w-0"
         />
 
         <button
           onClick={handleSend}
           disabled={cargando}
-          className="w-9 h-9 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-bold text-sm flex items-center justify-center hover:opacity-90 transition disabled:opacity-50"
+          className="w-9 h-9 rounded-full bg-ember text-carbon font-bold text-sm flex items-center justify-center hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 shrink-0"
+          aria-label="Enviar"
         >
-          ➤
+          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+            <path d="M3.4 20.4l17.5-7.5a1 1 0 0 0 0-1.8L3.4 3.6a1 1 0 0 0-1.4 1.2l1.8 6.2 10.2 1.5-10.2 1.5-1.8 6.2a1 1 0 0 0 1.4 1.2z" />
+          </svg>
         </button>
       </div>
     </div>

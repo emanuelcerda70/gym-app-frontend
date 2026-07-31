@@ -65,9 +65,13 @@ export const api = {
   },
 
   ejercicios: {
-    list: (musculo?: string) => {
-      const params = musculo ? `?musculo=${encodeURIComponent(musculo)}` : ""
-      return request<import("@/types").Ejercicio[]>(`/api/ejercicios${params}`)
+    list: (musculo?: string, todos = false) => {
+      const params = new URLSearchParams()
+      if (musculo) params.set("musculo", musculo)
+      if (todos) params.set("todos", "true")
+      params.set("limit", "200")
+      const qs = params.toString()
+      return request<import("@/types").Ejercicio[]>(`/api/ejercicios${qs ? `?${qs}` : ""}`)
     },
     detalle: (id: number) =>
       request<import("@/types").Ejercicio>(`/api/ejercicios/${id}`),
@@ -85,7 +89,7 @@ export const api = {
 
   checkin: {
     historial: () =>
-      request<import("@/types").HistorialAsistencias>("/api/checkin/historial"),
+      request<import("@/types").Asistencia[]>("/api/checkin/historial"),
     registrar: () =>
       request<import("@/types").CheckinResponse>("/api/checkin", { method: "POST" }),
   },

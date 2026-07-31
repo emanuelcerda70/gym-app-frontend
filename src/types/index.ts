@@ -71,7 +71,8 @@ export interface RutinaResumen {
   id: number
   nombre: string
   descripcion: string
-  ejercicios_count: number
+  ejercicios_count?: number
+  ejercicios?: { id: number; ejercicio_id: number; dia_semana?: string }[]
 }
 
 export interface RegistroCarga {
@@ -90,10 +91,16 @@ export interface HistorialEjercicio {
   }[]
 }
 
-export interface HistorialAsistencias {
-  rachas: string[]
+export interface Asistencia {
+  id: number
+  usuario_id: number
+  fecha: string
+  completado: boolean
+}
+
+export interface HistorialCheckin {
+  fechas: string[]
   total_dias: number
-  racha_actual: number
 }
 
 export interface CheckinResponse {

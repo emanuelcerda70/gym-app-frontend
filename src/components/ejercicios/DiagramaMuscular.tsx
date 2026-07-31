@@ -24,7 +24,7 @@ export default function DiagramaMuscular({ musculo }: { musculo: string }) {
           )}
         </div>
       </div>
-      <p className="text-[10px] text-muted text-center">
+      <p className="text-[10px] text-ceniza text-center">
         Diagramas musculares: wger.de (CC-BY-SA)
       </p>
     </div>

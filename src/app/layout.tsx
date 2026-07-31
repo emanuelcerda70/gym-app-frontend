@@ -1,16 +1,36 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
+import { Archivo, Sora } from "next/font/google"
 import "./globals.css"
 import Providers from "./providers"
 
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-sora",
+})
+
+const archivo = Archivo({
+  subsets: ["latin"],
+  variable: "--font-archivo",
+  axes: ["wdth"],
+})
+
 export const metadata: Metadata = {
-  title: "GYM APP - Entrenador Personal IA",
-  description: "Entrená con inteligencia artificial",
+  title: "BRASA — Tu Súper Entrenador IA",
+  description: "Entrená con inteligencia artificial, con racha que se ve y se siente.",
+  manifest: "/manifest.webmanifest",
+}
+
+export const viewport: Viewport = {
+  themeColor: "#0B0B0F",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className="dark">
-      <body className="bg-surface text-white min-h-screen">
+      <body className={`${sora.variable} ${archivo.variable} min-h-screen`}>
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -4,56 +4,88 @@
 
 @layer base {
   :root {
-    --nav-height: 70px;
+    --nav-height: 76px;
+    --ember: 255, 77, 0;
   }
 
   html {
-    @apply bg-surface text-white antialiased;
+    @apply bg-carbon text-hueso antialiased;
+    color-scheme: dark;
   }
 
   body {
-    @apply min-h-screen;
+    @apply min-h-screen bg-carbon text-hueso;
+    background-image:
+      radial-gradient(1200px 500px at 50% -10%, rgba(255, 77, 0, 0.07), transparent 60%),
+      radial-gradient(800px 400px at 100% 110%, rgba(255, 179, 0, 0.04), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgba(var(--ember), 0.35);
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    scrollbar-color: rgba(244, 243, 239, 0.12) transparent;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-hierro border border-hierro-border shadow-card;
+  }
+
+  .ember-btn {
+    @apply bg-ember text-carbon font-bold transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
+    box-shadow: 0 6px 20px rgba(var(--ember), 0.35);
+  }
+
+  .ember-btn:active:not(:disabled) {
+    box-shadow: 0 2px 10px rgba(var(--ember), 0.5);
+  }
+
+  .ghost-btn {
+    @apply bg-hierro-soft text-ceniza border border-hierro-border font-semibold transition-all hover:text-hueso hover:border-hierro active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 }
 
 @layer utilities {
-  .bg-card-glass {
-    background: rgba(31, 41, 55, 0.65);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+  .font-display-expanded {
+    font-family: var(--font-archivo);
+    font-weight: 800;
+    font-stretch: 125%;
+    letter-spacing: -0.02em;
   }
 
-  .bg-surface-secondary {
-    background-color: #111827;
+  .text-ember-glow {
+    color: #ff7a1f;
+    text-shadow: 0 0 24px rgba(255, 77, 0, 0.55);
   }
 
-  .text-gradient {
-    background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .label-caps {
+    @apply text-[11px] uppercase tracking-[0.08em] text-ceniza font-semibold;
   }
 
-  .glow-green {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  .ember-glow {
+    box-shadow: 0 0 24px rgba(255, 77, 0, 0.35);
   }
 
-  .nav-blur {
-    background: rgba(17, 24, 39, 0.85);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
-
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }

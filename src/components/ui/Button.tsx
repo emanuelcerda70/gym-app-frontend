@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { ButtonHTMLAttributes, forwardRef } from "react"
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "ghost" | "danger"
+  variant?: "primary" | "ghost" | "danger" | "soft"
   fullWidth?: boolean
 }
 
@@ -14,15 +14,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "rounded-md font-bold text-sm transition-all font-sans",
+          "rounded-md font-bold text-sm transition-all font-sans select-none",
           fullWidth && "w-full",
-          variant === "primary" &&
-            "bg-gradient-to-r from-emerald-500 to-cyan-500 text-black hover:opacity-90 active:scale-[0.98]",
-          variant === "ghost" &&
-            "bg-white/10 text-muted hover:bg-white/20 border border-white/10",
+          variant === "primary" && "ember-btn",
+          variant === "soft" &&
+            "bg-ember/10 text-ember-soft border border-ember/25 font-semibold transition-all hover:bg-ember/20 active:scale-[0.97] disabled:opacity-50",
+          variant === "ghost" && "ghost-btn",
           variant === "danger" &&
-            "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30",
-          props.disabled && "opacity-50 cursor-not-allowed",
+            "bg-red-500/10 text-red-400 border border-red-500/25 font-semibold transition-all hover:bg-red-500/20 active:scale-[0.97]",
           className
         )}
         {...props}
