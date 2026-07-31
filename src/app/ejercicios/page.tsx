@@ -43,6 +43,9 @@ const MUSCULO_CATEGORIA = new Map([
   ["Isquiotibiales", "Tren Inferior"],
   ["Glúteos", "Tren Inferior"],
   ["Gemelos", "Tren Inferior"],
+  ["Aductores", "Tren Inferior"],
+  ["Abductores", "Tren Inferior"],
+  ["Cuello", "Tren Superior"],
 ])
 
 export default function EjerciciosPage() {
@@ -96,7 +99,7 @@ export default function EjerciciosPage() {
 
   if (!grupoSeleccionado) {
     const grupos = categoria === "Otros"
-      ? []
+      ? [...MUSCULO_CATEGORIA.keys()].sort()
       : [...MUSCULO_CATEGORIA.entries()]
           .filter(([, cat]) => cat === categoria)
           .map(([musculo]) => musculo)
