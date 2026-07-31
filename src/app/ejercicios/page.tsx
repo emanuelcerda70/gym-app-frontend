@@ -166,17 +166,8 @@ export default function EjerciciosPage() {
               <Link
                 key={ej.id}
                 href={`/ejercicios/${ej.id}`}
-                className="flex items-center gap-3 bg-card-glass backdrop-blur-md border border-white/10 rounded-xl p-2.5 hover:border-emerald-500/50 transition-all active:scale-[0.98]"
+                className="flex items-center gap-3 bg-card-glass backdrop-blur-md border border-white/10 rounded-xl p-3.5 hover:border-emerald-500/50 transition-all active:scale-[0.98]"
               >
-                {ej.gif_url ? (
-                  <div className="w-14 h-14 rounded-lg overflow-hidden bg-black/40 shrink-0">
-                    <img src={ej.gif_url} alt="" className="w-full h-full object-contain" loading="lazy" />
-                  </div>
-                ) : (
-                  <div className="w-14 h-14 rounded-lg bg-white/5 flex items-center justify-center text-lg shrink-0">
-                    🏋️
-                  </div>
-                )}
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-bold capitalize truncate">{ej.nombre}</h3>
                   {ej.equipo && (
