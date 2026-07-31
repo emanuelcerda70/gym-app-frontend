@@ -54,6 +54,7 @@ export interface Ejercicio {
 }
 
 export interface RutinaEjercicio {
+  ejercicio_id?: number
   nombre: string
   series: number
   repeticiones: string

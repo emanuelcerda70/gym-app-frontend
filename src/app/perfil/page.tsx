@@ -23,6 +23,12 @@ const NIVELES = [
   { value: "avanzado", label: "Avanzado" },
 ]
 
+const PRESUPUESTOS = [
+  { value: "bajo", label: "Económico" },
+  { value: "medio", label: "Medio" },
+  { value: "alto", label: "Alto" },
+]
+
 function labelDe(value: string | null, lista: { value: string; label: string }[]): string {
   return lista.find((o) => o.value === value)?.label ?? value ?? "—"
 }
@@ -38,6 +44,9 @@ export default function PerfilPage() {
     edad: "",
     objetivo: "salud_agilidad",
     nivel: "principiante",
+    presupuesto_comida: "",
+    comidas_favoritas: "",
+    comidas_evitar: "",
   })
 
   const startEditing = () => {
@@ -48,6 +57,9 @@ export default function PerfilPage() {
       edad: perfil.edad?.toString() ?? "",
       objetivo: perfil.objetivo ?? "salud_agilidad",
       nivel: perfil.nivel ?? "principiante",
+      presupuesto_comida: perfil.presupuesto_comida ?? "",
+      comidas_favoritas: perfil.comidas_favoritas ?? "",
+      comidas_evitar: perfil.comidas_evitar ?? "",
     })
     setEditando(true)
   }
@@ -61,6 +73,9 @@ export default function PerfilPage() {
         edad: form.edad ? Number(form.edad) : null,
         objetivo: form.objetivo || null,
         nivel: form.nivel || null,
+        presupuesto_comida: form.presupuesto_comida || null,
+        comidas_favoritas: form.comidas_favoritas || null,
+        comidas_evitar: form.comidas_evitar || null,
       })
       setEditando(false)
       setListo(true)
@@ -145,6 +160,40 @@ export default function PerfilPage() {
               </select>
             </div>
 
+            <p className="label-caps pt-2">Preferencias alimenticias</p>
+
+            <div>
+              <label className="text-xs text-ceniza block mb-1.5">Presupuesto de comida</label>
+              <select
+                value={form.presupuesto_comida}
+                onChange={(e) => setForm({ ...form, presupuesto_comida: e.target.value })}
+                className={selectCls}
+              >
+                <option value="" className="bg-hierro">No me fijo</option>
+                {PRESUPUESTOS.map((p) => (
+                  <option key={p.value} value={p.value} className="bg-hierro">{p.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs text-ceniza block mb-1.5">Comidas favoritas</label>
+              <Input
+                value={form.comidas_favoritas}
+                onChange={(e) => setForm({ ...form, comidas_favoritas: e.target.value })}
+                placeholder="Ej: pollo, arroz, batata"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-ceniza block mb-1.5">Comidas a evitar</label>
+              <Input
+                value={form.comidas_evitar}
+                onChange={(e) => setForm({ ...form, comidas_evitar: e.target.value })}
+                placeholder="Ej: lácteos, picante"
+              />
+            </div>
+
             <div className="flex gap-3 pt-2">
               <Button onClick={save} fullWidth disabled={guardando}>
                 {guardando ? "Guardando..." : "Guardar"}
@@ -198,6 +247,32 @@ export default function PerfilPage() {
                   <span className="text-xs text-ceniza">Nivel</span>
                   <span className={cn("text-sm font-semibold capitalize", !perfil?.nivel && "text-ceniza-dim")}>
                     {labelDe(perfil?.nivel ?? null, NIVELES)}
+                  </span>
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <p className="label-caps mb-2.5">Preferencias alimenticias</p>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-ceniza">Presupuesto</span>
+                  <span className={cn("text-sm font-semibold capitalize", !perfil?.presupuesto_comida && "text-ceniza-dim")}>
+                    {labelDe(perfil?.presupuesto_comida ?? null, PRESUPUESTOS) || "No me fijo"}
+                  </span>
+                </div>
+                <div className="h-px bg-hierro-border/60" />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-ceniza">Favoritas</span>
+                  <span className={cn("text-sm font-semibold", !perfil?.comidas_favoritas && "text-ceniza-dim")}>
+                    {perfil?.comidas_favoritas || "—"}
+                  </span>
+                </div>
+                <div className="h-px bg-hierro-border/60" />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-ceniza">A evitar</span>
+                  <span className={cn("text-sm font-semibold", !perfil?.comidas_evitar && "text-ceniza-dim")}>
+                    {perfil?.comidas_evitar || "—"}
                   </span>
                 </div>
               </div>

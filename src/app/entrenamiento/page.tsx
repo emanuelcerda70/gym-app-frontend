@@ -130,15 +130,24 @@ export default function EntrenamientoPage() {
 
         {/* Ejercicios */}
         <div className="space-y-4">
-          {ejercicios.map((ej, i) => (
-            <ExerciseCard
-              key={`${ej.nombre}-${i}`}
-              ejercicio={ej}
-              index={i}
-              hecho={!!hechos[i]}
-              onToggleHecho={() => setHechos((prev) => ({ ...prev, [i]: !prev[i] }))}
-            />
-          ))}
+          {ejercicios.map((ej, i) => {
+            const card = (
+              <ExerciseCard
+                key={`${ej.nombre}-${i}`}
+                ejercicio={ej}
+                index={i}
+                hecho={!!hechos[i]}
+                onToggleHecho={() => setHechos((prev) => ({ ...prev, [i]: !prev[i] }))}
+              />
+            )
+            return ej.ejercicio_id ? (
+              <Link key={`${ej.nombre}-${i}`} href={`/ejercicios/${ej.ejercicio_id}`} className="block">
+                {card}
+              </Link>
+            ) : (
+              card
+            )
+          })}
         </div>
 
         <Link

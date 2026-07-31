@@ -48,9 +48,20 @@ const PASOS: {
       { label: "5+ días", sub: "Vivís en el gym", value: "5" },
     ],
   },
+  {
+    key: "presupuesto",
+    titulo: "¿Cómo venís con la comida?",
+    subtitulo: "Así el plan te arma menús que no rompan el bolsillo.",
+    options: [
+      { label: "Soy de ir a lo seguro", sub: "Económico", value: "bajo" },
+      { label: "Tengo margen", sub: "Medio", value: "medio" },
+      { label: "Dale sin filtro", sub: "Alto", value: "alto" },
+      { label: "No me fijo", sub: "No tengo presupuesto", value: "ninguno" },
+    ],
+  },
 ]
 
-const ETAPAS = 5 // bienvenida + 3 quiz + datos
+const ETAPAS = 6 // bienvenida + 4 quiz + datos
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -66,7 +77,7 @@ export default function OnboardingPage() {
 
   const seleccionar = (value: string) => {
     setRespuestas((prev) => ({ ...prev, [paso.key]: value }))
-    if (etapa < 3) setEtapa(etapa + 1)
+    if (etapa < 4) setEtapa(etapa + 1)
   }
 
   const puedeGuardar =
@@ -75,17 +86,19 @@ export default function OnboardingPage() {
   const finalizar = async () => {
     if (!puedeGuardar || cargando) return
     setCargando(true)
-    setEtapa(5)
+    setEtapa(6)
     try {
       await actualizar({
         objetivo: respuestas.objetivo,
         nivel: respuestas.nivel,
+        dias_disponibles: Number(respuestas.dias_disponibles),
+        presupuesto_comida: respuestas.presupuesto === "ninguno" ? null : respuestas.presupuesto || null,
         edad: Number(fisicos.edad),
         peso_kg: Number(fisicos.peso_kg),
         altura_cm: Number(fisicos.altura_cm),
       })
     } catch {
-      setEtapa(4)
+      setEtapa(5)
       setCargando(false)
       return
     }
@@ -115,7 +128,7 @@ export default function OnboardingPage() {
         )}
 
         {/* Quiz */}
-        {etapa >= 1 && etapa <= 3 && (
+        {etapa >= 1 && etapa <= 4 && (
           <>
             {/* Brazas de progreso */}
             <div className="flex gap-1.5 mb-8">
@@ -170,7 +183,7 @@ export default function OnboardingPage() {
         )}
 
         {/* Datos físicos */}
-        {etapa === 4 && (
+        {etapa === 5 && (
           <>
             <div className="flex gap-1.5 mb-8">
               {Array.from({ length: ETAPAS }, (_, i) => (
@@ -212,7 +225,7 @@ export default function OnboardingPage() {
           </>
         )}
         {/* Armando tu plan */}
-        {etapa === 5 && (
+        {etapa === 6 && (
           <div className="flex-1 flex flex-col items-center justify-center text-center">
             <Fueguito racha={3} size={80} flare className="mb-6" />
             <h2 className="text-xl font-bold mb-2">Armando tu plan...</h2>
