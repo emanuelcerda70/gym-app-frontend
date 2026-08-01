@@ -13,6 +13,7 @@ import DiagramaMuscular from "@/components/ejercicios/DiagramaMuscular"
 import { getDiagrama } from "@/lib/wger"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import type { RecordsEjercicio } from "@/types"
 
 const TABS = [
   { key: "resumen", label: "Resumen" },
@@ -22,11 +23,11 @@ const TABS = [
 
 type Tab = (typeof TABS)[number]["key"]
 
-const RECORDS = [
+const RECORDS: { key: string; label: string; field: keyof RecordsEjercicio; destacado?: boolean }[] = [
   { key: "mayor_peso", label: "Mayor Peso", field: "mayor_peso" },
   { key: "mejor_1rm", label: "Mejor 1RM", field: "mejor_1rm", destacado: true },
   { key: "mayor_volumen", label: "Mayor Volumen", field: "mejor_volumen_serie" },
-] as const
+]
 
 function formatKg(v: number) {
   return v % 1 === 0 ? String(v) : v.toFixed(1)
