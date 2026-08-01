@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { getDiagrama } from "@/lib/wger"
 
 export default function DiagramaMuscular({ musculo }: { musculo: string }) {
