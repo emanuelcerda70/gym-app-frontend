@@ -76,6 +76,19 @@ export interface RutinaResumen {
   ejercicios?: { id: number; ejercicio_id: number; dia_semana?: string }[]
 }
 
+export interface RecordsEjercicio {
+  mayor_peso: number
+  mejor_1rm: number
+  mejor_volumen_serie: number
+}
+
+export interface ResumenEjercicio {
+  id: number
+  nombre: string
+  records: RecordsEjercicio
+  historial_grafico: { fecha: string; peso_max: number }[]
+}
+
 export interface RegistroCarga {
   ejercicio_id: number
   peso_kg: number

@@ -75,6 +75,8 @@ export const api = {
     },
     detalle: (id: number) =>
       request<import("@/types").Ejercicio>(`/api/ejercicios/${id}`),
+    resumen: (id: number) =>
+      request<import("@/types").ResumenEjercicio>(`/api/ejercicios/${id}/resumen`),
   },
 
   progreso: {
