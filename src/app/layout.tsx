@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Archivo, Sora } from "next/font/google"
 import "./globals.css"
 import Providers from "./providers"
+import RouteRecorder from "@/components/layout/RouteRecorder"
 
 const sora = Sora({
   subsets: ["latin"],
@@ -31,7 +32,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className="dark">
       <body className={`${sora.variable} ${archivo.variable} min-h-screen`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <RouteRecorder />
+          {children}
+        </Providers>
       </body>
     </html>
   )

@@ -7,6 +7,7 @@ import Header from "@/components/layout/Header"
 import BottomNav from "@/components/layout/BottomNav"
 import Button from "@/components/ui/Button"
 import Fueguito from "@/components/ui/Fueguito"
+import { getPrevRoute } from "@/components/layout/RouteRecorder"
 import { useRutinas } from "@/hooks/useRutinas"
 
 export default function RutinaDetallePage() {
@@ -21,7 +22,11 @@ export default function RutinaDetallePage() {
       <Header />
       <main className="px-4 pt-4 pb-28 animate-fade-in max-w-md mx-auto">
         <button
-          onClick={() => router.back()}
+          onClick={() => {
+            const prev = getPrevRoute()
+            if (prev && prev !== "/entrenamiento/" + params.id) router.push(prev)
+            else router.push("/entrenamiento")
+          }}
           className="text-sm text-ceniza flex items-center gap-1 mb-4"
         >
           ← Volver

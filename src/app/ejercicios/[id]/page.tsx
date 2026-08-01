@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation"
 import AuthGuard from "@/components/layout/AuthGuard"
 import Header from "@/components/layout/Header"
 import BottomNav from "@/components/layout/BottomNav"
+import { getPrevRoute } from "@/components/layout/RouteRecorder"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import Link from "next/link"
@@ -83,7 +84,8 @@ export default function EjercicioDetallePage() {
       <main className="px-4 pt-4 pb-28 animate-fade-in max-w-md mx-auto">
         <button
           onClick={() => {
-            if (window.history.length > 1) router.back()
+            const prev = getPrevRoute()
+            if (prev && prev !== "/ejercicios/" + id) router.push(prev)
             else router.push("/ejercicios")
           }}
           className="text-sm text-ceniza flex items-center gap-1 mb-4"
