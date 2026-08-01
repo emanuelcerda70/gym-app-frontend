@@ -53,7 +53,7 @@ export default function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-3 left-1/2 -translate-x-1/2 w-[calc(100%-24px)] max-w-md h-[68px] glass rounded-full flex items-center justify-around px-2 z-50" style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.6)" }}>
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-16 bg-black/95 border-t border-hierro-border backdrop-blur-md flex items-stretch z-50">
       {tabs.map((tab) => {
         const active = pathname === tab.href || pathname.startsWith(tab.href + "/")
         return (
@@ -61,13 +61,11 @@ export default function BottomNav() {
             key={tab.href}
             href={tab.href}
             className={cn(
-              "flex flex-col items-center justify-center gap-0.5 w-14 h-14 rounded-full transition-all text-[10px] font-semibold",
-              active ? "text-ember-soft" : "text-ceniza hover:text-hueso"
+              "flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-semibold transition-colors",
+              active ? "text-ember" : "text-ceniza-dim hover:text-ceniza"
             )}
           >
-            <div className={cn("flex items-center justify-center w-8 h-8 rounded-full transition-all", active && "bg-ember/10")}>
-              {tab.icon(active)}
-            </div>
+            {tab.icon(active)}
             <span>{tab.label}</span>
           </Link>
         )
@@ -75,4 +73,3 @@ export default function BottomNav() {
     </nav>
   )
 }
- 

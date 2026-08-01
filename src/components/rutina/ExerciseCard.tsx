@@ -3,7 +3,6 @@
 
 import { useState } from "react"
 import Card from "@/components/ui/Card"
-import Badge from "@/components/ui/Badge"
 import RestTimer from "@/components/rutina/RestTimer"
 import { useEjercicioCatalog } from "@/hooks/useEjercicios"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
@@ -25,13 +24,24 @@ function parseReps(repeticiones: string): number {
   return rango.length > 1 && rango[1] ? rango[1] : rango[0]
 }
 
+interface FilaSerie {
+  peso: string
+  reps: string
+  hecho: boolean
+}
+
 export default function ExerciseCard({ ejercicio, index, hecho, onToggleHecho }: Props) {
   const { findByName } = useEjercicioCatalog()
   const queryClient = useQueryClient()
-  const [peso, setPeso] = useState("")
-  const [series, setSeries] = useState(0)
+  const [series, setSeries] = useState<FilaSerie[]>(() =>
+    Array.from({ length: Math.max(ejercicio.series, 1) }, () => ({
+      peso: "",
+      reps: String(parseReps(ejercicio.repeticiones)),
+      hecho: false,
+    }))
+  )
   const [spark, setSpark] = useState<number | null>(null)
-  const [guardando, setGuardando] = useState(false)
+  const [guardando, setGuardando] = useState<number | null>(null)
 
   const match = findByName(ejercicio.nombre)
   const matchId = match?.id
@@ -42,91 +52,121 @@ export default function ExerciseCard({ ejercicio, index, hecho, onToggleHecho }:
     enabled: !!matchId,
   })
 
-  const registrarSerie = async () => {
-    if (!match || guardando) return
-    const pesoKg = peso ? Number(peso) : historial?.marca_maxima_kg || 20
-    setGuardando(true)
+  const marca = historial?.marca_maxima_kg
+
+  const setFila = (i: number, patch: Partial<FilaSerie>) => {
+    setSeries((prev) => prev.map((f, j) => (j === i ? { ...f, ...patch } : f)))
+  }
+
+  const registrarSerie = async (i: number) => {
+    const fila = series[i]
+    if (!match || guardando !== null || fila.hecho) return
+    const pesoKg = Number(fila.peso) || marca || 20
+    const repeticiones = Number(fila.reps) || parseReps(ejercicio.repeticiones)
+    setGuardando(i)
     try {
       await api.progreso.registrar({
         ejercicio_id: matchId!,
         peso_kg: pesoKg,
-        repeticiones: parseReps(ejercicio.repeticiones),
+        repeticiones,
         series: 1,
       })
-      setSeries((s) => s + 1)
-      setSpark(Date.now())
-      setPeso(pesoKg > 0 && peso === "" ? "" : peso)
+      setFila(i, { hecho: true, peso: fila.peso || String(pesoKg) })
+      setSpark(i)
       queryClient.invalidateQueries({ queryKey: ["progreso", match.id] })
       queryClient.invalidateQueries({ queryKey: ["checkin"] })
     } finally {
-      setGuardando(false)
+      setGuardando(null)
     }
   }
 
-  const marca = historial?.marca_maxima_kg
+  const hechas = series.filter((f) => f.hecho).length
 
   return (
-    <Card
-      className={cn(
-        "!p-0 overflow-hidden transition-all",
-        hecho && "border-ember/40"
-      )}
-    >
-      {ejercicio.gif_url && (
-        <div className="w-full bg-carbon flex items-center justify-center border-b border-hierro-border" style={{ minHeight: 110 }}>
-          <img src={ejercicio.gif_url} alt={ejercicio.nombre} className="w-full max-h-44 object-contain" loading="lazy" />
-        </div>
-      )}
-
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-1">
-          <h3 className="text-base font-bold capitalize leading-tight pr-2">
-            <span className="text-ceniza-dim font-semibold text-sm mr-1.5">{String(index + 1).padStart(2, "0")}</span>
-            {ejercicio.nombre}
-          </h3>
-          <Badge className="shrink-0">
+    <Card className="!p-0 overflow-hidden transition-all">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-1">
+        <h3 className="text-[15px] font-bold capitalize leading-tight">
+          <span className="text-ceniza-dim font-semibold text-xs mr-2 tabular-nums">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          {ejercicio.nombre}
+        </h3>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <span className="text-[11px] font-semibold text-ceniza tabular-nums">
             {ejercicio.series} × {ejercicio.repeticiones}
-          </Badge>
+          </span>
+          <button
+            onClick={onToggleHecho}
+            title={hecho ? "Desmarcar ejercicio" : "Marcar ejercicio completo"}
+            className={cn(
+              "flex items-center justify-center w-6 h-6 rounded-full border-2 transition-all active:scale-90",
+              hecho ? "bg-ember border-ember text-carbon" : "border-ceniza-dim/70 text-transparent hover:border-ember"
+            )}
+          >
+            <span className="text-[11px] font-black leading-none">✓</span>
+          </button>
         </div>
+      </div>
 
+      <div className="px-4 pb-2">
         <RestTimer descansoSegundos={ejercicio.descanso} />
+      </div>
 
-        {/* Carga rápida */}
-        <div className="mt-3 bg-carbon/60 border border-hierro-border rounded-md px-3 py-2.5">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <span className="text-xs text-ceniza shrink-0">Peso</span>
-              <input
-                type="number"
-                inputMode="decimal"
-                placeholder={marca ? String(marca) : "20"}
-                value={peso}
-                onChange={(e) => setPeso(e.target.value)}
-                className="w-16 bg-hierro-soft border border-hierro-border rounded text-ember-soft text-center text-sm font-bold py-1.5 outline-none focus:border-ember/60 focus:ring-2 focus:ring-ember/20"
-              />
-              <span className="text-[11px] text-ceniza-dim">kg</span>
-              {series > 0 && (
-                <span className="flex items-center gap-0.5 ml-auto">
-                  {Array.from({ length: Math.min(series, 6) }, (_, i) => (
-                    <span key={i} className="w-1.5 h-1.5 rounded-full bg-ember animate-pop" style={{ animationDelay: `${i * 60}ms` }} />
-                  ))}
-                  <span className="text-[11px] font-bold text-ember-soft ml-1">{series}</span>
-                </span>
-              )}
-            </div>
+      {/* Encabezados de columnas */}
+      <div className="grid grid-cols-[28px_1fr_auto_1fr_auto] items-center gap-2 px-4 pb-1 text-[10px] uppercase tracking-wider text-ceniza-dim font-semibold">
+        <span>Serie</span>
+        <span className="text-right">kg</span>
+        <span />
+        <span className="text-right">Reps</span>
+        <span />
+      </div>
 
+      {/* Filas de series */}
+      <div className="px-2 pb-3 pt-0.5 space-y-1">
+        {series.map((fila, i) => (
+          <div
+            key={i}
+            className={cn(
+              "grid grid-cols-[28px_1fr_auto_1fr_auto] items-center gap-2 rounded-lg px-2 py-1.5 transition-colors",
+              fila.hecho ? "bg-ember/5" : "bg-hierro-soft/50"
+            )}
+          >
+            <span className={cn("text-xs font-bold text-center tabular-nums", fila.hecho ? "text-ember-soft" : "text-ceniza")}>
+              {i + 1}
+            </span>
+            <input
+              type="number"
+              inputMode="decimal"
+              disabled={fila.hecho || guardando === i}
+              placeholder={marca ? String(marca) : "20"}
+              value={fila.peso}
+              onChange={(e) => setFila(i, { peso: e.target.value })}
+              className="w-full min-w-0 bg-carbon border border-hierro-border rounded-md px-2 py-1.5 text-center text-sm font-bold text-hueso outline-none transition-all focus:border-ember/60 focus:ring-2 focus:ring-ember/20 disabled:opacity-40 [appearance:textfield]"
+            />
+            <span className="text-[11px] text-ceniza-dim font-semibold">kg</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              disabled={fila.hecho || guardando === i}
+              value={fila.reps}
+              onChange={(e) => setFila(i, { reps: e.target.value })}
+              className="w-full min-w-0 bg-carbon border border-hierro-border rounded-md px-2 py-1.5 text-center text-sm font-bold text-hueso outline-none transition-all focus:border-ember/60 focus:ring-2 focus:ring-ember/20 disabled:opacity-40 [appearance:textfield]"
+            />
             <button
-              onClick={registrarSerie}
-              disabled={!match || guardando}
+              onClick={() => registrarSerie(i)}
+              disabled={!match || guardando !== null || fila.hecho}
+              title={fila.hecho ? "Serie completada" : "Completar serie"}
               className={cn(
-                "relative shrink-0 text-xs font-bold px-3.5 py-2 rounded-md transition-all active:scale-95",
-                match
-                  ? "ember-btn"
-                  : "bg-hierro-soft border border-hierro-border text-ceniza-dim cursor-not-allowed"
+                "relative flex items-center justify-center w-7 h-7 rounded-full border-2 transition-all active:scale-90",
+                fila.hecho
+                  ? "bg-ember border-ember text-carbon"
+                  : "border-ceniza-dim/70 text-transparent hover:border-ember",
+                !match && "opacity-40 cursor-not-allowed"
               )}
             >
-              +1 serie
-              {spark && (
+              <span className="text-xs font-black leading-none">✓</span>
+              {spark === i && (
                 <>
                   <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-brasa animate-spark" style={{ ["--sx" as string]: "6px", ["--sy" as string]: "-10px" }} />
                   <span className="absolute -top-2 right-2 w-1.5 h-1.5 rounded-full bg-ember animate-spark" style={{ ["--sx" as string]: "-8px", ["--sy" as string]: "-12px", animationDelay: "0.1s" }} />
@@ -134,33 +174,26 @@ export default function ExerciseCard({ ejercicio, index, hecho, onToggleHecho }:
               )}
             </button>
           </div>
+        ))}
+      </div>
 
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-hierro-border/60">
-            <span className="text-[11px] text-ceniza">
-              {marca ? (
-                <>
-                  Marca: <span className="text-ember-soft font-bold">{marca} kg</span>
-                </>
-              ) : match ? (
-                "Sin registros todavía"
-              ) : (
-                "Registro no disponible"
-              )}
-            </span>
-            <label className="flex items-center gap-1.5 text-xs text-ceniza cursor-pointer select-none">
-              Hecho
-              <input
-                type="checkbox"
-                checked={hecho}
-                onChange={onToggleHecho}
-                className="appearance-none w-5 h-5 border-2 border-ceniza-dim rounded-md checked:bg-ember checked:border-ember relative cursor-pointer transition-colors
-                  checked:after:content-['✓'] checked:after:absolute checked:after:text-carbon checked:after:font-black checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:text-xs"
-              />
-            </label>
-          </div>
-        </div>
+      {/* Footer */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-t border-hierro-border/60">
+        <span className="text-[11px] text-ceniza">
+          {marca ? (
+            <>
+              Marca: <span className="text-ember-soft font-bold">{marca} kg</span>
+            </>
+          ) : match ? (
+            "Sin registros todavía"
+          ) : (
+            "Registro no disponible"
+          )}
+        </span>
+        <span className="text-[11px] font-bold text-ember-soft tabular-nums">
+          {hechas}/{series.length}
+        </span>
       </div>
     </Card>
   )
 }
- 

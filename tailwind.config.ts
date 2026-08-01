@@ -7,18 +7,18 @@ const config: Config = {
     extend: {
       colors: {
         carbon: {
-          DEFAULT: "#0B0B0F",
-          deep: "#07070A",
+          DEFAULT: "#000000",
+          deep: "#050505",
         },
         hierro: {
-          DEFAULT: "#17171E",
-          soft: "#1E1E26",
-          border: "#23232C",
+          DEFAULT: "#1C1C1E",
+          soft: "#27272A",
+          border: "#2E2E33",
         },
-        hueso: "#F4F3EF",
+        hueso: "#FFFFFF",
         ceniza: {
-          DEFAULT: "#75757F",
-          dim: "#5A5A64",
+          DEFAULT: "#A1A1AA",
+          dim: "#71717A",
         },
         ember: {
           DEFAULT: "#FF4D00",
@@ -33,10 +33,10 @@ const config: Config = {
         display: ["var(--font-archivo)", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        sm: "10px",
-        md: "14px",
-        lg: "20px",
-        xl: "26px",
+        sm: "8px",
+        md: "10px",
+        lg: "12px",
+        xl: "16px",
         full: "9999px",
       },
       boxShadow: {

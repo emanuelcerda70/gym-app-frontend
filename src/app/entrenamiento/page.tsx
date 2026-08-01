@@ -166,7 +166,7 @@ export default function EntrenamientoPage() {
       {/* Barra de sesión */}
       <div
         className={cn(
-          "fixed bottom-[92px] left-1/2 -translate-x-1/2 w-[calc(100%-24px)] max-w-md transition-all duration-300",
+          "fixed bottom-[76px] left-1/2 -translate-x-1/2 w-[calc(100%-24px)] max-w-md transition-all duration-300",
           modoEntrenar ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
         )}
       >
