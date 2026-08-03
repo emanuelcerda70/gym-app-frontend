@@ -79,13 +79,13 @@ export default function RestTimer({ descansoSegundos }: Props) {
                 <circle cx="32" cy="32" r={R} fill="none" stroke="#23232C" strokeWidth="5" />
                 <circle
                   cx="32" cy="32" r={R} fill="none"
-                  stroke={terminado ? "#FF4D00" : activo ? "#FF7A1F" : "#75757F"}
+                  stroke={terminado ? "#6C5CFF" : activo ? "#8B7DFF" : "#75757F"}
                   strokeWidth="5"
                   strokeLinecap="round"
                   strokeDasharray={CIRC}
                   strokeDashoffset={CIRC * (1 - progreso)}
                   className="transition-all duration-1000 ease-linear"
-                  style={terminado ? { filter: "drop-shadow(0 0 6px rgba(255,77,0,0.8))" } : undefined}
+                  style={terminado ? { filter: "drop-shadow(0 0 6px rgba(108,92,255,0.8))" } : undefined}
                 />
               </svg>
               <div

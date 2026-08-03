@@ -25,7 +25,7 @@ export default function Header({ backTo }: { backTo?: string }) {
         </button>
       ) : (
         <div className="flex items-baseline gap-1">
-          <span className="font-display-expanded text-lg tracking-tight">Gym App</span>
+          <span className="font-display-expanded text-lg tracking-tight">ASCEND</span>
           <span className="w-1.5 h-1.5 rounded-full bg-ember inline-block" />
         </div>
       )}

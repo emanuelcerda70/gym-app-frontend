@@ -9,6 +9,7 @@ import AuthGuard from "@/components/layout/AuthGuard"
 import Header from "@/components/layout/Header"
 import BottomNav from "@/components/layout/BottomNav"
 import Badge from "@/components/ui/Badge"
+import FrameAnimator from "@/components/ui/FrameAnimator"
 import DiagramaMuscular from "@/components/ejercicios/DiagramaMuscular"
 import { getDiagrama } from "@/lib/wger"
 import { api } from "@/lib/api"
@@ -98,10 +99,15 @@ export default function EjercicioDetallePage() {
 
       {/* Reproductor: visualizador limpio tipo modelo 3D */}
       <div className="bg-carbon-deep relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,77,0,0.07),transparent_65%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(108,92,255,0.08),transparent_65%)] pointer-events-none" />
         <div className="relative max-w-md mx-auto px-4 py-5 flex items-center justify-center min-h-[240px]">
           {ej.gif_url ? (
-            <img src={ej.gif_url} alt={ej.nombre} className="w-full max-h-[320px] object-contain" />
+            ej.gif_url.endsWith(".gif") ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={ej.gif_url} alt={ej.nombre} className="w-full max-h-[320px] object-contain" />
+            ) : (
+              <FrameAnimator baseUrl={ej.gif_url} />
+            )
           ) : (
             <div className="flex items-center justify-center text-5xl">🏋️</div>
           )}

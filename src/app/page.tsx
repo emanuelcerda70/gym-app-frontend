@@ -34,7 +34,7 @@ export default function AuthPage() {
         <div className="flex flex-col items-center mb-8">
           <Fueguito racha={3} size={56} className="mb-4" />
           <div className="flex items-baseline gap-1">
-            <span className="font-display-expanded text-3xl tracking-tight">Gym App</span>
+            <span className="font-display-expanded text-3xl tracking-tight">ASCEND</span>
             <span className="w-1.5 h-1.5 rounded-full bg-ember inline-block" />
           </div>
           <p className="text-xs text-ceniza mt-2">Tu Súper Entrenador IA</p>

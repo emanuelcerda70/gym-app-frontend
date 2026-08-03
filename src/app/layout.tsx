@@ -16,7 +16,7 @@ const archivo = Archivo({
 })
 
 export const metadata: Metadata = {
-  title: "Gym App — Tu Súper Entrenador IA",
+  title: "ASCEND — Tu Súper Entrenador IA",
   description: "Entrená con inteligencia artificial, con racha que se ve y se siente.",
   manifest: "/manifest.webmanifest",
 }

@@ -93,8 +93,8 @@ function PRCard({ ejercicioId, nombre }: { ejercicioId: number; nombre: string }
               <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-11 overflow-visible">
                 <defs>
                   <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgba(255,77,0,0.4)" />
-                    <stop offset="100%" stopColor="rgba(255,77,0,0)" />
+                    <stop offset="0%" stopColor="rgba(108,92,255,0.4)" />
+                    <stop offset="100%" stopColor="rgba(108,92,255,0)" />
                   </linearGradient>
                 </defs>
                 <polyline
@@ -102,7 +102,7 @@ function PRCard({ ejercicioId, nombre }: { ejercicioId: number; nombre: string }
                   fill="url(#chartGrad)"
                   stroke="none"
                 />
-                <polyline points={coords} fill="none" stroke="#FF7A1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <polyline points={coords} fill="none" stroke="#8B7DFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             ) : (
               <p className="text-[11px] text-ceniza text-right">{registros[0]?.peso_kg} kg · última carga</p>

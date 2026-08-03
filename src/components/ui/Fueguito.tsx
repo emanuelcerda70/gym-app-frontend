@@ -34,9 +34,9 @@ export default function Fueguito({ racha, size = 56, flare = false, className }:
       <svg viewBox="0 0 64 72" width={size} height={size} className="overflow-visible">
         <defs>
           <linearGradient id="fuegoGrad" x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0%" stopColor="#FF4D00" />
-            <stop offset="70%" stopColor="#FF7A1F" />
-            <stop offset="100%" stopColor="#FFB300" />
+            <stop offset="0%" stopColor="#6C5CFF" />
+            <stop offset="70%" stopColor="#8B7DFF" />
+            <stop offset="100%" stopColor="#00D4FF" />
           </linearGradient>
           <clipPath id="fuegoClip">
             <FlamePath />
@@ -68,7 +68,7 @@ export default function Fueguito({ racha, size = 56, flare = false, className }:
         {lit > 0 && (
           <FlamePath
             fill="none"
-            stroke="rgba(255,77,0,0.4)"
+            stroke="rgba(108,92,255,0.4)"
             strokeWidth="3"
             style={{ filter: "blur(6px)" }}
           />
@@ -77,9 +77,9 @@ export default function Fueguito({ racha, size = 56, flare = false, className }:
         {/* Chispas en hitos (7, 14, 30...) */}
         {hito && (
           <g>
-            <circle cx="50" cy="14" r="2.2" fill="#FFB300" className="animate-spark" />
-            <circle cx="44" cy="4" r="1.6" fill="#FF7A1F" className="animate-spark" style={{ animationDelay: "0.12s" }} />
-            <circle cx="57" cy="5" r="1.4" fill="#FF4D00" className="animate-spark" style={{ animationDelay: "0.22s" }} />
+            <circle cx="50" cy="14" r="2.2" fill="#00D4FF" className="animate-spark" />
+            <circle cx="44" cy="4" r="1.6" fill="#8B7DFF" className="animate-spark" style={{ animationDelay: "0.12s" }} />
+            <circle cx="57" cy="5" r="1.4" fill="#6C5CFF" className="animate-spark" style={{ animationDelay: "0.22s" }} />
           </g>
         )}
       </svg>

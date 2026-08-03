@@ -5,7 +5,7 @@
 @layer base {
   :root {
     --nav-height: 64px;
-    --ember: 255, 77, 0;
+    --ember: 108, 92, 255;
   }
 
   html {
@@ -65,8 +65,8 @@
   }
 
   .text-ember-glow {
-    color: #ff7a1f;
-    text-shadow: 0 0 24px rgba(255, 77, 0, 0.55);
+    color: #8b7dff;
+    text-shadow: 0 0 24px rgba(108, 92, 255, 0.55);
   }
 
   .label-caps {
@@ -74,7 +74,7 @@
   }
 
   .ember-glow {
-    box-shadow: 0 0 24px rgba(255, 77, 0, 0.35);
+    box-shadow: 0 0 24px rgba(108, 92, 255, 0.35);
   }
 
   .no-scrollbar {

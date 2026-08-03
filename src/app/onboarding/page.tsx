@@ -113,7 +113,7 @@ export default function OnboardingPage() {
           <div className="flex-1 flex flex-col justify-center items-center text-center">
             <Fueguito racha={3} size={88} className="mb-6" />
             <div className="flex items-baseline gap-1 mb-3">
-              <span className="font-display-expanded text-4xl tracking-tight">Gym App</span>
+              <span className="font-display-expanded text-4xl tracking-tight">ASCEND</span>
               <span className="w-2 h-2 rounded-full bg-ember inline-block" />
             </div>
             <h1 className="text-2xl font-bold mb-2">Tu Súper Entrenador IA</h1>

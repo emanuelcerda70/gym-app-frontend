@@ -21,12 +21,12 @@ const config: Config = {
           dim: "#71717A",
         },
         ember: {
-          DEFAULT: "#FF4D00",
-          soft: "#FF7A1F",
-          glow: "rgba(255, 77, 0, 0.35)",
-          dark: "#B33400",
+          DEFAULT: "#6C5CFF",
+          soft: "#8B7DFF",
+          glow: "rgba(108, 92, 255, 0.35)",
+          dark: "#4C40C9",
         },
-        brasa: "#FFB300",
+        brasa: "#00D4FF",
       },
       fontFamily: {
         sans: ["var(--font-sora)", "system-ui", "sans-serif"],
@@ -40,15 +40,15 @@ const config: Config = {
         full: "9999px",
       },
       boxShadow: {
-        ember: "0 0 24px rgba(255, 77, 0, 0.35)",
-        "ember-lg": "0 0 48px rgba(255, 77, 0, 0.45)",
+        ember: "0 0 24px rgba(108, 92, 255, 0.35)",
+        "ember-lg": "0 0 48px rgba(108, 92, 255, 0.45)",
         card: "0 1px 0 rgba(255,255,255,0.03) inset, 0 8px 24px rgba(0,0,0,0.35)",
       },
       keyframes: {
         flare: {
-          "0%": { transform: "scale(1)", filter: "drop-shadow(0 0 0 rgba(255,77,0,0))" },
-          "35%": { transform: "scale(1.22)", filter: "drop-shadow(0 0 28px rgba(255,77,0,0.9))" },
-          "100%": { transform: "scale(1)", filter: "drop-shadow(0 0 14px rgba(255,77,0,0.45))" },
+          "0%": { transform: "scale(1)", filter: "drop-shadow(0 0 0 rgba(108,92,255,0))" },
+          "35%": { transform: "scale(1.22)", filter: "drop-shadow(0 0 28px rgba(108,92,255,0.9))" },
+          "100%": { transform: "scale(1)", filter: "drop-shadow(0 0 14px rgba(108,92,255,0.45))" },
         },
         tick: {
           "0%": { transform: "translateY(6px)", opacity: "0" },
