@@ -37,7 +37,7 @@ export default function FrameAnimator({ baseUrl }: FrameAnimatorProps) {
       <img
         src={`${safeUrl}-${frame}.png`}
         alt="Animación ASCEND"
-        className="w-full h-full object-contain mix-blend-screen transition-opacity duration-150"
+        className="w-full h-full object-contain transition-opacity duration-150"
         suppressHydrationWarning
       />
     </div>
