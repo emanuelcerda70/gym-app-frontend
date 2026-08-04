@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import Input from "@/components/ui/Input"
@@ -60,13 +61,13 @@ export default function AuthPage() {
               Entrenamiento inteligente y seguimiento milimétrico para alcanzar
               tu mejor versión.
             </p>
-            <button
-              onClick={() => setIsAuthenticating(true)}
+            <Link
+              href="/dashboard"
               className="flex items-center justify-center gap-2 w-full h-12 bg-primary text-text-primary font-bold rounded-xl hover:bg-primary-hover transition-colors active:scale-[0.98]"
             >
               Comenzar ahora
               <ArrowRight className="w-5 h-5" />
-            </button>
+            </Link>
           </div>
         </div>
       ) : (

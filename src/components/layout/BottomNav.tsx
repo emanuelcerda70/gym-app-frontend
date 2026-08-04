@@ -6,10 +6,10 @@ import { Home, Dumbbell, MessageCircle, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const tabs = [
-  { href: "/home", label: "Inicio", icon: Home, highlight: false },
-  { href: "/entrenamiento", label: "Rutinas", icon: Dumbbell, highlight: false },
-  { href: "/chat", label: "Chat", icon: MessageCircle, highlight: true },
-  { href: "/perfil", label: "Perfil", icon: User, highlight: false },
+  { href: "/dashboard", label: "Inicio", icon: Home, highlight: false },
+  { href: "/dashboard/rutinas", label: "Rutinas", icon: Dumbbell, highlight: false },
+  { href: "/dashboard/chat", label: "Chat", icon: MessageCircle, highlight: true },
+  { href: "/dashboard/perfil", label: "Perfil", icon: User, highlight: false },
 ]
 
 export default function BottomNav() {
