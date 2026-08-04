@@ -3,7 +3,6 @@
 import Link from "next/link"
 import {
   Bell,
-  Bot,
   Calendar,
   Clock,
   Dumbbell,
@@ -15,6 +14,7 @@ import {
   User,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getMascotAvatar } from "@/utils/mascot"
 import { useAuthStore } from "@/store/authStore"
 import { useRutinas } from "@/hooks/useRutinas"
 import { useCheckin } from "@/hooks/useCheckin"
@@ -62,36 +62,44 @@ export default function DashboardPage() {
       {/* Hero Card - Racha Actual */}
       <section className="mt-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-hierro to-surface border border-hierro-border p-6">
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/10 blur-2xl" />
-        <div className="relative">
-          <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-secondary" />
-            <p className="label-caps">Racha Actual</p>
+        <div className="relative flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <Flame className="w-5 h-5 text-secondary" />
+              <p className="label-caps">Racha Actual</p>
+            </div>
+            <div className="flex items-end gap-2 mt-3">
+              <span className="font-display text-5xl font-bold text-text-primary">
+                {perfilLoading ? "--" : racha}
+              </span>
+              <span className="font-sans text-sm text-text-secondary mb-2">días</span>
+            </div>
+            <p className="font-sans text-sm text-text-secondary mt-2">
+              {racha > 0
+                ? "¡Vamos! No la cortes hoy 🔥"
+                : "Arrancá tu racha hoy: cada día suma."}
+            </p>
+            <div className="flex gap-1.5 mt-5">
+              {Array.from({ length: DIAS_SEMANA }, (_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex-1 h-1.5 rounded-full transition-colors",
+                    i < Math.min(racha, DIAS_SEMANA)
+                      ? "bg-gradient-to-r from-primary to-secondary"
+                      : "bg-surface-light border border-hierro-border"
+                  )}
+                />
+              ))}
+            </div>
+            <p className="font-sans text-[11px] text-text-secondary mt-2">Meta semanal</p>
           </div>
-          <div className="flex items-end gap-2 mt-3">
-            <span className="font-display text-5xl font-bold text-text-primary">
-              {perfilLoading ? "--" : racha}
-            </span>
-            <span className="font-sans text-sm text-text-secondary mb-2">días</span>
-          </div>
-          <p className="font-sans text-sm text-text-secondary mt-2">
-            {racha > 0
-              ? "¡Vamos! No la cortes hoy 🔥"
-              : "Arrancá tu racha hoy: cada día suma."}
-          </p>
-          <div className="flex gap-1.5 mt-5">
-            {Array.from({ length: DIAS_SEMANA }, (_, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "flex-1 h-1.5 rounded-full transition-colors",
-                  i < Math.min(racha, DIAS_SEMANA)
-                    ? "bg-gradient-to-r from-primary to-secondary"
-                    : "bg-surface-light border border-hierro-border"
-                )}
-              />
-            ))}
-          </div>
-          <p className="font-sans text-[11px] text-text-secondary mt-2">Meta semanal</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={getMascotAvatar(racha)}
+            alt="Mascota ASCEND"
+            className="w-24 h-24 object-contain shrink-0"
+          />
         </div>
       </section>
 
@@ -249,8 +257,13 @@ export default function DashboardPage() {
       <section className="mt-2">
         <div className="rounded-2xl bg-hierro/50 backdrop-blur-md border border-hierro-border p-5">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
-              <Bot className="w-5 h-5" />
+            <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={getMascotAvatar(racha)}
+                alt="Mascota IA"
+                className="w-12 h-12 object-contain"
+              />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">

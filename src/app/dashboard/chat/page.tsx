@@ -1,9 +1,11 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Bot, Send } from "lucide-react"
+import { Send } from "lucide-react"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { getMascotAvatar } from "@/utils/mascot"
+import { usePerfil } from "@/hooks/usePerfil"
 import type { MensajeHistorial } from "@/types"
 
 const MENSAJE_BIENVENIDA: MensajeHistorial = {
@@ -17,6 +19,8 @@ export default function ChatPage() {
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const { perfil } = usePerfil()
+  const racha = perfil?.racha_actual_dias ?? 0
 
   useEffect(() => {
     const el = scrollRef.current
@@ -69,8 +73,13 @@ export default function ChatPage() {
             </div>
           ) : (
             <div key={i} className="flex items-end gap-2">
-              <div className="w-8 h-8 rounded-full bg-hierro p-2 flex items-center justify-center text-primary shrink-0">
-                <Bot className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-full bg-hierro p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={getMascotAvatar(racha)}
+                  alt="Mascota IA"
+                  className="w-8 h-8 object-contain"
+                />
               </div>
               <div className="bg-hierro-soft border border-hierro-border rounded-2xl rounded-tl-sm p-3 text-text-primary text-sm font-sans max-w-[85%]">
                 {msg.content}
@@ -81,8 +90,13 @@ export default function ChatPage() {
 
         {isLoading && (
           <div className="flex items-end gap-2">
-            <div className="w-8 h-8 rounded-full bg-hierro p-2 flex items-center justify-center text-primary shrink-0">
-              <Bot className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-full bg-hierro p-1 flex items-center justify-center shrink-0 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={getMascotAvatar(racha)}
+                alt="Mascota IA"
+                className="w-8 h-8 object-contain"
+              />
             </div>
             <div className="bg-hierro-soft border border-hierro-border rounded-2xl rounded-tl-sm p-3 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ember-pulse" />
