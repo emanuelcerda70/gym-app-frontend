@@ -9,6 +9,7 @@ const config: Config = {
         surface: {
           DEFAULT: "#09090B",
           light: "#14141A",
+          primary: "#09090B",
         },
         border: "#2B2B36",
         primary: {
@@ -21,6 +22,17 @@ const config: Config = {
         text: {
           primary: "#F5F7FA",
           secondary: "#9CA3AF",
+        },
+        // Tokens usados por globals.css (@apply) — antes no existían acá,
+        // por eso rompía el build. Ajustá los hex si no son los definitivos.
+        carbon: "#09090B",
+        ember: "#6C5CFF",
+        ceniza: "#9CA3AF",
+        hueso: "#F5F7FA",
+        hierro: {
+          DEFAULT: "#14141A",
+          soft: "#1C1C22",
+          border: "#2B2B36",
         },
       },
       fontFamily: {
@@ -105,4 +117,3 @@ const config: Config = {
   plugins: [],
 }
 export default config
- 
