@@ -48,14 +48,7 @@ export default function AuthPage() {
       {!isAuthenticating ? (
         /* -------- Vista 1: Onboarding Limpio -------- */
         <div className="relative z-20 h-full flex flex-col items-center justify-between py-16 px-6">
-          <div className="flex flex-col items-center pt-10">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo-ascend.png"
-              alt="ASCEND"
-              className="h-12 w-auto"
-            />
-          </div>
+          <div className="flex flex-col items-center pt-10" />
 
           <div className="flex flex-col items-center text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
@@ -87,12 +80,6 @@ export default function AuthPage() {
 
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 max-w-md w-full shadow-2xl animate-fade-in">
             <div className="flex flex-col items-center mb-6">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo-ascend.png"
-                alt="ASCEND"
-                className="h-9 w-auto mb-3"
-              />
               <h2 className="text-xl font-bold text-white">
                 {authMode === "login" ? "Bienvenido de vuelta" : "Creá tu cuenta"}
               </h2>
