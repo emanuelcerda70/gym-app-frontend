@@ -9,12 +9,12 @@
   }
 
   html {
-    @apply bg-surface-primary text-text-primary antialiased;
+    @apply bg-surface text-text-primary antialiased;
     color-scheme: dark;
   }
 
   body {
-    @apply min-h-screen bg-surface-primary text-text-primary;
+    @apply min-h-screen bg-surface text-text-primary;
   }
 
   ::selection {
@@ -39,20 +39,20 @@
 
 @layer components {
   .glass {
-    @apply bg-hierro border border-hierro-border shadow-card;
+    @apply bg-surface-light border border-border shadow-card;
   }
 
-  .ember-btn {
-    @apply bg-ember text-carbon font-bold transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
+  .primary-btn {
+    @apply bg-primary text-white font-bold transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
     box-shadow: 0 6px 20px rgba(var(--ember), 0.35);
   }
 
-  .ember-btn:active:not(:disabled) {
+  .primary-btn:active:not(:disabled) {
     box-shadow: 0 2px 10px rgba(var(--ember), 0.5);
   }
 
   .ghost-btn {
-    @apply bg-hierro-soft text-ceniza border border-hierro-border font-semibold transition-all hover:text-hueso hover:border-hierro active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-surface-light text-text-secondary border border-border font-semibold transition-all hover:text-text-primary hover:border-primary active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 }
 
@@ -64,16 +64,16 @@
     letter-spacing: -0.02em;
   }
 
-  .text-ember-glow {
+  .text-primary-glow {
     color: #8b7dff;
     text-shadow: 0 0 24px rgba(108, 92, 255, 0.55);
   }
 
   .label-caps {
-    @apply text-[11px] uppercase tracking-[0.08em] text-ceniza font-semibold;
+    @apply text-xs uppercase tracking-wider text-text-secondary font-semibold;
   }
 
-  .ember-glow {
+  .primary-glow {
     box-shadow: 0 0 24px rgba(108, 92, 255, 0.35);
   }
 
