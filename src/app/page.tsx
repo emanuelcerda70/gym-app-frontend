@@ -31,9 +31,9 @@ export default function AuthPage() {
       {/* Fondo de montaña */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/bg-onboarding.jpg"
+        src="/bg-onboarding.png"
         alt=""
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover object-center"
       />
 
       {/* Overlay con blur transicional */}
