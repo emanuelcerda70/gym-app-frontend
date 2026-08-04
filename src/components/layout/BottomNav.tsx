@@ -2,13 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Dumbbell, User } from "lucide-react"
+import { Home, Dumbbell, MessageCircle, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const tabs = [
-  { href: "/home", label: "Inicio", icon: Home },
-  { href: "/entrenamiento", label: "Rutinas", icon: Dumbbell },
-  { href: "/perfil", label: "Perfil", icon: User },
+  { href: "/home", label: "Inicio", icon: Home, highlight: false },
+  { href: "/entrenamiento", label: "Rutinas", icon: Dumbbell, highlight: false },
+  { href: "/chat", label: "Chat", icon: MessageCircle, highlight: true },
+  { href: "/perfil", label: "Perfil", icon: User, highlight: false },
 ]
 
 export default function BottomNav() {
@@ -25,16 +26,36 @@ export default function BottomNav() {
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={cn(
-                  "flex flex-col items-center gap-1 transition-colors",
-                  active
-                    ? "text-primary"
-                    : "text-text-secondary hover:text-text-primary"
-                )}
+                className={cn("flex flex-col items-center transition-colors gap-1")}
               >
-                <Icon className="w-6 h-6" />
-                <span className="text-[10px] font-sans font-medium mt-1">
-                  {tab.label}
+                <span
+                  className={cn(
+                    !tab.highlight && "flex flex-col items-center gap-1",
+                    tab.highlight &&
+                      "flex flex-col items-center gap-1 bg-primary/20 text-primary rounded-full p-2 text-primary"
+                  )}
+                >
+                  <Icon
+                    className={cn(
+                      "w-6 h-6",
+                      active
+                        ? "text-primary"
+                        : "text-text-secondary hover:text-text-primary",
+                      tab.highlight && "text-primary"
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "text-[10px] font-sans font-medium mt-1",
+                      tab.highlight
+                        ? "text-primary font-semibold"
+                        : active
+                          ? "text-primary"
+                          : "text-text-secondary"
+                    )}
+                  >
+                    {tab.label}
+                  </span>
                 </span>
               </Link>
             )
