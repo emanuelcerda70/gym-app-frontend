@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Archivo, Sora } from "next/font/google"
+import { Archivo, Inter, Space_Grotesk, Sora } from "next/font/google"
 import "./globals.css"
 import Providers from "./providers"
 import RouteRecorder from "@/components/layout/RouteRecorder"
@@ -7,6 +7,16 @@ import RouteRecorder from "@/components/layout/RouteRecorder"
 const sora = Sora({
   subsets: ["latin"],
   variable: "--font-sora",
+})
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+})
+
+const space = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space",
 })
 
 const archivo = Archivo({
@@ -31,7 +41,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className="dark">
-      <body className={`${sora.variable} ${archivo.variable} min-h-screen`}>
+      <body className="bg-[#09090B] text-[#F5F7FA] min-h-screen font-inter" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
         <Providers>
           <RouteRecorder />
           {children}

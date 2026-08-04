@@ -9,12 +9,12 @@
   }
 
   html {
-    @apply bg-carbon text-hueso antialiased;
+    @apply bg-surface-primary text-text-primary antialiased;
     color-scheme: dark;
   }
 
   body {
-    @apply min-h-screen bg-carbon text-hueso;
+    @apply min-h-screen bg-surface-primary text-text-primary;
   }
 
   ::selection {

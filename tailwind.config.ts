@@ -6,38 +6,45 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        carbon: {
-          DEFAULT: "#000000",
-          deep: "#050505",
+        surface: {
+          DEFAULT: "#09090B",
+          light: "#14141A",
         },
-        hierro: {
-          DEFAULT: "#1C1C1E",
-          soft: "#27272A",
-          border: "#2E2E33",
-        },
-        hueso: "#FFFFFF",
-        ceniza: {
-          DEFAULT: "#A1A1AA",
-          dim: "#71717A",
-        },
-        ember: {
+        border: "#2B2B36",
+        primary: {
           DEFAULT: "#6C5CFF",
-          soft: "#8B7DFF",
-          glow: "rgba(108, 92, 255, 0.35)",
-          dark: "#4C40C9",
+          hover: "#8B7DFF",
         },
-        brasa: "#00D4FF",
+        secondary: {
+          DEFAULT: "#00D4FF",
+        },
+        text: {
+          primary: "#F5F7FA",
+          secondary: "#9CA3AF",
+        },
       },
       fontFamily: {
-        sans: ["var(--font-sora)", "system-ui", "sans-serif"],
-        display: ["var(--font-archivo)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-space)", "Space Grotesk", "system-ui", "sans-serif"],
+        sora: ["var(--font-sora)", "system-ui", "sans-serif"],
+        archivo: ["var(--font-archivo)", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        sm: "8px",
-        md: "10px",
+        none: "0",
+        sm: "4px",
+        md: "8px",
         lg: "12px",
         xl: "16px",
+        "2xl": "20px",
         full: "9999px",
+      },
+      fontSize: {
+        xs: ["14px", { lineHeight: "20px" }],
+        sm: ["16px", { lineHeight: "24px" }],
+        base: ["18px", { lineHeight: "28px" }],
+        lg: ["20px", { lineHeight: "32px" }],
+        xl: ["24px", { lineHeight: "32px" }],
+        "2xl": ["32px", { lineHeight: "40px" }],
       },
       boxShadow: {
         ember: "0 0 24px rgba(108, 92, 255, 0.35)",
