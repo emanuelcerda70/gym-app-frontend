@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { ArrowRight } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import Input from "@/components/ui/Input"
 
 export default function AuthPage() {
+  const router = useRouter()
   const { login, register, error } = useAuth()
   const [isAuthenticating, setIsAuthenticating] = useState(false)
   const [authMode, setAuthMode] = useState<"login" | "register">("login")
@@ -21,8 +22,11 @@ export default function AuthPage() {
     if (authMode === "register" && !nombre) return
     setEnviando(true)
     try {
-      if (authMode === "register") await register(nombre, email, password)
-      else await login(email, password)
+      const exito =
+        authMode === "register"
+          ? await register(nombre, email, password)
+          : await login(email, password)
+      if (exito && authMode === "login") router.push("/dashboard")
     } finally {
       setEnviando(false)
     }
@@ -61,13 +65,13 @@ export default function AuthPage() {
               Entrenamiento inteligente y seguimiento milimétrico para alcanzar
               tu mejor versión.
             </p>
-            <Link
-              href="/dashboard"
+            <button
+              onClick={() => setIsAuthenticating(true)}
               className="flex items-center justify-center gap-2 w-full h-12 bg-primary text-text-primary font-bold rounded-xl hover:bg-primary-hover transition-colors active:scale-[0.98]"
             >
               Comenzar ahora
               <ArrowRight className="w-5 h-5" />
-            </Link>
+            </button>
           </div>
         </div>
       ) : (

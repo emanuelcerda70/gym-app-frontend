@@ -15,9 +15,10 @@ export function useAuth() {
     try {
       const data = await api.auth.login({ email, password })
       setAuth(data.access_token, data.usuario_id, data.nombre)
-      router.push("/home")
+      return true
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Error al iniciar sesión")
+      return false
     }
   }
 
@@ -27,8 +28,10 @@ export function useAuth() {
       const data = await api.auth.register({ nombre, email, password })
       setAuth(data.access_token, data.usuario_id, data.nombre)
       router.push("/onboarding")
+      return true
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Error al registrarse")
+      return false
     }
   }
 
