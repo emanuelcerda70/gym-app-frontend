@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { ArrowRight } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import Input from "@/components/ui/Input"
 
@@ -27,7 +28,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="h-screen w-full relative overflow-hidden bg-black">
+    <div className="h-screen w-full relative overflow-hidden bg-surface">
       {/* Fondo de montaña */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -35,6 +36,9 @@ export default function AuthPage() {
         alt=""
         className="absolute inset-0 w-full h-full object-cover object-center"
       />
+
+      {/* Gradiente oscuro inferior para legibilidad */}
+      <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/80 to-transparent" />
 
       {/* Overlay con blur transicional */}
       <div
@@ -46,26 +50,24 @@ export default function AuthPage() {
       />
 
       {!isAuthenticating ? (
-        /* -------- Vista 1: Onboarding Limpio -------- */
-        <div className="relative z-20 h-full flex flex-col items-center justify-between py-16 px-6">
-          <div className="flex flex-col items-center pt-10" />
-
-          <div className="flex flex-col items-center text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-              Tu camino empieza aquí
+        /* -------- Vista 1: Onboarding / Welcome -------- */
+        <div className="relative z-20 h-full flex flex-col justify-end p-8">
+          <div className="flex flex-col gap-4 max-w-xl">
+            <h1 className="font-display text-2xl font-bold text-text-primary">
+              Eleva tu potencial.
             </h1>
-            <p className="text-gray-300 text-lg mb-8">
-              Entrenamiento inteligente, hecho para vos.
+            <p className="font-sans text-base text-text-secondary">
+              Entrenamiento inteligente y seguimiento milimétrico para alcanzar
+              tu mejor versión.
             </p>
             <button
               onClick={() => setIsAuthenticating(true)}
-              className="bg-gradient-to-r from-[#6C5CFF] to-[#00D4FF] text-white font-semibold py-4 px-8 rounded-full shadow-lg w-full max-w-xs active:scale-[0.98] transition-transform"
+              className="flex items-center justify-center gap-2 w-full h-12 bg-primary text-text-primary font-bold rounded-xl hover:bg-primary-hover transition-colors active:scale-[0.98]"
             >
-              Comenzar
+              Comenzar ahora
+              <ArrowRight className="w-5 h-5" />
             </button>
           </div>
-
-          <div className="h-10" />
         </div>
       ) : (
         /* -------- Vista 2: Formulario Glassmorphism -------- */
@@ -80,6 +82,12 @@ export default function AuthPage() {
 
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 max-w-md w-full shadow-2xl animate-fade-in">
             <div className="flex flex-col items-center mb-6">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo-ascend.png"
+                alt="ASCEND"
+                className="h-9 w-auto mb-3"
+              />
               <h2 className="text-xl font-bold text-white">
                 {authMode === "login" ? "Bienvenido de vuelta" : "Creá tu cuenta"}
               </h2>
