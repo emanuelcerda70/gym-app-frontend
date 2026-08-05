@@ -1,5 +1,6 @@
 "use client"
 
+import type { ElementType } from "react"
 import { CalendarCheck, Dumbbell, Flame, TrendingUp } from "lucide-react"
 import { usePerfil } from "@/hooks/usePerfil"
 
@@ -12,7 +13,7 @@ function ProgressCard({
   contexto,
   tendencia,
 }: {
-  icon: React.ElementType
+  icon: ElementType
   label: string
   value: string
   contexto?: string
