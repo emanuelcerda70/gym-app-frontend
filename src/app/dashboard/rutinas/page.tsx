@@ -171,9 +171,10 @@ function MisRutinas() {
         const count = Array.isArray(r.ejercicios) ? r.ejercicios.length : r.ejercicios_count
         const duracion = typeof count === "number" ? count * 12 : null
         return (
-          <div
+          <Link
             key={r.id}
-            className="bg-hierro rounded-2xl p-4 border border-hierro-border"
+            href={`/dashboard/rutinas/${r.id}`}
+            className="block bg-hierro rounded-2xl p-4 border border-hierro-border hover:border-primary/40 transition-colors active:scale-[0.98] active:bg-surface-elevated cursor-pointer"
           >
             <span className="inline-block bg-primary/20 text-primary text-[11px] font-bold uppercase tracking-wider rounded-full px-3 py-1">
               Fuerza
@@ -198,7 +199,7 @@ function MisRutinas() {
                 </span>
               )}
             </div>
-          </div>
+          </Link>
         )
       })}
     </div>
