@@ -32,6 +32,31 @@ export default function RutinaDetallePage() {
     staleTime: 10 * 60_000,
   })
 
+  const ejercicios = useMemo(() => {
+    const r = rutinasQuery.data?.find((x) => x.id === id)
+    return Array.isArray(r?.ejercicios) ? r.ejercicios : []
+  }, [rutinasQuery.data, id])
+
+  const gruposPorDia = useMemo(() => {
+    const mapa = new Map<string, typeof ejercicios>()
+    for (const ej of ejercicios) {
+      const dia = ej.dia_semana ?? "Sesión única"
+      const lista = mapa.get(dia) ?? []
+      lista.push(ej)
+      mapa.set(dia, lista)
+    }
+    const orden = new Map<string, number>()
+    DIAS.forEach((d, i) => orden.set(d, i))
+    return [...mapa.entries()].sort((a, b) => {
+      const iA = orden.get(a[0]) ?? 99
+      const iB = orden.get(b[0]) ?? 99
+      return iA - iB
+    })
+  }, [ejercicios])
+
+  const nombreDe = (ejercicioId?: number) =>
+    catalogoQuery.data?.find((e) => e.id === ejercicioId)?.nombre
+
   /* -------- Estado de carga -------- */
   if (rutinasQuery.isLoading) {
     return (
@@ -72,29 +97,8 @@ export default function RutinaDetallePage() {
     )
   }
 
-  const ejercicios = Array.isArray(rutina.ejercicios) ? rutina.ejercicios : []
   const count = ejercicios.length || rutina.ejercicios_count
   const duracion = typeof count === "number" ? count * 12 : null
-
-  const nombreDe = (ejercicioId?: number) =>
-    catalogoQuery.data?.find((e) => e.id === ejercicioId)?.nombre
-
-  const gruposPorDia = useMemo(() => {
-    const mapa = new Map<string, typeof ejercicios>()
-    for (const ej of ejercicios) {
-      const dia = ej.dia_semana ?? "Sesión única"
-      const lista = mapa.get(dia) ?? []
-      lista.push(ej)
-      mapa.set(dia, lista)
-    }
-    const orden = new Map<string, number>()
-    DIAS.forEach((d, i) => orden.set(d, i))
-    return [...mapa.entries()].sort((a, b) => {
-      const iA = orden.get(a[0]) ?? 99
-      const iB = orden.get(b[0]) ?? 99
-      return iA - iB
-    })
-  }, [ejercicios])
 
   return (
     <main className="px-6 pt-6 pb-6 animate-fade-in">
