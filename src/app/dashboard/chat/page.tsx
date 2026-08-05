@@ -1,7 +1,17 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { ImagePlus, Send, X } from "lucide-react"
+import {
+  BarChart3,
+  ClipboardList,
+  Dumbbell,
+  ImagePlus,
+  MessageCircleQuestion,
+  Send,
+  Settings2,
+  Sparkles,
+  X,
+} from "lucide-react"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { getMascotAvatar } from "@/utils/mascot"
@@ -12,14 +22,38 @@ interface ChatMsg extends MensajeHistorial {
   imagen?: string | null
 }
 
-const MENSAJE_BIENVENIDA: ChatMsg = {
-  role: "assistant",
-  content:
-    "¡Buenas! Soy el Asistente ASCEND. Contame qué querés lograr hoy: puedo armarte una rutina, ajustar tu plan o responder cualquier duda de entrenamiento.",
-}
+const ACCIONES_RAPIDAS = [
+  {
+    icono: ClipboardList,
+    titulo: "Crear una rutina",
+    subtitulo: "Arma tu plan desde cero",
+  },
+  {
+    icono: Settings2,
+    titulo: "Ajustar mi plan",
+    subtitulo: "Adaptá rutina o dieta",
+  },
+  {
+    icono: MessageCircleQuestion,
+    titulo: "Resolver dudas",
+    subtitulo: "Técnica, nutrición y más",
+  },
+  {
+    icono: BarChart3,
+    titulo: "Análisis de progreso",
+    subtitulo: "Revisá tu evolución",
+  },
+]
+
+const SUGERENCIAS = [
+  "Armame una rutina de tren superior",
+  "¿Cómo mejoro mi técnica de sentadilla?",
+  "Qué debería comer hoy para entrenar",
+  "Revisá mi progreso de esta semana",
+]
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<ChatMsg[]>([MENSAJE_BIENVENIDA])
+  const [messages, setMessages] = useState<ChatMsg[]>([])
   const [input, setInput] = useState("")
   const [imagen, setImagen] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -27,6 +61,17 @@ export default function ChatPage() {
   const fileRef = useRef<HTMLInputElement>(null)
   const { perfil } = usePerfil()
   const racha = perfil?.racha_actual_dias ?? 0
+  const nombre = perfil?.nombre?.split(" ")[0] ?? "Atleta"
+
+  const mensajeBienvenida: ChatMsg = {
+    role: "assistant",
+    content:
+      "Soy tu asistente personal. Contame qué querés lograr hoy y lo hacemos realidad.",
+  }
+
+  const conBienvenida = messages.length === 0
+    ? [mensajeBienvenida]
+    : messages
 
   useEffect(() => {
     const el = scrollRef.current
@@ -42,15 +87,11 @@ export default function ChatPage() {
     e.target.value = ""
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const texto = input.trim()
+  const enviar = async (textoRaw: string) => {
+    const texto = textoRaw.trim()
     if ((!texto && !imagen) || isLoading) return
 
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", content: texto, imagen },
-    ])
+    setMessages((prev) => [...prev, { role: "user", content: texto, imagen }])
     setInput("")
     setImagen(null)
     setIsLoading(true)
@@ -79,11 +120,103 @@ export default function ChatPage() {
     }
   }
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    enviar(input)
+  }
+
   return (
     <main className="flex flex-col h-[calc(100vh-var(--nav-height)-16px)] -mb-24">
-      {/* Área de mensajes */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-6">
-        {messages.map((msg, i) =>
+      {/* -------- Header del chat -------- */}
+      <header className="flex items-center justify-between px-6 pt-6 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="relative w-12 h-12 rounded-full bg-hierro border border-hierro-border p-1 flex items-center justify-center shrink-0 overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={getMascotAvatar(racha)}
+              alt="Mascota IA"
+              className="w-10 h-10 object-contain"
+            />
+            <span className="absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-surface" />
+          </div>
+          <div>
+            <p className="font-display text-base font-bold text-text-primary">
+              Asistente ASCEND
+            </p>
+            <p className="flex items-center gap-1.5 font-sans text-[11px] text-green-500">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              En línea
+            </p>
+          </div>
+        </div>
+        <button
+          aria-label="Sugerencias de IA"
+          className="w-10 h-10 rounded-full bg-hierro border border-hierro-border flex items-center justify-center text-primary hover:text-primary-hover transition-colors active:scale-95"
+        >
+          <Sparkles className="w-4 h-4" />
+        </button>
+      </header>
+
+      {/* -------- Área scrolleable -------- */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 pb-4 space-y-5">
+        {/* Tarjeta de bienvenida */}
+        {messages.length === 0 && (
+          <section className="bg-surface p-5 rounded-[20px] border border-border mb-1">
+            <h2 className="font-display text-xl font-bold text-text-primary">
+              ¡Hola {nombre}!
+            </h2>
+            <p className="font-sans text-sm text-text-muted mt-1">
+              Soy tu asistente personal. Contame qué querés lograr hoy.
+            </p>
+
+            <div className="mt-5 space-y-2.5">
+              {ACCIONES_RAPIDAS.map((a) => {
+                const Icono = a.icono
+                return (
+                  <button
+                    key={a.titulo}
+                    onClick={() => enviar(a.titulo)}
+                    className="w-full flex items-center gap-3 p-3 rounded-2xl bg-surface-light border border-border text-left hover:border-primary/40 transition-colors active:scale-[0.98]"
+                  >
+                    <span className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <Icono className="w-5 h-5" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-sans text-sm font-semibold text-text-primary">
+                        {a.titulo}
+                      </span>
+                      <span className="block font-sans text-xs text-text-muted truncate">
+                        {a.subtitulo}
+                      </span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
+        {messages.length === 0 && (
+          <section className="mb-1">
+            <p className="font-sans text-xs font-semibold text-text-muted mb-3 uppercase tracking-wider">
+              Sugerencias rápidas
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {SUGERENCIAS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => enviar(s)}
+                  className="border border-border rounded-full p-3 font-sans text-xs text-text-secondary hover:text-text-primary hover:border-primary/40 transition-colors active:scale-[0.98]"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Mensajes */}
+        {conBienvenida.map((msg, i) =>
           msg.role === "user" ? (
             <div key={i} className="flex flex-col items-end gap-2">
               {msg.imagen && (
@@ -144,12 +277,11 @@ export default function ChatPage() {
         )}
       </div>
 
-      {/* Área del input */}
+      {/* -------- Input (conserva cámara) -------- */}
       <form
         onSubmit={handleSubmit}
         className="w-full bg-surface/90 backdrop-blur-md border-t border-hierro-border p-4"
       >
-        {/* Preview de imagen */}
         {imagen && (
           <div className="flex items-center gap-2 mb-3">
             <div className="relative rounded-xl overflow-hidden border border-primary/30">

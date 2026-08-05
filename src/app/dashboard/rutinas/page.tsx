@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowRight, ClipboardList, Clock, Dumbbell, Search, Sparkles } from "lucide-react"
+import { ArrowRight, ClipboardList, Clock, Dumbbell, Search, SlidersHorizontal, Sparkles } from "lucide-react"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { useRutinas } from "@/hooks/useRutinas"
@@ -276,16 +276,32 @@ function Biblioteca() {
 
   return (
     <div className="mt-6">
-      {/* Búsqueda */}
-      <div className="flex items-center gap-2 bg-hierro border border-hierro-border rounded-full px-4 py-2.5">
-        <Search className="w-4 h-4 text-text-secondary shrink-0" />
-        <input
-          type="text"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar por nombre o músculo..."
-          className="flex-1 bg-transparent outline-none text-sm font-sans text-text-primary placeholder:text-text-secondary/60"
-        />
+      {/* Encabezado */}
+      <h2 className="font-display text-2xl font-bold text-text-primary mb-1">
+        Biblioteca
+      </h2>
+      <p className="font-sans text-sm text-text-muted mb-5">
+        Explorá ejercicios por músculo o categoría.
+      </p>
+
+      {/* Búsqueda + Filtros */}
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 bg-hierro border border-hierro-border rounded-full px-4 py-2.5 flex-1">
+          <Search className="w-4 h-4 text-text-secondary shrink-0" />
+          <input
+            type="text"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Buscar por nombre o músculo..."
+            className="flex-1 bg-transparent outline-none text-sm font-sans text-text-primary placeholder:text-text-secondary/60"
+          />
+        </div>
+        <button
+          aria-label="Filtros"
+          className="w-10 h-10 rounded-full bg-hierro border border-hierro-border flex items-center justify-center text-text-secondary hover:text-text-primary hover:border-primary/40 transition-colors active:scale-95 shrink-0"
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Resultados de búsqueda */}
@@ -331,39 +347,55 @@ function Biblioteca() {
         </div>
       ) : !categoria ? (
         /* Nivel 1: Categorías madre */
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-4">
           {CATEGORIAS.map((cat) => {
             const count = (ejercicios ?? []).filter((e) => categoriaDe(e) === cat.id).length
             return (
               <button
                 key={cat.id}
                 onClick={() => setCategoria(cat.id)}
-                className="w-full group relative bg-hierro rounded-2xl p-5 border border-hierro-border text-left hover:border-primary/40 transition-colors active:scale-[0.98]"
+                className="w-full flex items-stretch bg-surface-light border border-border rounded-2xl overflow-hidden text-left hover:border-primary/40 transition-colors active:scale-[0.98] min-h-28"
               >
-                <div className="text-3xl mb-2">{cat.emoji}</div>
-                <h3 className="font-display text-base font-bold text-text-primary">{cat.label}</h3>
-                <p className="font-sans text-xs text-text-secondary mt-1">
-                  {cat.desc} · {count} ejercicios
-                </p>
-                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-text-secondary/40">
-                  →
-                </span>
+                <div className="flex-1 min-w-0 p-5">
+                  <div className="text-3xl mb-2">{cat.emoji}</div>
+                  <h3 className="font-display text-base font-bold text-text-primary">
+                    {cat.label}
+                  </h3>
+                  <p className="font-sans text-xs text-text-secondary mt-1">
+                    {cat.desc}
+                  </p>
+                  <span className="inline-block mt-3 bg-primary/10 text-primary text-[11px] font-bold rounded-full px-3 py-1">
+                    {count} ejercicios
+                  </span>
+                </div>
+                <div className="relative w-24 bg-gradient-to-l from-surface-elevated to-transparent flex items-end justify-end p-4 shrink-0">
+                  <span className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
+                </div>
               </button>
             )
           })}
           {gruposDeCategoria.length > 0 && (
             <button
               onClick={() => setCategoria("Otros")}
-              className="w-full group relative bg-hierro rounded-2xl p-5 border border-hierro-border text-left hover:border-primary/40 transition-colors active:scale-[0.98]"
+              className="w-full flex items-stretch bg-surface-light border border-border rounded-2xl overflow-hidden text-left hover:border-primary/40 transition-colors active:scale-[0.98] min-h-28"
             >
-              <div className="text-3xl mb-2">🗂️</div>
-              <h3 className="font-display text-base font-bold text-text-primary">OTROS</h3>
-              <p className="font-sans text-xs text-text-secondary mt-1">
-                Grupos sin clasificar · {gruposDeCategoria.length} grupos
-              </p>
-              <span className="absolute right-5 top-1/2 -translate-y-1/2 text-text-secondary/40">
-                →
-              </span>
+              <div className="flex-1 min-w-0 p-5">
+                <div className="text-3xl mb-2">🗂️</div>
+                <h3 className="font-display text-base font-bold text-text-primary">OTROS</h3>
+                <p className="font-sans text-xs text-text-secondary mt-1">
+                  Grupos sin clasificar
+                </p>
+                <span className="inline-block mt-3 bg-primary/10 text-primary text-[11px] font-bold rounded-full px-3 py-1">
+                  {gruposDeCategoria.length} grupos
+                </span>
+              </div>
+              <div className="relative w-24 bg-gradient-to-l from-surface-elevated to-transparent flex items-end justify-end p-4 shrink-0">
+                <span className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                  <ArrowRight className="w-4 h-4" />
+                </span>
+              </div>
             </button>
           )}
         </div>
