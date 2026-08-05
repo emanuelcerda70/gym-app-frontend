@@ -2,14 +2,15 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Dumbbell, MessageCircle, User } from "lucide-react"
+import { Home, Dumbbell, TrendingUp, MessageCircle, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const tabs = [
-  { href: "/dashboard", label: "Inicio", icon: Home, highlight: false },
-  { href: "/dashboard/rutinas", label: "Rutinas", icon: Dumbbell, highlight: false },
-  { href: "/dashboard/chat", label: "Chat", icon: MessageCircle, highlight: true },
-  { href: "/dashboard/perfil", label: "Perfil", icon: User, highlight: false },
+  { href: "/dashboard", label: "Inicio", icon: Home },
+  { href: "/dashboard/rutinas", label: "Rutinas", icon: Dumbbell },
+  { href: "/dashboard/progreso", label: "Progreso", icon: TrendingUp },
+  { href: "/dashboard/chat", label: "Chat", icon: MessageCircle },
+  { href: "/dashboard/perfil", label: "Perfil", icon: User },
 ]
 
 export default function BottomNav() {
@@ -26,36 +27,23 @@ export default function BottomNav() {
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={cn("flex flex-col items-center transition-colors gap-1")}
+                className="flex flex-col items-center gap-1 transition-colors"
               >
+                <Icon
+                  className={cn(
+                    "w-6 h-6",
+                    active
+                      ? "text-primary"
+                      : "text-text-secondary hover:text-text-primary"
+                  )}
+                />
                 <span
                   className={cn(
-                    !tab.highlight && "flex flex-col items-center gap-1",
-                    tab.highlight &&
-                      "flex flex-col items-center gap-1 bg-primary/20 text-primary rounded-full p-2 text-primary"
+                    "text-[10px] font-sans font-medium mt-1",
+                    active ? "text-primary" : "text-text-secondary"
                   )}
                 >
-                  <Icon
-                    className={cn(
-                      "w-6 h-6",
-                      active
-                        ? "text-primary"
-                        : "text-text-secondary hover:text-text-primary",
-                      tab.highlight && "text-primary"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "text-[10px] font-sans font-medium mt-1",
-                      tab.highlight
-                        ? "text-primary font-semibold"
-                        : active
-                          ? "text-primary"
-                          : "text-text-secondary"
-                    )}
-                  >
-                    {tab.label}
-                  </span>
+                  {tab.label}
                 </span>
               </Link>
             )

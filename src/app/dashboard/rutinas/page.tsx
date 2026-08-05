@@ -220,7 +220,7 @@ function Biblioteca() {
   const ejercicioCard = (ej: Ejercicio) => (
     <Link
       key={ej.id}
-      href={`/ejercicios/${ej.id}`}
+      href={`/dashboard/ejercicios/${ej.id}`}
       className="flex items-center gap-3 bg-hierro rounded-xl p-3.5 border border-hierro-border hover:border-primary/40 transition-colors active:scale-[0.98]"
     >
       <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
