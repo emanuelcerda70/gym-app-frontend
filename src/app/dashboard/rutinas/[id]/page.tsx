@@ -17,7 +17,17 @@ const DIAS = [
   "Domingo",
 ]
 
-const MOCK_EJERCICIOS = [
+interface EjercicioUI {
+  id: string | number
+  ejercicio_id?: string | number
+  nombre?: string
+  series?: number | string
+  repeticiones?: string
+  dia_semana?: string
+  dia?: string
+}
+
+const MOCK_EJERCICIOS: EjercicioUI[] = [
   {
     id: 1,
     ejercicio_id: 1,
@@ -80,10 +90,10 @@ export default function RutinaDetallePage() {
     staleTime: 10 * 60_000,
   })
 
-  const ejercicios = useMemo(() => {
+  const ejercicios = useMemo<EjercicioUI[]>(() => {
     const r = rutinasQuery.data?.find((x) => x.id === id)
     const reales = Array.isArray(r?.ejercicios) ? r.ejercicios : []
-    return reales.length > 0 ? reales : MOCK_EJERCICIOS
+    return (reales.length > 0 ? reales : MOCK_EJERCICIOS) as EjercicioUI[]
   }, [rutinasQuery.data, id])
 
   const gruposPorDia = useMemo(() => {
@@ -103,8 +113,8 @@ export default function RutinaDetallePage() {
     })
   }, [ejercicios])
 
-  const nombreDe = (ejercicioId?: number) =>
-    catalogoQuery.data?.find((e) => e.id === ejercicioId)?.nombre
+  const nombreDe = (ejercicioId?: string | number) =>
+    catalogoQuery.data?.find((e) => e.id === Number(ejercicioId))?.nombre
 
   /* -------- Estado de carga -------- */
   if (rutinasQuery.isLoading) {
@@ -227,7 +237,7 @@ export default function RutinaDetallePage() {
                         <span className="block font-sans text-sm font-semibold text-text-primary capitalize truncate">
                           {nombre ?? `Ejercicio #${ej.ejercicio_id}`}
                         </span>
-                        {typeof ej.series === "number" && ej.repeticiones && (
+                        {ej.series != null && ej.repeticiones && (
                           <span className="inline-block mt-1 bg-surface-elevated text-text-muted font-sans text-[11px] font-semibold rounded-full px-2.5 py-0.5">
                             {ej.series} x {ej.repeticiones}
                           </span>
