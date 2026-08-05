@@ -155,7 +155,7 @@ function MisRutinas() {
           Hablá con el asistente para que arme tu primer plan de entrenamiento.
         </p>
         <Link
-          href="/dashboard/chat"
+          href="/dashboard/chat?intent=create_routine"
           className="w-full bg-primary text-white rounded-2xl py-4 flex items-center justify-center gap-2 font-sans font-bold hover:bg-primary-hover transition-colors active:scale-[0.98]"
         >
           Crear mi primera rutina

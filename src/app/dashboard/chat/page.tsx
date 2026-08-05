@@ -57,8 +57,10 @@ export default function ChatPage() {
   const [input, setInput] = useState("")
   const [imagen, setImagen] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [intentActivo, setIntentActivo] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const intentDisparado = useRef(false)
   const { perfil } = usePerfil()
   const racha = perfil?.racha_actual_dias ?? 0
   const nombre = perfil?.nombre?.split(" ")[0] ?? "Atleta"
@@ -77,6 +79,20 @@ export default function ChatPage() {
     const el = scrollRef.current
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" })
   }, [messages, isLoading])
+
+  /* -------- Interceptar intent=create_routine -------- */
+  useEffect(() => {
+    if (intentDisparado.current) return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("intent") === "create_routine") {
+      intentDisparado.current = true
+      setIntentActivo(true)
+      setTimeout(() => {
+        enviar("Quiero crear mi primera rutina")
+      }, 300)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -160,7 +176,7 @@ export default function ChatPage() {
       {/* -------- Área scrolleable -------- */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 pb-4 space-y-5">
         {/* Tarjeta de bienvenida */}
-        {messages.length === 0 && (
+        {messages.length === 0 && !intentActivo && (
           <section className="bg-surface p-5 rounded-[20px] border border-border mb-1">
             <h2 className="font-display text-xl font-bold text-text-primary">
               ¡Hola {nombre}!
@@ -196,7 +212,7 @@ export default function ChatPage() {
           </section>
         )}
 
-        {messages.length === 0 && (
+        {messages.length === 0 && !intentActivo && (
           <section className="mb-1">
             <p className="font-sans text-xs font-semibold text-text-muted mb-3 uppercase tracking-wider">
               Sugerencias rápidas
