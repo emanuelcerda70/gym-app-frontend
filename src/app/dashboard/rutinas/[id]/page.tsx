@@ -23,6 +23,7 @@ interface EjercicioUI {
   nombre?: string
   series?: number | string
   repeticiones?: string
+  descanso?: number
   dia_semana?: string
   dia?: string
 }
