@@ -20,6 +20,9 @@ const config: Config = {
         secondary: {
           DEFAULT: "#00D4FF",
         },
+        success: {
+          DEFAULT: "#00E676",
+        },
         text: {
           primary: "#F5F7FA",
           secondary: "#9CA3AF",

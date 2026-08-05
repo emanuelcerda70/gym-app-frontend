@@ -5,6 +5,14 @@ import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import { ArrowLeft, BookOpen, Dumbbell, Play } from "lucide-react"
 import { api } from "@/lib/api"
+import SetLogger from "@/components/entrenamiento/SetLogger"
+
+const SETS_MOCK = [
+  { setNumber: 1, previousWeight: 60, previousReps: 10 },
+  { setNumber: 2, previousWeight: 65, previousReps: 8 },
+  { setNumber: 3, previousWeight: 65, previousReps: 8 },
+  { setNumber: 4, previousWeight: null, previousReps: null },
+]
 
 const MUSCULO_CATEGORIA = new Map<string, string>([
   ["Pecho", "Tren Superior"],
@@ -173,6 +181,29 @@ export default function EjercicioDetallePage() {
             </p>
           </div>
         )}
+      </section>
+
+      {/* -------- Registro de Series -------- */}
+      <section className="mt-6 bg-hierro-soft rounded-2xl p-5 border border-hierro-border">
+        <h2 className="font-display text-lg font-bold text-text-primary mb-1">
+          Registro de Series
+        </h2>
+        <p className="font-sans text-xs text-text-muted mb-4">
+          Cargá el peso y las repeticiones de cada serie.
+        </p>
+        <div className="divide-y divide-hierro-border/60">
+          {SETS_MOCK.map((s) => (
+            <SetLogger
+              key={s.setNumber}
+              setNumber={s.setNumber}
+              previousWeight={s.previousWeight}
+              previousReps={s.previousReps}
+              onSave={(peso, reps) => {
+                console.log(`Serie ${s.setNumber}: ${peso}kg x ${reps}`)
+              }}
+            />
+          ))}
+        </div>
       </section>
     </main>
   )
