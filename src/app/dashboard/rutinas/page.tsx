@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
-import { Clock, Dumbbell, Search } from "lucide-react"
+import { ArrowRight, ClipboardList, Clock, Dumbbell, Search, Sparkles } from "lucide-react"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { useRutinas } from "@/hooks/useRutinas"
@@ -83,14 +83,14 @@ export default function RutinasPage() {
   return (
     <main className="px-6 pt-6 pb-6">
       {/* Selector de pestañas */}
-      <div className="bg-hierro-soft p-1 rounded-xl flex gap-2">
+      <div className="bg-hierro-soft p-1 rounded-xl flex gap-1.5">
         <button
           onClick={() => setActiveTab("rutinas")}
           className={cn(
             "flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors",
             activeTab === "rutinas"
-              ? "bg-surface text-primary shadow"
-              : "text-text-secondary"
+              ? "bg-surface-elevated border border-primary/30 text-text-primary shadow"
+              : "border border-transparent text-text-muted hover:text-text-secondary"
           )}
         >
           Mis Rutinas
@@ -100,8 +100,8 @@ export default function RutinasPage() {
           className={cn(
             "flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors",
             activeTab === "ejercicios"
-              ? "bg-surface text-primary shadow"
-              : "text-text-secondary"
+              ? "bg-surface-elevated border border-primary/30 text-text-primary shadow"
+              : "border border-transparent text-text-muted hover:text-text-secondary"
           )}
         >
           Biblioteca
@@ -130,17 +130,36 @@ function MisRutinas() {
 
   if (rutinas.length === 0) {
     return (
-      <div className="mt-6 w-full bg-hierro-soft rounded-2xl p-6 border border-hierro-border text-center">
-        <Dumbbell className="w-12 h-12 text-text-secondary/50 mx-auto mb-4" />
-        <p className="font-sans text-sm text-text-secondary mb-6">
-          Aún no tenés rutinas creadas. Hablá con el asistente para que arme tu
-          primer plan de entrenamiento.
+      <div className="mt-4 w-full bg-surface rounded-[20px] border border-border p-8 flex flex-col items-center text-center">
+        {/* Ícono central brillante */}
+        <div className="relative w-32 h-32 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(108,92,255,0.15)]">
+          <ClipboardList className="text-primary w-12 h-12" />
+          <span className="absolute -bottom-1 -right-1 w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <Dumbbell className="text-primary w-5 h-5" />
+          </span>
+          <Sparkles className="absolute -top-2 -left-3 w-4 h-4 text-secondary animate-ember-pulse" />
+          <Sparkles
+            className="absolute top-6 -right-2 w-3 h-3 text-primary animate-ember-pulse"
+            style={{ animationDelay: "0.3s" }}
+          />
+          <Sparkles
+            className="absolute -top-1 right-1/3 w-3 h-3 text-secondary animate-ember-pulse"
+            style={{ animationDelay: "0.6s" }}
+          />
+        </div>
+
+        <h2 className="font-display text-xl font-bold mb-2 text-text-primary">
+          Aún no tenés rutinas creadas
+        </h2>
+        <p className="font-sans text-sm text-text-muted mb-8 max-w-xs">
+          Hablá con el asistente para que arme tu primer plan de entrenamiento.
         </p>
         <Link
           href="/dashboard/chat"
-          className="w-full bg-primary text-text-primary font-bold rounded-xl h-12 flex items-center justify-center hover:bg-primary-hover transition-colors active:scale-[0.98]"
+          className="w-full bg-primary text-white rounded-2xl py-4 flex items-center justify-center gap-2 font-sans font-bold hover:bg-primary-hover transition-colors active:scale-[0.98]"
         >
           Crear mi primera rutina
+          <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     )

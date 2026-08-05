@@ -10,6 +10,7 @@ const config: Config = {
           DEFAULT: "#09090B",
           light: "#14141A",
           primary: "#09090B",
+          elevated: "#1C1C22",
         },
         border: "#2B2B36",
         primary: {
@@ -22,6 +23,7 @@ const config: Config = {
         text: {
           primary: "#F5F7FA",
           secondary: "#9CA3AF",
+          muted: "#7A8090",
         },
         // Tokens usados por globals.css (@apply) — antes no existían acá,
         // por eso rompía el build. Ajustá los hex si no son los definitivos.
