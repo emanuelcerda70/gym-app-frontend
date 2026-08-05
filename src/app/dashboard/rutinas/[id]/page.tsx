@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowLeft, Clock, Dumbbell, Flame } from "lucide-react"
+import { ArrowLeft, ChevronRight, Clock, Dumbbell, Flame } from "lucide-react"
 import { api } from "@/lib/api"
 
 const DIAS = [
@@ -15,6 +15,54 @@ const DIAS = [
   "Viernes",
   "Sábado",
   "Domingo",
+]
+
+const MOCK_EJERCICIOS = [
+  {
+    id: 1,
+    ejercicio_id: 1,
+    nombre: "Press de Banca",
+    series: 4,
+    repeticiones: "8-10",
+    descanso: 90,
+    dia_semana: "Día 1: Empuje",
+  },
+  {
+    id: 2,
+    ejercicio_id: 2,
+    nombre: "Sentadilla con Barra",
+    series: 4,
+    repeticiones: "8-10",
+    descanso: 120,
+    dia_semana: "Día 1: Empuje",
+  },
+  {
+    id: 3,
+    ejercicio_id: 3,
+    nombre: "Dominadas",
+    series: 3,
+    repeticiones: "Al fallo",
+    descanso: 90,
+    dia_semana: "Día 2: Tirón",
+  },
+  {
+    id: 4,
+    ejercicio_id: 4,
+    nombre: "Remo con Barra",
+    series: 4,
+    repeticiones: "8-12",
+    descanso: 90,
+    dia_semana: "Día 2: Tirón",
+  },
+  {
+    id: 5,
+    ejercicio_id: 5,
+    nombre: "Plancha Abdominal",
+    series: 3,
+    repeticiones: "45-60 seg",
+    descanso: 60,
+    dia_semana: "Día 3: Core",
+  },
 ]
 
 export default function RutinaDetallePage() {
@@ -34,7 +82,8 @@ export default function RutinaDetallePage() {
 
   const ejercicios = useMemo(() => {
     const r = rutinasQuery.data?.find((x) => x.id === id)
-    return Array.isArray(r?.ejercicios) ? r.ejercicios : []
+    const reales = Array.isArray(r?.ejercicios) ? r.ejercicios : []
+    return reales.length > 0 ? reales : MOCK_EJERCICIOS
   }, [rutinasQuery.data, id])
 
   const gruposPorDia = useMemo(() => {
@@ -160,7 +209,7 @@ export default function RutinaDetallePage() {
               </div>
               <div className="divide-y divide-border/60">
                 {lista.map((ej) => {
-                  const nombre = nombreDe(ej.ejercicio_id)
+                  const nombre = ej.nombre ?? nombreDe(ej.ejercicio_id)
                   return (
                     <Link
                       key={ej.id}
@@ -169,7 +218,7 @@ export default function RutinaDetallePage() {
                           ? `/dashboard/ejercicios/${ej.ejercicio_id}`
                           : "/dashboard/rutinas"
                       }
-                      className="flex items-center gap-3 px-4 py-3.5 text-left hover:bg-surface-light transition-colors active:scale-[0.99] active:bg-surface-elevated cursor-pointer"
+                      className="flex items-center gap-3 px-4 py-3.5 text-left hover:bg-surface-light transition-colors active:scale-[0.98] active:bg-surface-elevated cursor-pointer"
                     >
                       <span className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                         <Dumbbell className="w-4 h-4" />
@@ -178,8 +227,13 @@ export default function RutinaDetallePage() {
                         <span className="block font-sans text-sm font-semibold text-text-primary capitalize truncate">
                           {nombre ?? `Ejercicio #${ej.ejercicio_id}`}
                         </span>
+                        {typeof ej.series === "number" && ej.repeticiones && (
+                          <span className="inline-block mt-1 bg-surface-elevated text-text-muted font-sans text-[11px] font-semibold rounded-full px-2.5 py-0.5">
+                            {ej.series} x {ej.repeticiones}
+                          </span>
+                        )}
                       </span>
-                      <span className="text-text-secondary/40 shrink-0">→</span>
+                      <ChevronRight className="w-4 h-4 text-text-secondary/40 shrink-0" />
                     </Link>
                   )
                 })}
