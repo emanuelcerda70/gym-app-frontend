@@ -3,6 +3,7 @@ import { Archivo, Inter, Space_Grotesk, Sora } from "next/font/google"
 import "./globals.css"
 import Providers from "./providers"
 import RouteRecorder from "@/components/layout/RouteRecorder"
+import InstallPrompt from "@/components/layout/InstallPrompt"
 
 const sora = Sora({
   subsets: ["latin"],
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <RouteRecorder />
           {children}
+          <InstallPrompt />
         </Providers>
       </body>
     </html>
