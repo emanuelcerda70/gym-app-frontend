@@ -42,6 +42,7 @@ export default function SetLogger({
     onSuccess: () => {
       setEstado("guardado")
       queryClient.invalidateQueries({ queryKey: ["ejercicio", "resumen"] })
+      queryClient.invalidateQueries({ queryKey: ["progreso"] })
     },
     onError: () => {
       setEstado("error")
