@@ -5,11 +5,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Check, Loader2, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
+import { useRestTimerStore } from "@/store/restTimerStore"
 
 interface SetLoggerProps {
   setNumber: number
   ejercicioId: number
   rutinaId?: number | null
+  descansoDefault?: number
   previousWeight?: number | null
   previousReps?: number | null
 }
@@ -20,6 +22,7 @@ export default function SetLogger({
   setNumber,
   ejercicioId,
   rutinaId = null,
+  descansoDefault = 90,
   previousWeight,
   previousReps,
 }: SetLoggerProps) {
@@ -27,6 +30,7 @@ export default function SetLogger({
   const [reps, setReps] = useState("")
   const [estado, setEstado] = useState<EstadoGuardado>("idle")
   const queryClient = useQueryClient()
+  const ofrecerDescanso = useRestTimerStore((s) => s.ofrecer)
 
   const tieneAnterior = previousWeight != null || previousReps != null
   const esFinal = estado === "guardado" || estado === "guardando"
@@ -43,6 +47,7 @@ export default function SetLogger({
       setEstado("guardado")
       queryClient.invalidateQueries({ queryKey: ["ejercicio", "resumen"] })
       queryClient.invalidateQueries({ queryKey: ["progreso"] })
+      ofrecerDescanso(setNumber, ejercicioId, descansoDefault)
     },
     onError: () => {
       setEstado("error")

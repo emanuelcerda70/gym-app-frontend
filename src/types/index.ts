@@ -83,6 +83,7 @@ export interface RutinaDetalleEjercicio {
   series?: number | string
   repeticiones?: string
   dia_semana?: string
+  descanso_segundos?: number
 }
 
 export interface RutinaDetalle {

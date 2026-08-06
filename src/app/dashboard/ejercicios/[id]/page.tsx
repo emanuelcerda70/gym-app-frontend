@@ -1,6 +1,7 @@
 "use client"
 
-import { useParams } from "next/navigation"
+import { Suspense } from "react"
+import { useParams, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import { ArrowLeft, BookOpen, Dumbbell, Play } from "lucide-react"
@@ -40,9 +41,19 @@ function categoriaDe(musculo?: string): string {
   return MUSCULO_CATEGORIA.get(musculo) ?? "General"
 }
 
-export default function EjercicioDetallePage() {
+export default function EjercicioDetallePageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <EjercicioDetallePage />
+    </Suspense>
+  )
+}
+
+function EjercicioDetallePage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const id = Number(params.id)
+  const descansoId = Number(searchParams.get("descanso")) || null
 
   const { data: ej, isLoading, isError, refetch } = useQuery({
     queryKey: ["ejercicio", id],
@@ -205,6 +216,7 @@ export default function EjercicioDetallePage() {
               key={num}
               setNumber={num}
               ejercicioId={ej.id ?? 0}
+              descansoDefault={descansoId ?? 90}
               {...registroDeSerie(num)}
             />
           ))}

@@ -201,7 +201,7 @@ export default function RutinaDetallePage() {
                     key={ej.id}
                     href={
                       ej.ejercicio_id
-                        ? `/dashboard/ejercicios/${ej.ejercicio_id}`
+                        ? `/dashboard/ejercicios/${ej.ejercicio_id}?descanso=${ej.descanso_segundos ?? 90}`
                         : "/dashboard/rutinas"
                     }
                     className="flex items-center gap-3 px-4 py-3.5 text-left hover:bg-surface-light transition-colors active:scale-[0.98] active:bg-surface-elevated cursor-pointer"
