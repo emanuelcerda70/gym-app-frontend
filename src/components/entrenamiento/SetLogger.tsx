@@ -63,11 +63,11 @@ export default function SetLogger({
   }
 
   return (
-    <div className="flex items-center gap-3 py-2">
+    <div className="flex items-center gap-2 py-2">
       {/* Número de serie */}
       <span
         className={cn(
-          "shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-sans text-sm font-semibold",
+          "shrink-0 w-7 h-7 text-xs rounded-full flex items-center justify-center font-sans font-semibold",
           estado === "guardado"
             ? "bg-success/20 text-success"
             : "bg-surface-elevated text-text-muted"
@@ -77,13 +77,13 @@ export default function SetLogger({
       </span>
 
       {/* Referencia histórica */}
-      <div className="w-20 shrink-0">
+      <div className="w-14 shrink-0">
         {tieneAnterior ? (
-          <p className="font-sans text-sm text-text-muted">
+          <p className="font-sans text-[10px] leading-tight text-text-muted">
             Ant: {previousWeight ?? "-"}kg x {previousReps ?? "-"}
           </p>
         ) : (
-          <p className="font-sans text-sm text-text-muted/50">Sin historial</p>
+          <p className="font-sans text-[10px] leading-tight text-text-muted/50">Sin hist.</p>
         )}
       </div>
 
@@ -97,11 +97,11 @@ export default function SetLogger({
           onChange={(e) => handleChange("peso", e.target.value)}
           disabled={esFinal}
           className={cn(
-            "w-full bg-surface border border-border rounded-xl px-3 py-2.5 pr-8 font-sans text-sm text-text-primary placeholder:text-text-muted/50 outline-none focus:border-primary/50 transition-colors",
+            "w-full bg-surface border border-border rounded-xl px-2 py-2 pr-6 font-sans text-sm text-text-primary placeholder:text-text-muted/50 outline-none focus:border-primary/50 transition-colors",
             esFinal && "opacity-60"
           )}
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 font-sans text-xs text-text-muted pointer-events-none">
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 font-sans text-[10px] text-text-muted pointer-events-none">
           kg
         </span>
       </label>
@@ -116,11 +116,11 @@ export default function SetLogger({
           onChange={(e) => handleChange("reps", e.target.value)}
           disabled={esFinal}
           className={cn(
-            "w-full bg-surface border border-border rounded-xl px-3 py-2.5 pr-8 font-sans text-sm text-text-primary placeholder:text-text-muted/50 outline-none focus:border-primary/50 transition-colors",
+            "w-full bg-surface border border-border rounded-xl px-2 py-2 pr-6 font-sans text-sm text-text-primary placeholder:text-text-muted/50 outline-none focus:border-primary/50 transition-colors",
             esFinal && "opacity-60"
           )}
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 font-sans text-xs text-text-muted pointer-events-none">
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 font-sans text-[10px] text-text-muted pointer-events-none">
           reps
         </span>
       </label>
@@ -131,7 +131,7 @@ export default function SetLogger({
         aria-label={`Guardar serie ${setNumber}`}
         disabled={esFinal}
         className={cn(
-          "shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95",
+          "shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-95",
           estado === "guardado" && "bg-success/20 text-success",
           estado === "guardando" && "bg-surface-elevated text-text-muted",
           estado === "error" && "bg-red-500/15 text-red-500",
@@ -140,11 +140,11 @@ export default function SetLogger({
         )}
       >
         {estado === "guardando" ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
+          <Loader2 className="w-4 h-4 animate-spin" />
         ) : estado === "error" ? (
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         ) : (
-          <Check className="w-5 h-5" />
+          <Check className="w-4 h-4" />
         )}
       </button>
     </div>
