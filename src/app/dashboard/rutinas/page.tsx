@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowRight, ClipboardList, Clock, Dumbbell, Search, SlidersHorizontal, Sparkles } from "lucide-react"
+import { ArrowRight, ClipboardList, Clock, Dumbbell, Search, SlidersHorizontal, Sparkles, WifiOff } from "lucide-react"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { useRutinas } from "@/hooks/useRutinas"
+import OfflineBanner from "@/components/OfflineBanner"
 import type { Ejercicio } from "@/types"
 
 function normalizar(s: string): string {
@@ -277,6 +278,9 @@ function Biblioteca() {
 
   return (
     <div className="mt-6">
+      {/* Banner offline (datos de caché) */}
+      {isError && ejercicios && <OfflineBanner />}
+
       {/* Encabezado */}
       <h2 className="font-display text-2xl font-bold text-text-primary mb-1">
         Biblioteca
@@ -334,10 +338,13 @@ function Biblioteca() {
             <div key={i} className="h-16 bg-hierro-soft rounded-xl border border-hierro-border animate-pulse" />
           ))}
         </div>
-      ) : isError ? (
+      ) : isError && !ejercicios ? (
         <div className="mt-6 bg-hierro-soft rounded-2xl p-6 border border-hierro-border text-center">
+          <div className="w-14 h-14 rounded-full bg-hierro border border-hierro-border flex items-center justify-center mx-auto mb-4">
+            <WifiOff className="w-7 h-7 text-secondary/70" />
+          </div>
           <p className="font-sans text-sm text-text-secondary mb-4">
-            No pudimos cargar los ejercicios.
+            Sin conexión. No pudimos cargar los ejercicios.
           </p>
           <button
             onClick={() => refetch()}

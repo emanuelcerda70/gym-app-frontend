@@ -4,8 +4,9 @@ import { useMemo } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowLeft, ChevronRight, Clock, Dumbbell, Flame } from "lucide-react"
+import { ArrowLeft, ChevronRight, Clock, Dumbbell, Flame, RefreshCw, WifiOff } from "lucide-react"
 import { api } from "@/lib/api"
+import OfflineBanner from "@/components/OfflineBanner"
 
 const DIAS = [
   "Lunes",
@@ -132,6 +133,32 @@ export default function RutinaDetallePage() {
 
   const rutina = rutinasQuery.data?.find((r) => r.id === id)
 
+  /* -------- Error de red: sin caché y sin conexión -------- */
+  if (rutinasQuery.isError && !rutinasQuery.data) {
+    return (
+      <main className="px-6 pt-6 pb-6">
+        <div className="pt-16 flex flex-col items-center text-center">
+          <div className="w-16 h-16 rounded-full bg-hierro border border-hierro-border flex items-center justify-center mb-4">
+            <WifiOff className="w-8 h-8 text-secondary/70" />
+          </div>
+          <h1 className="font-display text-2xl font-bold text-text-primary mb-2">
+            Sin conexión
+          </h1>
+          <p className="font-sans text-sm text-text-secondary mb-6">
+            No pudimos cargar esta rutina. Revisá tu conexión y volvé a intentarlo.
+          </p>
+          <button
+            onClick={() => rutinasQuery.refetch()}
+            className="bg-primary text-text-primary font-bold rounded-xl h-12 px-6 flex items-center justify-center gap-2 hover:bg-primary-hover transition-colors active:scale-[0.98]"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Reintentar
+          </button>
+        </div>
+      </main>
+    )
+  }
+
   /* -------- Error: ID inexistente -------- */
   if (rutinasQuery.isError || !rutina) {
     return (
@@ -162,6 +189,9 @@ export default function RutinaDetallePage() {
 
   return (
     <main className="px-6 pt-6 pb-6 animate-fade-in">
+      {/* -------- Banner offline (datos de caché) -------- */}
+      {(rutinasQuery.isError || catalogoQuery.isError) && <OfflineBanner />}
+
       {/* -------- Header: volver + título -------- */}
       <Link
         href="/dashboard/rutinas"
