@@ -196,7 +196,7 @@ export default function EjercicioDetallePage() {
             <SetLogger
               key={s.setNumber}
               setNumber={s.setNumber}
-              ejercicioId={ej.id}
+              ejercicioId={ej.id ?? 0}
               previousWeight={s.previousWeight}
               previousReps={s.previousReps}
             />

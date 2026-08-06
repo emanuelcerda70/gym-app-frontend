@@ -17,7 +17,7 @@ export function useRutinas() {
   })
 
   const eliminar = useMutation({
-    mutationFn: (id: number) => api.rutinas.delete(id),
+    mutationFn: (id: number) => api.rutinas.delete(id.toString()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rutinas"] })
     },
