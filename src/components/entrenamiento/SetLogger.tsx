@@ -1,40 +1,78 @@
 "use client"
 
 import { useState } from "react"
-import { Check } from "lucide-react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Check, Loader2, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { api } from "@/lib/api"
 
 interface SetLoggerProps {
   setNumber: number
+  ejercicioId: number
+  rutinaId?: number | null
   previousWeight?: number | null
   previousReps?: number | null
-  onSave: (peso: number, reps: number) => void
 }
+
+type EstadoGuardado = "idle" | "guardando" | "guardado" | "error"
 
 export default function SetLogger({
   setNumber,
+  ejercicioId,
+  rutinaId = null,
   previousWeight,
   previousReps,
-  onSave,
 }: SetLoggerProps) {
   const [peso, setPeso] = useState("")
   const [reps, setReps] = useState("")
-  const [guardado, setGuardado] = useState(false)
+  const [estado, setEstado] = useState<EstadoGuardado>("idle")
+  const queryClient = useQueryClient()
 
   const tieneAnterior = previousWeight != null || previousReps != null
+  const esFinal = estado === "guardado" || estado === "guardando"
+
+  const mutacion = useMutation({
+    mutationFn: () =>
+      api.historial.create({
+        ejercicio_id: ejercicioId,
+        peso: parseFloat(peso),
+        repeticiones: parseInt(reps, 10),
+        rutina_id: rutinaId,
+      }),
+    onSuccess: () => {
+      setEstado("guardado")
+      queryClient.invalidateQueries({ queryKey: ["ejercicio", "resumen"] })
+    },
+    onError: () => {
+      setEstado("error")
+    },
+  })
 
   const handleSave = () => {
     const pesoNum = parseFloat(peso)
     const repsNum = parseInt(reps, 10)
-    if (Number.isNaN(pesoNum) || Number.isNaN(repsNum) || guardado) return
-    onSave(pesoNum, repsNum)
-    setGuardado(true)
+    if (Number.isNaN(pesoNum) || Number.isNaN(repsNum) || esFinal) return
+    setEstado("guardando")
+    mutacion.mutate()
+  }
+
+  const handleChange = (tipo: "peso" | "reps", valor: string) => {
+    if (tipo === "peso") setPeso(valor.replace(/[^0-9.,]/g, ""))
+    else setReps(valor.replace(/[^0-9]/g, ""))
+    setEstado("idle")
   }
 
   return (
     <div className="flex items-center gap-3 py-2">
       {/* Número de serie */}
-      <span className="shrink-0 w-8 h-8 rounded-full bg-surface-elevated text-text-muted font-sans text-sm font-semibold flex items-center justify-center">
+      <span
+        className={cn(
+          "shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-sans text-sm font-semibold",
+          estado === "guardado"
+            ? "bg-success/20 text-success"
+            : "bg-surface-elevated text-text-muted"
+        )}
+      >
         {setNumber}
       </span>
 
@@ -56,14 +94,11 @@ export default function SetLogger({
           inputMode="decimal"
           placeholder="0"
           value={peso}
-          onChange={(e) => {
-            setPeso(e.target.value.replace(/[^0-9.,]/g, ""))
-            setGuardado(false)
-          }}
-          disabled={guardado}
+          onChange={(e) => handleChange("peso", e.target.value)}
+          disabled={esFinal}
           className={cn(
             "w-full bg-surface border border-border rounded-xl px-3 py-2.5 pr-8 font-sans text-sm text-text-primary placeholder:text-text-muted/50 outline-none focus:border-primary/50 transition-colors",
-            guardado && "opacity-60"
+            esFinal && "opacity-60"
           )}
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 font-sans text-xs text-text-muted pointer-events-none">
@@ -78,14 +113,11 @@ export default function SetLogger({
           inputMode="numeric"
           placeholder="0"
           value={reps}
-          onChange={(e) => {
-            setReps(e.target.value.replace(/[^0-9]/g, ""))
-            setGuardado(false)
-          }}
-          disabled={guardado}
+          onChange={(e) => handleChange("reps", e.target.value)}
+          disabled={esFinal}
           className={cn(
             "w-full bg-surface border border-border rounded-xl px-3 py-2.5 pr-8 font-sans text-sm text-text-primary placeholder:text-text-muted/50 outline-none focus:border-primary/50 transition-colors",
-            guardado && "opacity-60"
+            esFinal && "opacity-60"
           )}
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 font-sans text-xs text-text-muted pointer-events-none">
@@ -97,15 +129,23 @@ export default function SetLogger({
       <button
         onClick={handleSave}
         aria-label={`Guardar serie ${setNumber}`}
-        disabled={guardado}
+        disabled={esFinal}
         className={cn(
           "shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95",
-          guardado
-            ? "bg-success/20 text-success"
-            : "bg-surface-elevated text-text-muted hover:text-text-primary hover:bg-hierro"
+          estado === "guardado" && "bg-success/20 text-success",
+          estado === "guardando" && "bg-surface-elevated text-text-muted",
+          estado === "error" && "bg-red-500/15 text-red-500",
+          estado === "idle" &&
+            "bg-surface-elevated text-text-muted hover:text-text-primary hover:bg-hierro"
         )}
       >
-        <Check className="w-5 h-5" />
+        {estado === "guardando" ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : estado === "error" ? (
+          <X className="w-5 h-5" />
+        ) : (
+          <Check className="w-5 h-5" />
+        )}
       </button>
     </div>
   )

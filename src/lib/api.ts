@@ -10,6 +10,25 @@ class ApiError extends Error {
   }
 }
 
+export interface HistorialSerieCreate {
+  ejercicio_id: number
+  peso: number
+  repeticiones: number
+  rpe?: number | null
+  rutina_id?: number | null
+}
+
+export interface HistorialSerieResponse {
+  id: number
+  usuario_id: number
+  ejercicio_id: number
+  rutina_id?: number | null
+  peso: number
+  repeticiones: number
+  rpe?: number | null
+  fecha_registro: string
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -79,6 +98,14 @@ export const api = {
       request<import("@/types").Ejercicio>(`/api/ejercicios/${id}`),
     resumen: (id: number) =>
       request<import("@/types").ResumenEjercicio>(`/api/ejercicios/${id}/resumen`),
+  },
+
+  historial: {
+    create: (datos: HistorialSerieCreate) =>
+      request<HistorialSerieResponse>("/api/historial", {
+        method: "POST",
+        body: JSON.stringify(datos),
+      }),
   },
 
   progreso: {

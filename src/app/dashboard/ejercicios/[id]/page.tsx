@@ -196,11 +196,9 @@ export default function EjercicioDetallePage() {
             <SetLogger
               key={s.setNumber}
               setNumber={s.setNumber}
+              ejercicioId={ej.id}
               previousWeight={s.previousWeight}
               previousReps={s.previousReps}
-              onSave={(peso, reps) => {
-                console.log(`Serie ${s.setNumber}: ${peso}kg x ${reps}`)
-              }}
             />
           ))}
         </div>
