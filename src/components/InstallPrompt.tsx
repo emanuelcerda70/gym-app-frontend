@@ -17,13 +17,8 @@ function yaInstalada(): boolean {
   )
 }
 
-function esIOS(): boolean {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent)
-}
-
 export default function InstallPrompt() {
   const [evento, setEvento] = useState<BeforeInstallPromptEvent | null>(null)
-  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     if (yaInstalada()) return
@@ -32,7 +27,6 @@ export default function InstallPrompt() {
     const handler = (e: Event) => {
       e.preventDefault()
       setEvento(e as BeforeInstallPromptEvent)
-      setVisible(true)
     }
 
     window.addEventListener("beforeinstallprompt", handler)
@@ -40,27 +34,26 @@ export default function InstallPrompt() {
   }, [])
 
   useEffect(() => {
-    const handler = () => setVisible(false)
+    const handler = () => setEvento(null)
     window.addEventListener("appinstalled", handler)
     return () => window.removeEventListener("appinstalled", handler)
   }, [])
 
-  if (!visible) return null
+  if (!evento) return null
 
   const instalar = async () => {
-    if (evento) {
-      await evento.prompt()
-      setVisible(false)
+    await evento.prompt()
+    const { outcome } = await evento.userChoice
+    setEvento(null)
+    if (outcome !== "accepted") {
+      localStorage.setItem(OCULTO_KEY, "1")
     }
   }
 
   const cerrar = () => {
     localStorage.setItem(OCULTO_KEY, "1")
-    setVisible(false)
+    setEvento(null)
   }
-
-  const mensajeIOS =
-    "Abrí el menú Compartir y elegí “Agregar a Pantalla de Inicio” para instalar ASCEND."
 
   return (
     <div className="fixed bottom-24 inset-x-4 z-50 max-w-md mx-auto animate-fade-in">
@@ -69,17 +62,17 @@ export default function InstallPrompt() {
           <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-primary/30">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/icons/icon-192x192.png"
+              src="/icons/icon-192x192.png?v=2"
               alt="ASCEND"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-display text-sm font-bold text-text-primary">
-              Instalá ASCEND
+              Instalá ASCEND para una mejor experiencia
             </p>
             <p className="font-sans text-xs text-text-secondary mt-0.5 leading-relaxed">
-              {evento ? "Accedé a tu rutina y al registro de series incluso sin conexión." : mensajeIOS}
+              Accedé a tu rutina y al registro de series incluso sin conexión.
             </p>
           </div>
           <button
@@ -91,15 +84,13 @@ export default function InstallPrompt() {
           </button>
         </div>
 
-        {evento && (
-          <button
-            onClick={instalar}
-            className="mt-4 w-full bg-primary text-text-primary font-sans font-bold rounded-xl h-11 flex items-center justify-center gap-2 hover:bg-primary-hover transition-colors active:scale-[0.98]"
-          >
-            <Download className="w-4 h-4" />
-            Descargar app
-          </button>
-        )}
+        <button
+          onClick={instalar}
+          className="mt-4 w-full bg-primary text-text-primary font-sans font-bold rounded-xl h-11 flex items-center justify-center gap-2 hover:bg-primary-hover transition-colors active:scale-[0.98]"
+        >
+          <Download className="w-4 h-4" />
+          Instalar
+        </button>
       </div>
     </div>
   )

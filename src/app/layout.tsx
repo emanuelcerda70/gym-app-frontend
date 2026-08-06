@@ -3,7 +3,7 @@ import { Archivo, Inter, Space_Grotesk, Sora } from "next/font/google"
 import "./globals.css"
 import Providers from "./providers"
 import RouteRecorder from "@/components/layout/RouteRecorder"
-import InstallPrompt from "@/components/layout/InstallPrompt"
+import InstallPrompt from "@/components/InstallPrompt"
 
 const sora = Sora({
   subsets: ["latin"],
