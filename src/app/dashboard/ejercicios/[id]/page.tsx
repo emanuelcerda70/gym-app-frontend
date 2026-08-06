@@ -7,13 +7,6 @@ import { ArrowLeft, BookOpen, Dumbbell, Play } from "lucide-react"
 import { api } from "@/lib/api"
 import SetLogger from "@/components/entrenamiento/SetLogger"
 
-const SETS_MOCK = [
-  { setNumber: 1, previousWeight: 60, previousReps: 10 },
-  { setNumber: 2, previousWeight: 65, previousReps: 8 },
-  { setNumber: 3, previousWeight: 65, previousReps: 8 },
-  { setNumber: 4, previousWeight: null, previousReps: null },
-]
-
 const MUSCULO_CATEGORIA = new Map<string, string>([
   ["Pecho", "Tren Superior"],
   ["Pectorales", "Tren Superior"],
@@ -54,6 +47,12 @@ export default function EjercicioDetallePage() {
   const { data: ej, isLoading, isError, refetch } = useQuery({
     queryKey: ["ejercicio", id],
     queryFn: () => api.ejercicios.detalle(id),
+    enabled: !!id,
+  })
+
+  const { data: progreso } = useQuery({
+    queryKey: ["progreso", id],
+    queryFn: () => api.progreso.getByEjercicio(id),
     enabled: !!id,
   })
 
@@ -108,6 +107,15 @@ export default function EjercicioDetallePage() {
   }
 
   const categoria = categoriaDe(ej.musculo_objetivo)
+
+  const registros = progreso?.ultimos_registros ?? []
+  const ultimoRegistro = registros[registros.length - 1]
+
+  const registroDeSerie = (setNumber: number) => {
+    const r = registros[setNumber - 1] ?? ultimoRegistro
+    if (!r) return { previousWeight: null, previousReps: null }
+    return { previousWeight: r.peso_kg, previousReps: r.repeticiones }
+  }
 
   return (
     <main className="px-6 pt-6 pb-6 animate-fade-in">
@@ -192,13 +200,12 @@ export default function EjercicioDetallePage() {
           Cargá el peso y las repeticiones de cada serie.
         </p>
         <div className="divide-y divide-hierro-border/60">
-          {SETS_MOCK.map((s) => (
+          {[1, 2, 3, 4].map((num) => (
             <SetLogger
-              key={s.setNumber}
-              setNumber={s.setNumber}
+              key={num}
+              setNumber={num}
               ejercicioId={ej.id ?? 0}
-              previousWeight={s.previousWeight}
-              previousReps={s.previousReps}
+              {...registroDeSerie(num)}
             />
           ))}
         </div>
