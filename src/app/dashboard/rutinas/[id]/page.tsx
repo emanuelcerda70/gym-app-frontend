@@ -1,10 +1,10 @@
 "use client"
 
 import { useMemo } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { useQuery } from "@tanstack/react-query"
-import { ArrowLeft, ChevronRight, Clock, Dumbbell, Flame, RefreshCw, WifiOff } from "lucide-react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { ArrowLeft, ChevronRight, Clock, Dumbbell, Flame, RefreshCw, Trash2, WifiOff } from "lucide-react"
 import { api } from "@/lib/api"
 import OfflineBanner from "@/components/OfflineBanner"
 
@@ -18,85 +18,30 @@ const DIAS = [
   "Domingo",
 ]
 
-interface EjercicioUI {
-  id: string | number
-  ejercicio_id?: string | number
-  nombre?: string
-  series?: number | string
-  repeticiones?: string
-  descanso?: number
-  dia_semana?: string
-  dia?: string
-}
-
-const MOCK_EJERCICIOS: EjercicioUI[] = [
-  {
-    id: 1,
-    ejercicio_id: 1,
-    nombre: "Press de Banca",
-    series: 4,
-    repeticiones: "8-10",
-    descanso: 90,
-    dia_semana: "Día 1: Empuje",
-  },
-  {
-    id: 2,
-    ejercicio_id: 2,
-    nombre: "Sentadilla con Barra",
-    series: 4,
-    repeticiones: "8-10",
-    descanso: 120,
-    dia_semana: "Día 1: Empuje",
-  },
-  {
-    id: 3,
-    ejercicio_id: 3,
-    nombre: "Dominadas",
-    series: 3,
-    repeticiones: "Al fallo",
-    descanso: 90,
-    dia_semana: "Día 2: Tirón",
-  },
-  {
-    id: 4,
-    ejercicio_id: 4,
-    nombre: "Remo con Barra",
-    series: 4,
-    repeticiones: "8-12",
-    descanso: 90,
-    dia_semana: "Día 2: Tirón",
-  },
-  {
-    id: 5,
-    ejercicio_id: 5,
-    nombre: "Plancha Abdominal",
-    series: 3,
-    repeticiones: "45-60 seg",
-    descanso: 60,
-    dia_semana: "Día 3: Core",
-  },
-]
-
 export default function RutinaDetallePage() {
   const params = useParams()
-  const id = Number(params.id)
+  const id = String(params.id)
+  const router = useRouter()
+  const queryClient = useQueryClient()
 
-  const rutinasQuery = useQuery({
-    queryKey: ["rutinas", "todas"],
-    queryFn: api.rutinas.getAll,
+  const rutinaQuery = useQuery({
+    queryKey: ["rutina", "detalle", id],
+    queryFn: () => api.rutinas.getOne(id),
+    enabled: !!id,
   })
 
-  const catalogoQuery = useQuery({
-    queryKey: ["ejercicios", "catalogo"],
-    queryFn: () => api.ejercicios.list(undefined, true),
-    staleTime: 10 * 60_000,
+  const eliminarMutation = useMutation({
+    mutationFn: () => api.rutinas.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["rutinas"] })
+      router.push("/dashboard/rutinas")
+    },
   })
 
-  const ejercicios = useMemo<EjercicioUI[]>(() => {
-    const r = rutinasQuery.data?.find((x) => x.id === id)
-    const reales = Array.isArray(r?.ejercicios) ? r.ejercicios : []
-    return (reales.length > 0 ? reales : MOCK_EJERCICIOS) as EjercicioUI[]
-  }, [rutinasQuery.data, id])
+  const ejercicios = useMemo(() => {
+    const lista = rutinaQuery.data?.ejercicios
+    return Array.isArray(lista) ? lista : []
+  }, [rutinaQuery.data])
 
   const gruposPorDia = useMemo(() => {
     const mapa = new Map<string, typeof ejercicios>()
@@ -115,11 +60,8 @@ export default function RutinaDetallePage() {
     })
   }, [ejercicios])
 
-  const nombreDe = (ejercicioId?: string | number) =>
-    catalogoQuery.data?.find((e) => e.id === Number(ejercicioId))?.nombre
-
   /* -------- Estado de carga -------- */
-  if (rutinasQuery.isLoading) {
+  if (rutinaQuery.isLoading) {
     return (
       <main className="px-6 pt-6 pb-6">
         <div className="h-5 w-20 bg-hierro-soft rounded-lg animate-pulse mb-6" />
@@ -131,10 +73,8 @@ export default function RutinaDetallePage() {
     )
   }
 
-  const rutina = rutinasQuery.data?.find((r) => r.id === id)
-
   /* -------- Error de red: sin caché y sin conexión -------- */
-  if (rutinasQuery.isError && !rutinasQuery.data) {
+  if (rutinaQuery.isError && !rutinaQuery.data) {
     return (
       <main className="px-6 pt-6 pb-6">
         <div className="pt-16 flex flex-col items-center text-center">
@@ -148,7 +88,7 @@ export default function RutinaDetallePage() {
             No pudimos cargar esta rutina. Revisá tu conexión y volvé a intentarlo.
           </p>
           <button
-            onClick={() => rutinasQuery.refetch()}
+            onClick={() => rutinaQuery.refetch()}
             className="bg-primary text-text-primary font-bold rounded-xl h-12 px-6 flex items-center justify-center gap-2 hover:bg-primary-hover transition-colors active:scale-[0.98]"
           >
             <RefreshCw className="w-4 h-4" />
@@ -160,7 +100,7 @@ export default function RutinaDetallePage() {
   }
 
   /* -------- Error: ID inexistente -------- */
-  if (rutinasQuery.isError || !rutina) {
+  if (rutinaQuery.isError || !rutinaQuery.data) {
     return (
       <main className="px-6 pt-6 pb-6">
         <div className="pt-16 flex flex-col items-center text-center">
@@ -184,13 +124,20 @@ export default function RutinaDetallePage() {
     )
   }
 
-  const count = ejercicios.length || rutina.ejercicios_count
-  const duracion = typeof count === "number" ? count * 12 : null
+  const rutina = rutinaQuery.data
+  const count = ejercicios.length
+  const duracion = count > 0 ? count * 12 : null
+
+  const confirmarEliminacion = () => {
+    if (window.confirm(`¿Seguro que querés eliminar "${rutina.nombre}"?`)) {
+      eliminarMutation.mutate()
+    }
+  }
 
   return (
     <main className="px-6 pt-6 pb-6 animate-fade-in">
       {/* -------- Banner offline (datos de caché) -------- */}
-      {(rutinasQuery.isError || catalogoQuery.isError) && <OfflineBanner />}
+      {rutinaQuery.isError && <OfflineBanner />}
 
       {/* -------- Header: volver + título -------- */}
       <Link
@@ -249,40 +196,54 @@ export default function RutinaDetallePage() {
                 )}
               </div>
               <div className="divide-y divide-border/60">
-                {lista.map((ej) => {
-                  const nombre = ej.nombre ?? nombreDe(ej.ejercicio_id)
-                  return (
-                    <Link
-                      key={ej.id}
-                      href={
-                        ej.ejercicio_id
-                          ? `/dashboard/ejercicios/${ej.ejercicio_id}`
-                          : "/dashboard/rutinas"
-                      }
-                      className="flex items-center gap-3 px-4 py-3.5 text-left hover:bg-surface-light transition-colors active:scale-[0.98] active:bg-surface-elevated cursor-pointer"
-                    >
-                      <span className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <Dumbbell className="w-4 h-4" />
+                {lista.map((ej) => (
+                  <Link
+                    key={ej.id}
+                    href={
+                      ej.ejercicio_id
+                        ? `/dashboard/ejercicios/${ej.ejercicio_id}`
+                        : "/dashboard/rutinas"
+                    }
+                    className="flex items-center gap-3 px-4 py-3.5 text-left hover:bg-surface-light transition-colors active:scale-[0.98] active:bg-surface-elevated cursor-pointer"
+                  >
+                    <span className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <Dumbbell className="w-4 h-4" />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block font-sans text-sm font-semibold text-text-primary capitalize truncate">
+                        {ej.nombre ?? `Ejercicio #${ej.ejercicio_id}`}
                       </span>
-                      <span className="flex-1 min-w-0">
-                        <span className="block font-sans text-sm font-semibold text-text-primary capitalize truncate">
-                          {nombre ?? `Ejercicio #${ej.ejercicio_id}`}
+                      {ej.series != null && ej.repeticiones && (
+                        <span className="inline-block mt-1 bg-surface-elevated text-text-muted font-sans text-[11px] font-semibold rounded-full px-2.5 py-0.5">
+                          {ej.series} x {ej.repeticiones}
                         </span>
-                        {ej.series != null && ej.repeticiones && (
-                          <span className="inline-block mt-1 bg-surface-elevated text-text-muted font-sans text-[11px] font-semibold rounded-full px-2.5 py-0.5">
-                            {ej.series} x {ej.repeticiones}
-                          </span>
-                        )}
-                      </span>
-                      <ChevronRight className="w-4 h-4 text-text-secondary/40 shrink-0" />
-                    </Link>
-                  )
-                })}
+                      )}
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-text-secondary/40 shrink-0" />
+                  </Link>
+                ))}
               </div>
             </section>
           ))}
         </div>
       )}
+
+      {/* -------- Eliminar rutina -------- */}
+      <div className="mt-10 border-t border-hierro-border pt-6">
+        <button
+          onClick={confirmarEliminacion}
+          disabled={eliminarMutation.isPending}
+          className="w-full bg-red-500/10 text-red-500 border border-red-500/30 font-sans font-bold rounded-2xl h-12 flex items-center justify-center gap-2 hover:bg-red-500/20 transition-colors active:scale-[0.98] disabled:opacity-60"
+        >
+          <Trash2 className="w-4 h-4" />
+          {eliminarMutation.isPending ? "Eliminando..." : "Eliminar Rutina"}
+        </button>
+        {eliminarMutation.isError && (
+          <p className="mt-3 text-center font-sans text-xs text-red-500/80">
+            No se pudo eliminar la rutina. Intentá de nuevo.
+          </p>
+        )}
+      </div>
     </main>
   )
 }

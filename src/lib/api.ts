@@ -60,7 +60,9 @@ export const api = {
   rutinas: {
     getActual: () => request<import("@/types").Rutina>("/api/rutinas"),
     getAll: () => request<import("@/types").RutinaResumen[]>("/api/rutinas/todas"),
-    delete: (id: number) =>
+    getOne: (id: string) =>
+      request<import("@/types").RutinaDetalle>(`/api/rutinas/${id}`),
+    delete: (id: string) =>
       request<{ mensaje: string }>(`/api/rutinas/${id}`, { method: "DELETE" }),
   },
 
@@ -104,4 +106,3 @@ export const api = {
       }),
   },
 }
- 
