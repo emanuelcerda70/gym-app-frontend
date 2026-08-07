@@ -47,6 +47,8 @@ export default function SetLogger({
       setEstado("guardado")
       queryClient.invalidateQueries({ queryKey: ["ejercicio", "resumen"] })
       queryClient.invalidateQueries({ queryKey: ["progreso"] })
+      queryClient.invalidateQueries({ queryKey: ["perfil"] })
+      api.checkin.registrar().catch(() => {})
       ofrecerDescanso(setNumber, ejercicioId, descansoDefault)
     },
     onError: () => {
