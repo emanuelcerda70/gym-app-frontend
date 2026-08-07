@@ -4,7 +4,7 @@ import { Suspense } from "react"
 import { useParams, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowLeft, BookOpen, Dumbbell, Play } from "lucide-react"
+import { ArrowLeft, Award, BookOpen, Dumbbell, Play, Trophy } from "lucide-react"
 import { api } from "@/lib/api"
 import SetLogger from "@/components/entrenamiento/SetLogger"
 
@@ -128,6 +128,17 @@ function EjercicioDetallePage() {
     return { previousWeight: r.peso_kg, previousReps: r.repeticiones }
   }
 
+  const formatearFecha = (fecha: string) => {
+    const d = new Date(fecha)
+    if (Number.isNaN(d.getTime())) return "—"
+    const dd = String(d.getDate()).padStart(2, "0")
+    const mm = String(d.getMonth() + 1).padStart(2, "0")
+    return `${dd}/${mm}/${d.getFullYear()}`
+  }
+
+  const marca = progreso?.marca_maxima_kg ?? 0
+  const registrosHistorial = registros.slice(0, 5)
+
   return (
     <main className="px-6 pt-6 pb-6 animate-fade-in">
       {/* -------- Header: volver + título -------- */}
@@ -221,6 +232,62 @@ function EjercicioDetallePage() {
             />
           ))}
         </div>
+      </section>
+
+      {/* -------- Historial y Récords -------- */}
+      <section className="mt-6 bg-hierro-soft rounded-2xl p-5 border border-hierro-border">
+        <div className="flex items-center gap-2 mb-4">
+          <Trophy className="w-5 h-5 text-primary" />
+          <h2 className="font-display text-lg font-bold text-text-primary">
+            Historial y Récords
+          </h2>
+        </div>
+
+        {marca > 0 && (
+          <div className="flex items-center gap-3 bg-primary/10 border border-primary/30 rounded-xl px-4 py-3 mb-4">
+            <span className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
+              <Award className="w-5 h-5" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-primary">
+                Récord Personal (PR)
+              </p>
+              <p className="font-display text-2xl font-bold text-text-primary">
+                {marca} kg
+              </p>
+            </div>
+          </div>
+        )}
+
+        {registrosHistorial.length > 0 ? (
+          <div className="space-y-1.5">
+            {registrosHistorial.map((r, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between bg-surface border border-border rounded-lg px-3 py-2"
+              >
+                <span className="font-sans text-xs text-text-muted tabular-nums">
+                  {formatearFecha(r.fecha)}
+                </span>
+                <span className="font-sans text-sm font-bold text-text-primary tabular-nums">
+                  {r.peso_kg} kg
+                </span>
+                <span className="font-sans text-xs text-text-secondary tabular-nums">
+                  x {r.repeticiones}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center text-center py-6">
+            <div className="w-12 h-12 rounded-full bg-hierro border border-hierro-border flex items-center justify-center mb-3">
+              <Dumbbell className="w-6 h-6 text-text-secondary/50" />
+            </div>
+            <p className="font-sans text-sm text-text-secondary">
+              Es tu primer entrenamiento de este ejercicio. ¡Dale, subí la primera serie! 💪
+            </p>
+          </div>
+        )}
       </section>
     </main>
   )
