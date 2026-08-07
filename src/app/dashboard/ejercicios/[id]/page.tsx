@@ -159,6 +159,7 @@ function EjercicioDetallePage() {
 {/* -------- Visual 3D / animación -------- */}
       <div className="relative w-full bg-surface border border-border rounded-2xl overflow-hidden mb-6 min-h-[220px] flex items-center justify-center">
         {ej.gif_url ? (
+          // eslint-disable-next-line jsx-a11y/media-has-caption
           <video
             src={ej.gif_url}
             autoPlay
@@ -178,10 +179,6 @@ function EjercicioDetallePage() {
             </span>
           </>
         )}
-      </div>
-        <span className="absolute bottom-3 right-3 font-sans text-[10px] text-text-secondary/60">
-          Vista animada próximamente
-        </span>
       </div>
 
       {/* -------- Metadatos (pills) -------- */}
