@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense } from "react"
-import { useParams, useSearchParams } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import { ArrowLeft, Award, BookOpen, Dumbbell, Play, Trophy } from "lucide-react"
@@ -52,6 +52,7 @@ export default function EjercicioDetallePageWrapper() {
 function EjercicioDetallePage() {
   const params = useParams()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const id = Number(params.id)
   const descansoId = Number(searchParams.get("descanso")) || null
 
@@ -140,6 +141,7 @@ function EjercicioDetallePage() {
   const registrosHistorial = registros.slice(0, 5)
 
   return (
+    <>
     <main className="px-6 pt-6 pb-6 animate-fade-in">
       {/* -------- Header: volver + título -------- */}
       <Link
@@ -289,6 +291,17 @@ function EjercicioDetallePage() {
           </div>
         )}
       </section>
-    </main>
+      </main>
+
+      {/* -------- Barra de acción rápida -------- */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface border-t border-border z-10">
+        <button
+          onClick={() => router.back()}
+          className="w-full bg-primary text-text-primary font-bold rounded-2xl h-12 flex items-center justify-center gap-2 hover:bg-primary-hover transition-colors active:scale-[0.98]"
+        >
+          Volver a la Rutina
+        </button>
+      </div>
+    </>
   )
 }
