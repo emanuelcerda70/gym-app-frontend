@@ -21,54 +21,75 @@ function normalizar(s: string): string {
 
 const CATEGORIAS = [
   {
-    id: "Tren Superior",
-    label: "TREN SUPERIOR",
-    emoji: "💪",
-    desc: "Pecho, Espalda, Hombros, Brazos",
+    id: "Pecho",
+    label: "PECHO",
+    emoji: "🏋️",
+    desc: "Press barra, mancuernas y poleas",
   },
   {
-    id: "Tren Inferior",
-    label: "TREN INFERIOR",
+    id: "Espalda",
+    label: "ESPALDA",
+    emoji: "🔩",
+    desc: "Jalones, remos y dorsales",
+  },
+  {
+    id: "Hombros",
+    label: "HOMBROS",
+    emoji: "💪",
+    desc: "Press militar y elevaciones",
+  },
+  {
+    id: "Brazos",
+    label: "BRAZOS",
+    emoji: "🦾",
+    desc: "Bíceps, tríceps y antebrazos",
+  },
+  {
+    id: "Piernas",
+    label: "PIERNAS",
     emoji: "🦵",
-    desc: "Cuádriceps, Isquiotibiales, Glúteos, Gemelos",
+    desc: "Sentadillas, prensa y gemelos",
   },
   {
     id: "Core",
     label: "CORE",
     emoji: "🎯",
-    desc: "Abdominales, Lumbar, Oblicuos",
+    desc: "Abdominales, lumbares y oblicuos",
   },
 ]
 
+const CATEGORIA_IDS = new Set(CATEGORIAS.map((c) => c.id))
+
 const MUSCULO_CATEGORIA = new Map<string, string>([
-  ["Pecho", "Tren Superior"],
-  ["Pectorales", "Tren Superior"],
-  ["Pectoral", "Tren Superior"],
-  ["Espalda", "Tren Superior"],
-  ["Espalda alta", "Tren Superior"],
-  ["Dorsales", "Tren Superior"],
-  ["Dorsal", "Tren Superior"],
-  ["Dorsal ancho", "Tren Superior"],
-  ["Hombros", "Tren Superior"],
-  ["Deltoides", "Tren Superior"],
-  ["Deltoide anterior", "Tren Superior"],
-  ["Deltoide posterior", "Tren Superior"],
-  ["Bíceps", "Tren Superior"],
-  ["Tríceps", "Tren Superior"],
-  ["Tríceps braquial", "Tren Superior"],
-  ["Trapecio", "Tren Superior"],
-  ["Trapecios", "Tren Superior"],
-  ["Antebrazos", "Tren Superior"],
-  ["Cuello", "Tren Superior"],
-  ["Cuádriceps", "Tren Inferior"],
-  ["Cuádriceps femorales", "Tren Inferior"],
-  ["Isquiotibiales", "Tren Inferior"],
-  ["Glúteos", "Tren Inferior"],
-  ["Glúteo medio", "Tren Inferior"],
-  ["Gemelos", "Tren Inferior"],
-  ["Sóleo", "Tren Inferior"],
-  ["Aductores", "Tren Inferior"],
-  ["Abductores", "Tren Inferior"],
+  ["Pechito", "Pecho"], // legacy
+  ["Pectorales", "Pecho"],
+  ["Pectoral", "Pecho"],
+  ["Espalda", "Espalda"],
+  ["Espalda alta", "Espalda"],
+  ["Dorsales", "Espalda"],
+  ["Dorsal", "Espalda"],
+  ["Dorsal ancho", "Espalda"],
+  ["Trapecio", "Espalda"],
+  ["Trapecios", "Espalda"],
+  ["Hombros", "Hombros"],
+  ["Deltoides", "Hombros"],
+  ["Deltoide anterior", "Hombros"],
+  ["Deltoide posterior", "Hombros"],
+  ["Cuello", "Hombros"],
+  ["Bíceps", "Brazos"],
+  ["Bíceps braquial", "Brazos"],
+  ["Tríceps", "Brazos"],
+  ["Tríceps braquial", "Brazos"],
+  ["Antebrazos", "Brazos"],
+  ["Cuádriceps", "Piernas"],
+  ["Cuádriceps femorales", "Piernas"],
+  ["Isquiotibiales", "Piernas"],
+  ["Glúteos", "Piernas"],
+  ["Glúteo medio", "Piernas"],
+  ["Gemelos", "Piernas"],
+  ["Sóleo", "Piernas"],
+  ["Aductores", "Piernas"],
+  ["Abductores", "Piernas"],
   ["Abdominales", "Core"],
   ["Recto abdominal", "Core"],
   ["Oblicuos", "Core"],
@@ -219,8 +240,11 @@ function Biblioteca() {
   })
 
   const musculoDe = (ej: Ejercicio) => ej.musculo_objetivo || "General"
-  const categoriaDe = (ej: Ejercicio) =>
-    MUSCULO_CATEGORIA.get(musculoDe(ej)) ?? "Otros"
+  const categoriaDe = (ej: Ejercicio) => {
+    const musculo = musculoDe(ej)
+    if (CATEGORIA_IDS.has(musculo)) return musculo
+    return MUSCULO_CATEGORIA.get(musculo) ?? "Otros"
+  }
 
   const filtrados = useMemo(() => {
     const q = normalizar(busqueda)
@@ -237,6 +261,14 @@ function Biblioteca() {
     }
     return [...grupos].sort((a, b) => a.localeCompare(b, "es"))
   }, [ejercicios, categoria]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const gruposSinClasificar = useMemo(() => {
+    const grupos = new Set<string>()
+    for (const ej of ejercicios ?? []) {
+      if (categoriaDe(ej) === "Otros") grupos.add(musculoDe(ej))
+    }
+    return [...grupos].sort((a, b) => a.localeCompare(b, "es"))
+  }, [ejercicios]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const ejercicioCard = (ej: Ejercicio) => (
     <Link
@@ -384,7 +416,7 @@ function Biblioteca() {
               </button>
             )
           })}
-          {gruposDeCategoria.length > 0 && (
+          {gruposSinClasificar.length > 0 && (
             <button
               onClick={() => setCategoria("Otros")}
               className="w-full flex items-stretch bg-surface-light border border-border rounded-2xl overflow-hidden text-left hover:border-primary/40 transition-colors active:scale-[0.98] min-h-28"
@@ -396,7 +428,7 @@ function Biblioteca() {
                   Grupos sin clasificar
                 </p>
                 <span className="inline-block mt-3 bg-primary/10 text-primary text-[11px] font-bold rounded-full px-3 py-1">
-                  {gruposDeCategoria.length} grupos
+                  {gruposSinClasificar.length} grupos
                 </span>
               </div>
               <div className="relative w-24 bg-gradient-to-l from-surface-elevated to-transparent flex items-end justify-end p-4 shrink-0">

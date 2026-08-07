@@ -31,7 +31,7 @@ export default function Providers({ children }: { children: ReactNode }) {
         queryClient: client,
         persister,
         maxAge: CACHE_MAX_AGE,
-        buster: "ascend-v1",
+        buster: "ascend-v2",
       })
     }
 

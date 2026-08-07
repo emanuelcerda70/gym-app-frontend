@@ -11,41 +11,66 @@ import type { Ejercicio } from "@/types"
 
 const CATEGORIAS = [
   {
-    id: "Tren Superior",
-    label: "TREN SUPERIOR",
-    emoji: "💪",
-    desc: "Pecho, Espalda, Hombros, Brazos",
+    id: "Pecho",
+    label: "Pecho",
+    emoji: "🏋️",
+    desc: "Press barra, mancuernas y poleas",
   },
   {
-    id: "Tren Inferior",
-    label: "TREN INFERIOR",
+    id: "Espalda",
+    label: "Espalda",
+    emoji: "🔩",
+    desc: "Jalones, remos y dorsales",
+  },
+  {
+    id: "Hombros",
+    label: "Hombros",
+    emoji: "💪",
+    desc: "Press militar y elevaciones",
+  },
+  {
+    id: "Brazos",
+    label: "Brazos",
+    emoji: "🦾",
+    desc: "Bíceps, tríceps y antebrazos",
+  },
+  {
+    id: "Piernas",
+    label: "Piernas",
     emoji: "🦵",
-    desc: "Cuádriceps, Isquiotibiales, Glúteos, Gemelos",
+    desc: "Sentadillas, prensa y gemelos",
+  },
+  {
+    id: "Core",
+    label: "Core",
+    emoji: "🎯",
+    desc: "Abdominales, lumbares y oblicuos",
   },
 ]
 
+const CATEGORIA_IDS = new Set(CATEGORIAS.map((c) => c.id))
+
 const MUSCULO_CATEGORIA = new Map([
-  ["Pecho", "Tren Superior"],
-  ["Pectorales", "Tren Superior"],
-  ["Espalda", "Tren Superior"],
-  ["Espalda alta", "Tren Superior"],
-  ["Dorsales", "Tren Superior"],
-  ["Hombros", "Tren Superior"],
-  ["Bíceps", "Tren Superior"],
-  ["Tríceps", "Tren Superior"],
-  ["Trapecio", "Tren Superior"],
-  ["Trapecios", "Tren Superior"],
-  ["Abdominales", "Tren Superior"],
-  ["Lumbar", "Tren Superior"],
-  ["Espalda baja", "Tren Superior"],
-  ["Antebrazos", "Tren Superior"],
-  ["Cuádriceps", "Tren Inferior"],
-  ["Isquiotibiales", "Tren Inferior"],
-  ["Glúteos", "Tren Inferior"],
-  ["Gemelos", "Tren Inferior"],
-  ["Aductores", "Tren Inferior"],
-  ["Abductores", "Tren Inferior"],
-  ["Cuello", "Tren Superior"],
+  ["Pectorales", "Pecho"],
+  ["Espalda", "Espalda"],
+  ["Espalda alta", "Espalda"],
+  ["Dorsales", "Espalda"],
+  ["Hombros", "Hombros"],
+  ["Deltoides", "Hombros"],
+  ["Bíceps", "Brazos"],
+  ["Tríceps", "Brazos"],
+  ["Antebrazos", "Brazos"],
+  ["Trapecios", "Espalda"],
+  ["Abdominales", "Core"],
+  ["Lumbar", "Core"],
+  ["Espalda baja", "Core"],
+  ["Cuádriceps", "Piernas"],
+  ["Isquiotibiales", "Piernas"],
+  ["Glúteos", "Piernas"],
+  ["Gemelos", "Piernas"],
+  ["Aductores", "Piernas"],
+  ["Abductores", "Piernas"],
+  ["Cuello", "Hombros"],
 ])
 
 export default function EjerciciosPage() {
@@ -97,13 +122,10 @@ export default function EjerciciosPage() {
     )
   }
 
-  if (!grupoSeleccionado) {
+if (!grupoSeleccionado) {
     const grupos = categoria === "Otros"
-      ? [...MUSCULO_CATEGORIA.keys()].sort()
-      : [...MUSCULO_CATEGORIA.entries()]
-          .filter(([, cat]) => cat === categoria)
-          .map(([musculo]) => musculo)
-          .sort()
+      ? [...new Set([...MUSCULO_CATEGORIA.values(), ...CATEGORIA_IDS])].sort((a, b) => a.localeCompare(b, "es"))
+      : [categoria]
 
     return (
       <AuthGuard>
@@ -115,8 +137,8 @@ export default function EjerciciosPage() {
           >
             ← Volver
           </button>
-          <h2 className="font-display text-lg font-bold mb-1">
-            {categoria === "Tren Superior" ? "💪" : "🦵"} {categoria}
+<h2 className="font-display text-lg font-bold mb-1">
+            {CATEGORIAS.find((c) => c.id === categoria)?.emoji ?? "🗂️"} {categoria}
           </h2>
           <p className="text-xs text-ceniza mb-5">Elegí un grupo muscular</p>
 

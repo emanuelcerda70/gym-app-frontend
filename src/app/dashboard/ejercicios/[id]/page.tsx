@@ -8,36 +8,50 @@ import { ArrowLeft, Award, BookOpen, Dumbbell, Trophy } from "lucide-react"
 import { api } from "@/lib/api"
 import SetLogger from "@/components/entrenamiento/SetLogger"
 
+const CATEGORIA_IDS = new Set(["Pecho", "Espalda", "Hombros", "Brazos", "Piernas", "Core"])
+
 const MUSCULO_CATEGORIA = new Map<string, string>([
-  ["Pecho", "Tren Superior"],
-  ["Pectorales", "Tren Superior"],
-  ["Pectoral", "Tren Superior"],
-  ["Espalda", "Tren Superior"],
-  ["Espalda alta", "Tren Superior"],
-  ["Dorsales", "Tren Superior"],
-  ["Dorsal", "Tren Superior"],
-  ["Hombros", "Tren Superior"],
-  ["Deltoides", "Tren Superior"],
-  ["Bíceps", "Tren Superior"],
-  ["Tríceps", "Tren Superior"],
-  ["Trapecio", "Tren Superior"],
-  ["Antebrazos", "Tren Superior"],
-  ["Cuádriceps", "Tren Inferior"],
-  ["Isquiotibiales", "Tren Inferior"],
-  ["Glúteos", "Tren Inferior"],
-  ["Gemelos", "Tren Inferior"],
-  ["Sóleo", "Tren Inferior"],
-  ["Aductores", "Tren Inferior"],
+  ["Pechito", "Pecho"], // legacy
+  ["Pectorales", "Pecho"],
+  ["Pectoral", "Pecho"],
+  ["Espalda", "Espalda"],
+  ["Espalda alta", "Espalda"],
+  ["Dorsales", "Espalda"],
+  ["Dorsal", "Espalda"],
+  ["Dorsal ancho", "Espalda"],
+  ["Trapecio", "Espalda"],
+  ["Trapecios", "Espalda"],
+  ["Hombros", "Hombros"],
+  ["Deltoides", "Hombros"],
+  ["Deltoide anterior", "Hombros"],
+  ["Deltoide posterior", "Hombros"],
+  ["Cuello", "Hombros"],
+  ["Bíceps", "Brazos"],
+  ["Bíceps braquial", "Brazos"],
+  ["Tríceps", "Brazos"],
+  ["Tríceps braquial", "Brazos"],
+  ["Antebrazos", "Brazos"],
+  ["Cuádriceps", "Piernas"],
+  ["Cuádriceps femorales", "Piernas"],
+  ["Isquiotibiales", "Piernas"],
+  ["Glúteos", "Piernas"],
+  ["Glúteo medio", "Piernas"],
+  ["Gemelos", "Piernas"],
+  ["Sóleo", "Piernas"],
+  ["Aductores", "Piernas"],
+  ["Abductores", "Piernas"],
   ["Abdominales", "Core"],
   ["Recto abdominal", "Core"],
   ["Oblicuos", "Core"],
   ["Transverso abdominal", "Core"],
   ["Lumbar", "Core"],
   ["Espalda baja", "Core"],
+  ["Erectores espinales", "Core"],
 ])
 
 function categoriaDe(musculo?: string): string {
   if (!musculo) return "General"
+  if (CATEGORIA_IDS.has(musculo)) return musculo
   return MUSCULO_CATEGORIA.get(musculo) ?? "General"
 }
 
