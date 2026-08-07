@@ -4,7 +4,7 @@ import { Suspense } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowLeft, Award, BookOpen, Dumbbell, Play, Trophy } from "lucide-react"
+import { ArrowLeft, Award, BookOpen, Dumbbell, Trophy } from "lucide-react"
 import { api } from "@/lib/api"
 import SetLogger from "@/components/entrenamiento/SetLogger"
 
@@ -156,18 +156,29 @@ function EjercicioDetallePage() {
         {ej.nombre}
       </h1>
 
-      {/* -------- Visual placeholder 3D -------- */}
+{/* -------- Visual 3D / animación -------- */}
       <div className="relative w-full bg-surface border border-border rounded-2xl overflow-hidden mb-6 min-h-[220px] flex items-center justify-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(108,92,255,0.10),transparent_65%)] pointer-events-none" />
-        <div className="relative w-20 h-20 rounded-full bg-hierro border border-hierro-border flex items-center justify-center">
-          {ej.gif_url ? (
-            <span className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-text-primary ml-0.5">
-              <Play className="w-4 h-4 fill-current" />
+        {ej.gif_url ? (
+          <video
+            src={ej.gif_url}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover rounded-2xl"
+          />
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(108,92,255,0.10),transparent_65%)] pointer-events-none" />
+            <div className="relative w-20 h-20 rounded-full bg-hierro border border-hierro-border flex items-center justify-center">
+              <Dumbbell className="w-9 h-9 text-primary" />
+            </div>
+            <span className="absolute bottom-3 right-3 font-sans text-[10px] text-text-secondary/60">
+              Vista animada próximamente
             </span>
-          ) : (
-            <Dumbbell className="w-9 h-9 text-primary" />
-          )}
-        </div>
+          </>
+        )}
+      </div>
         <span className="absolute bottom-3 right-3 font-sans text-[10px] text-text-secondary/60">
           Vista animada próximamente
         </span>
