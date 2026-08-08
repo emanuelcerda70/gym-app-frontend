@@ -70,6 +70,7 @@ function EjercicioDetallePage() {
   const router = useRouter()
   const id = Number(params.id)
   const descansoId = Number(searchParams.get("descanso")) || null
+  const [vista, setVista] = useState<"animacion" | "guia">("animacion")
 
   const { data: ej, isLoading, isError, refetch } = useQuery({
     queryKey: ["ejercicio", id],
@@ -135,7 +136,6 @@ function EjercicioDetallePage() {
 
   const categoria = categoriaDe(ej.musculo_objetivo)
   const tieneInfografia = Boolean(ej.infografia_url)
-  const [vista, setVista] = useState<"animacion" | "guia">("animacion")
 
   const registros = progreso?.ultimos_registros ?? []
   const ultimoRegistro = registros[registros.length - 1]
