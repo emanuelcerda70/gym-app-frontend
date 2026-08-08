@@ -250,9 +250,10 @@ function MisRutinas() {
 }
 
 function Biblioteca() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const categoria = searchParams.get("categoria")
   const [busqueda, setBusqueda] = useState("")
-  const [categoria, setCategoria] = useState<string | null>(null)
-  const [grupo, setGrupo] = useState<string | null>(null)
 
   const { data: ejercicios, isLoading, isError, refetch } = useQuery({
     queryKey: ["ejercicios", "catalogo"],
@@ -275,12 +276,9 @@ function Biblioteca() {
     )
   }, [ejercicios, busqueda])
 
-  const gruposDeCategoria = useMemo(() => {
-    const grupos = new Set<string>()
-    for (const ej of ejercicios ?? []) {
-      if (categoriaDe(ej) === categoria) grupos.add(musculoDe(ej))
-    }
-    return [...grupos].sort((a, b) => a.localeCompare(b, "es"))
+  const ejerciciosDeCategoria = useMemo(() => {
+    if (!categoria) return []
+    return (ejercicios ?? []).filter((e) => categoriaDe(e) === categoria)
   }, [ejercicios, categoria]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const gruposSinClasificar = useMemo(() => {
@@ -290,6 +288,13 @@ function Biblioteca() {
     }
     return [...grupos].sort((a, b) => a.localeCompare(b, "es"))
   }, [ejercicios]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const irACategoria = (cat: string) => {
+    router.replace(
+      cat ? `/dashboard/rutinas?tab=ejercicios&categoria=${encodeURIComponent(cat)}` : "/dashboard/rutinas?tab=ejercicios",
+      { scroll: false }
+    )
+  }
 
   const ejercicioCard = (ej: Ejercicio) => (
     <Link
@@ -315,18 +320,11 @@ function Biblioteca() {
 
   const volver = (
     <button
-      onClick={() => {
-        if (grupo) setGrupo(null)
-        else setCategoria(null)
-      }}
+      onClick={() => irACategoria("")}
       className="flex items-center gap-1 text-sm font-sans text-text-secondary mb-4"
     >
       ← Volver
     </button>
-  )
-
-  const ejerciciosDelGrupo = (ejercicios ?? []).filter(
-    (e) => musculoDe(e) === grupo
   )
 
   return (
@@ -414,7 +412,7 @@ function Biblioteca() {
             return (
               <button
                 key={cat.id}
-                onClick={() => setCategoria(cat.id)}
+                onClick={() => irACategoria(cat.id)}
                 className="w-full flex items-stretch bg-surface-light border border-border rounded-2xl overflow-hidden text-left hover:border-primary/40 transition-colors active:scale-[0.98] min-h-28"
               >
                 <div className="flex-1 min-w-0 p-5">
@@ -439,7 +437,7 @@ function Biblioteca() {
           })}
           {gruposSinClasificar.length > 0 && (
             <button
-              onClick={() => setCategoria("Otros")}
+              onClick={() => irACategoria("Otros")}
               className="w-full flex items-stretch bg-surface-light border border-border rounded-2xl overflow-hidden text-left hover:border-primary/40 transition-colors active:scale-[0.98] min-h-28"
             >
               <div className="flex-1 min-w-0 p-5">
@@ -460,54 +458,21 @@ function Biblioteca() {
             </button>
           )}
         </div>
-      ) : !grupo ? (
-        /* Nivel 2: Grupos musculares */
-        <>
-          {volver}
-          <h2 className="font-display text-lg font-bold text-text-primary mb-1 capitalize">
-            {categoria}
-          </h2>
-          <p className="font-sans text-xs text-text-secondary mb-5">
-            Elegí un grupo muscular
-          </p>
-          <div className="space-y-2.5">
-            {gruposDeCategoria.map((g) => {
-              const count = (ejercicios ?? []).filter((e) => musculoDe(e) === g).length
-              return (
-                <button
-                  key={g}
-                  onClick={() => setGrupo(g)}
-                  className="w-full flex items-center justify-between bg-hierro rounded-xl px-4 py-3.5 border border-hierro-border text-left hover:border-primary/40 transition-colors active:scale-[0.98]"
-                >
-                  <span className="text-sm font-semibold text-text-primary capitalize">
-                    {g}
-                  </span>
-                  <span className="text-xs text-text-secondary">{count} · →</span>
-                </button>
-              )
-            })}
-            {gruposDeCategoria.length === 0 && (
-              <p className="text-center text-sm text-text-secondary py-8">
-                No hay ejercicios en esta categoría.
-              </p>
-            )}
-          </div>
-        </>
       ) : (
-        /* Nivel 3: Ejercicios del grupo */
+        /* Nivel 2: Ejercicios de la categoría */
         <>
           {volver}
           <h2 className="font-display text-lg font-bold text-text-primary mb-1 capitalize">
-            {grupo}
+            {categoria === "Otros" ? "Otros" : categoria}
           </h2>
           <p className="font-sans text-xs text-text-secondary mb-4">
-            {ejerciciosDelGrupo.length} ejercicios
+            {isLoading ? "Cargando..." : `${ejerciciosDeCategoria.length} ejercicios`}
           </p>
           <div className="space-y-2.5">
-            {ejerciciosDelGrupo.map(ejercicioCard)}
-            {ejerciciosDelGrupo.length === 0 && (
+            {ejerciciosDeCategoria.map(ejercicioCard)}
+            {!isLoading && ejerciciosDeCategoria.length === 0 && (
               <p className="text-center text-sm text-text-secondary py-8">
-                No hay ejercicios para este grupo.
+                No hay ejercicios para esta categoría.
               </p>
             )}
           </div>
