@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense } from "react"
+import { Suspense, useState } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
@@ -134,6 +134,8 @@ function EjercicioDetallePage() {
   }
 
   const categoria = categoriaDe(ej.musculo_objetivo)
+  const tieneInfografia = Boolean(ej.infografia_url)
+  const [vista, setVista] = useState<"animacion" | "guia">("animacion")
 
   const registros = progreso?.ultimos_registros ?? []
   const ultimoRegistro = registros[registros.length - 1]
@@ -171,9 +173,35 @@ function EjercicioDetallePage() {
         {ej.nombre}
       </h1>
 
+{/* -------- Toggle Animación / Guía Técnica -------- */}
+      {tieneInfografia && (
+        <div className="flex gap-2 mb-4">
+          {(["animacion", "guia"] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setVista(v)}
+              className={`flex-1 font-sans text-sm font-semibold rounded-xl h-11 transition-colors active:scale-[0.98] ${
+                vista === v
+                  ? "bg-primary text-text-primary"
+                  : "bg-hierro border border-hierro-border text-text-secondary hover:border-primary/40"
+              }`}
+            >
+              {v === "animacion" ? "Animación" : "Guía Técnica"}
+            </button>
+          ))}
+        </div>
+      )}
+
 {/* -------- Visual 3D / animación -------- */}
       <div className="relative w-full bg-surface border border-border rounded-2xl overflow-hidden mb-6 min-h-[220px] flex items-center justify-center">
-        {ej.gif_url ? (
+        {vista === "guia" && ej.infografia_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={ej.infografia_url}
+            alt={`Guía técnica de ${ej.nombre}`}
+            className="w-full h-full object-contain rounded-2xl"
+          />
+        ) : ej.gif_url ? (
           // eslint-disable-next-line jsx-a11y/media-has-caption
           <video
             src={ej.gif_url}

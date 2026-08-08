@@ -50,6 +50,7 @@ export interface Ejercicio {
   musculo_objetivo?: string
   equipo?: string
   gif_url?: string
+  infografia_url?: string
   instrucciones?: string
 }
 
