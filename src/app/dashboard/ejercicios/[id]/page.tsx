@@ -8,7 +8,7 @@ import { ArrowLeft, Award, BookOpen, Dumbbell, Trophy } from "lucide-react"
 import { api } from "@/lib/api"
 import SetLogger from "@/components/entrenamiento/SetLogger"
 
-const CATEGORIA_IDS = new Set(["Pecho", "Espalda", "Hombros", "Brazos", "Piernas", "Core"])
+const CATEGORIA_IDS = new Set(["Pecho", "Espalda", "Hombros", "Bíceps", "Tríceps", "Piernas", "Core"])
 
 const MUSCULO_CATEGORIA = new Map<string, string>([
   ["Pechito", "Pecho"], // legacy
@@ -26,11 +26,12 @@ const MUSCULO_CATEGORIA = new Map<string, string>([
   ["Deltoide anterior", "Hombros"],
   ["Deltoide posterior", "Hombros"],
   ["Cuello", "Hombros"],
-  ["Bíceps", "Brazos"],
-  ["Bíceps braquial", "Brazos"],
-  ["Tríceps", "Brazos"],
-  ["Tríceps braquial", "Brazos"],
-  ["Antebrazos", "Brazos"],
+  ["Bíceps", "Bíceps"],
+  ["Bíceps braquial", "Bíceps"],
+  ["Bíceps femoral", "Piernas"],
+  ["Tríceps", "Tríceps"],
+  ["Tríceps braquial", "Tríceps"],
+  ["Antebrazos", "Bíceps"],
   ["Cuádriceps", "Piernas"],
   ["Cuádriceps femorales", "Piernas"],
   ["Isquiotibiales", "Piernas"],
