@@ -158,13 +158,13 @@ function EjercicioDetallePage() {
     <>
     <main className="px-6 pt-6 pb-6 animate-fade-in">
       {/* -------- Header: volver + título -------- */}
-      <Link
-        href="/dashboard/rutinas"
+      <button
+        onClick={() => router.back()}
         className="inline-flex items-center gap-2 font-sans text-sm font-medium text-text-secondary hover:text-text-primary transition-colors mb-4"
       >
         <ArrowLeft className="w-5 h-5" />
         Volver
-      </Link>
+      </button>
 
       <h1 className="font-display text-2xl font-bold text-text-primary capitalize mb-6">
         {ej.nombre}
