@@ -321,7 +321,7 @@ function EjercicioDetallePage() {
           onClick={() => router.back()}
           className="w-full bg-primary text-text-primary font-bold rounded-2xl h-12 flex items-center justify-center gap-2 hover:bg-primary-hover transition-colors active:scale-[0.98]"
         >
-          Volver a la Rutina
+          {descansoId ? "Volver a la Rutina" : "Volver"}
         </button>
       </div>
     </>

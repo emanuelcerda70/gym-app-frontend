@@ -1,7 +1,8 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { Suspense, useMemo, useState } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { ArrowRight, ClipboardList, Clock, Dumbbell, Search, SlidersHorizontal, Sparkles, WifiOff } from "lucide-react"
 import { api } from "@/lib/api"
@@ -100,14 +101,34 @@ const MUSCULO_CATEGORIA = new Map<string, string>([
 ])
 
 export default function RutinasPage() {
-  const [activeTab, setActiveTab] = useState<"rutinas" | "ejercicios">("rutinas")
+  return (
+    <Suspense fallback={<main className="px-6 pt-6 pb-6" />}>
+      <RutinasContent />
+    </Suspense>
+  )
+}
+
+function RutinasContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get("tab")
+  const [activeTab, setActiveTab] = useState<"rutinas" | "ejercicios">(
+    tabParam === "ejercicios" ? "ejercicios" : "rutinas"
+  )
+
+  const cambiarTab = (tab: "rutinas" | "ejercicios") => {
+    setActiveTab(tab)
+    router.replace(tab === "ejercicios" ? "/dashboard/rutinas?tab=ejercicios" : "/dashboard/rutinas", {
+      scroll: false,
+    })
+  }
 
   return (
     <main className="px-6 pt-6 pb-6">
       {/* Selector de pestañas */}
       <div className="bg-hierro-soft p-1 rounded-xl flex gap-1.5">
         <button
-          onClick={() => setActiveTab("rutinas")}
+          onClick={() => cambiarTab("rutinas")}
           className={cn(
             "flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors",
             activeTab === "rutinas"
@@ -118,7 +139,7 @@ export default function RutinasPage() {
           Mis Rutinas
         </button>
         <button
-          onClick={() => setActiveTab("ejercicios")}
+          onClick={() => cambiarTab("ejercicios")}
           className={cn(
             "flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors",
             activeTab === "ejercicios"
