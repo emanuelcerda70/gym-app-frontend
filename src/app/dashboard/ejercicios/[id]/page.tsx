@@ -306,7 +306,18 @@ function EjercicioDetallePage() {
           </p>
           <button
             className="shrink-0 bg-violet-600/30 text-violet-300 border border-violet-500/30 text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-transform"
-            onClick={() => setShowTecnica(true)}
+            onClick={() =>
+              router.push(
+                "/dashboard/chat?contexto=" +
+                  encodeURIComponent(ej.nombre) +
+                  "&serie=" +
+                  serieActual +
+                  "&peso=" +
+                  peso +
+                  "&reps=" +
+                  reps
+              )
+            }
           >
             Preguntarle
           </button>
@@ -489,22 +500,20 @@ function EjercicioDetallePage() {
 
       {/* Modal de infografía con zoom */}
       {showFullImage && tieneImagen && (
-        <div className="fixed inset-0 z-[100] bg-black flex flex-col">
+        <div className="fixed inset-0 z-[120] bg-black flex items-center justify-center">
           <button
             onClick={() => setShowFullImage(false)}
             aria-label="Cerrar infografía"
-            className="fixed top-4 right-4 z-[110] w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center active:scale-90 transition-transform"
+            className="fixed top-4 right-4 z-[130] w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center active:scale-90 transition-transform"
           >
             <X className="w-6 h-6" />
           </button>
-          <div className="flex-1 overflow-auto touch-pan-x touch-pan-y">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={ej.infografia_url}
-              alt={`Guía técnica de ${ej.nombre}`}
-              className="w-full min-w-[200%] object-contain"
-            />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={ej.infografia_url}
+            alt={`Guía técnica de ${ej.nombre}`}
+            className="w-full h-full object-contain"
+          />
         </div>
       )}
 
