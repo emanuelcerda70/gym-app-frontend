@@ -306,18 +306,11 @@ function EjercicioDetallePage() {
           </p>
           <button
             className="shrink-0 bg-violet-600/30 text-violet-300 border border-violet-500/30 text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-transform"
-            onClick={() =>
-              router.push(
-                "/dashboard/chat?contexto=" +
-                  encodeURIComponent(ej.nombre) +
-                  "&serie=" +
-                  serieActual +
-                  "&peso=" +
-                  peso +
-                  "&reps=" +
-                  reps
-              )
-            }
+            onClick={() => {
+              const mensajeIA =
+                "decime la tecnica correcta para realizar " + ej.nombre.toLowerCase()
+              router.push("/dashboard/chat?mensaje=" + encodeURIComponent(mensajeIA))
+            }}
           >
             Preguntarle
           </button>

@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   BarChart3,
   ClipboardList,
@@ -53,6 +54,16 @@ const SUGERENCIAS = [
 ]
 
 export default function ChatPage() {
+  return (
+    <Suspense fallback={null}>
+      <ChatPageInner />
+    </Suspense>
+  )
+}
+
+function ChatPageInner() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [messages, setMessages] = useState<ChatMsg[]>([])
   const [input, setInput] = useState("")
   const [imagen, setImagen] = useState<string | null>(null)
@@ -79,6 +90,16 @@ export default function ChatPage() {
     const el = scrollRef.current
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" })
   }, [messages, isLoading])
+
+  /* -------- Pre-fill desde la vista de ejercicio -------- */
+  useEffect(() => {
+    const mensajeInicial = searchParams.get("mensaje")
+    if (mensajeInicial) {
+      setInput(mensajeInicial)
+      router.replace("/dashboard/chat", { scroll: false })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   /* -------- Interceptar intent=create_routine -------- */
   useEffect(() => {
