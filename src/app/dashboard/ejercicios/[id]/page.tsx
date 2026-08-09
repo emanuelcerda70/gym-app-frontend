@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { ChevronLeft, Dumbbell, Loader2, Minus, MoreVertical, Plus, X } from "lucide-react"
+import { ChevronLeft, Dumbbell, Loader2, Maximize2, Minus, MoreVertical, Plus, X } from "lucide-react"
 import { api } from "@/lib/api"
 
 const TOTAL_SERIES = 4
@@ -25,16 +25,19 @@ function EjercicioDetallePage() {
   const descansoId = Number(searchParams.get("descanso")) || null
   const queryClient = useQueryClient()
 
-  const [vista, setVista] = useState<"animacion" | "guia">("animacion")
   const [serieActual, setSerieActual] = useState(1)
   const [isResting, setIsResting] = useState(false)
   const [showTecnica, setShowTecnica] = useState(false)
+  const [showFullVideo, setShowFullVideo] = useState(false)
+  const [showFullImage, setShowFullImage] = useState(false)
+  const [activeMedia, setActiveMedia] = useState(0) // 0 = Video, 1 = Infografía
   const [peso, setPeso] = useState(0)
   const [reps, setReps] = useState(0)
   const [segundosRestantes, setSegundosRestantes] = useState(descansoId ?? 90)
   const [mostrarHistorial, setMostrarHistorial] = useState(false)
   const [errorGuardado, setErrorGuardado] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const carruselRef = useRef<HTMLDivElement | null>(null)
 
   const { data: ej, isLoading, isError, refetch } = useQuery({
     queryKey: ["ejercicio", id],
@@ -159,6 +162,24 @@ function EjercicioDetallePage() {
     ? `${ultimoRegistro.peso_kg} kg x ${ultimoRegistro.repeticiones} reps`
     : "—"
 
+  const tieneVideo = Boolean(ej.gif_url)
+  const tieneImagen = Boolean(ej.infografia_url)
+  const cantidadMedia = (tieneVideo ? 1 : 0) + (tieneImagen ? 1 : 0)
+
+  function handleMediaScroll() {
+    const el = carruselRef.current
+    if (!el || el.clientWidth === 0) return
+    const idx = Math.round(el.scrollLeft / el.clientWidth)
+    setActiveMedia(Math.min(Math.max(idx, 0), cantidadMedia - 1))
+  }
+
+  function irAMedia(i: number) {
+    const el = carruselRef.current
+    if (!el) return
+    el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" })
+    setActiveMedia(i)
+  }
+
   return (
     <>
       <main className="px-5 pt-5 pb-32">
@@ -182,41 +203,94 @@ function EjercicioDetallePage() {
           </button>
         </div>
 
-        {/* Media Card */}
-        <div className="relative rounded-2xl overflow-hidden aspect-video bg-zinc-900 mb-4 flex items-center justify-center">
-          {vista === "guia" && ej.infografia_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={ej.infografia_url}
-              alt={`Guía técnica de ${ej.nombre}`}
-              className="absolute inset-0 w-full h-full object-contain"
-            />
-          ) : ej.gif_url ? (
-            // eslint-disable-next-line jsx-a11y/media-has-caption
-            <video
-              src={ej.gif_url}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          ) : (
-            <div className="flex flex-col items-center gap-3 text-zinc-500">
-              <Dumbbell className="w-12 h-12" />
-              <span className="text-[11px]">Vista animada próximamente</span>
+        {/* Carrusel multimedia */}
+        <div className="mb-1">
+          <div
+            ref={carruselRef}
+            onScroll={handleMediaScroll}
+            className="flex w-full overflow-x-auto snap-x snap-mandatory no-scrollbar rounded-2xl"
+          >
+            <div className="relative min-w-full snap-center aspect-video bg-zinc-900 flex items-center justify-center">
+              {tieneVideo ? (
+                // eslint-disable-next-line jsx-a11y/media-has-caption
+                <video
+                  src={ej.gif_url}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <>
+                  <Dumbbell className="w-12 h-12 text-zinc-500" />
+                  <span className="absolute bottom-3 right-3 text-[11px] text-zinc-500">
+                    Vista animada próximamente
+                  </span>
+                </>
+              )}
+              {tieneVideo && (
+                <button
+                  onClick={() => setShowFullVideo(true)}
+                  aria-label="Ampliar video"
+                  className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center active:scale-95 transition-transform z-10"
+                >
+                  <Maximize2 className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {tieneImagen && (
+              <div className="relative min-w-full snap-center aspect-video bg-zinc-900 flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={ej.infografia_url}
+                  alt={`Guía técnica de ${ej.nombre}`}
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+                <button
+                  onClick={() => setShowFullImage(true)}
+                  aria-label="Ampliar infografía"
+                  className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center active:scale-95 transition-transform z-10"
+                >
+                  <Maximize2 className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {cantidadMedia > 1 && (
+            <div className="flex justify-center gap-2 mt-2">
+              {Array.from({ length: cantidadMedia }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => irAMedia(i)}
+                  aria-label={`Ir al medio ${i + 1}`}
+                  className={`w-2 h-2 rounded-full transition-opacity ${
+                    activeMedia === i ? "bg-white opacity-100" : "bg-white/30 opacity-60"
+                  }`}
+                />
+              ))}
             </div>
           )}
         </div>
 
-        {/* Fila 1: Animación / Técnica */}
+        {/* Fila 1: Animación / Infografía / Técnica */}
         <div className="flex gap-4 mb-1">
           <button
-            onClick={() => setVista(vista === "animacion" ? "guia" : "animacion")}
+            onClick={() => irAMedia(0)}
             className="flex-1 py-3 rounded-xl bg-zinc-900 border border-zinc-800 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform"
           >
-            ▶ {vista === "animacion" ? "Animación" : "Infografía"}
+            ▶ Animación
           </button>
+          {tieneImagen && (
+            <button
+              onClick={() => irAMedia(1)}
+              className="flex-1 py-3 rounded-xl bg-zinc-900 border border-zinc-800 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform"
+            >
+              🖼 Infografía
+            </button>
+          )}
           <button
             onClick={() => setShowTecnica(true)}
             className="flex-1 py-3 rounded-xl bg-zinc-900 border border-zinc-800 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform"
@@ -392,10 +466,52 @@ function EjercicioDetallePage() {
         )}
       </main>
 
+      {/* Modal de video en pantalla completa */}
+      {showFullVideo && tieneVideo && (
+        <div className="fixed inset-0 z-[100] bg-black flex flex-col">
+          <button
+            onClick={() => setShowFullVideo(false)}
+            aria-label="Cerrar video"
+            className="fixed top-4 right-4 z-[110] w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center active:scale-90 transition-transform"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <video
+            src={ej.gif_url}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-contain"
+          />
+        </div>
+      )}
+
+      {/* Modal de infografía con zoom */}
+      {showFullImage && tieneImagen && (
+        <div className="fixed inset-0 z-[100] bg-black flex flex-col">
+          <button
+            onClick={() => setShowFullImage(false)}
+            aria-label="Cerrar infografía"
+            className="fixed top-4 right-4 z-[110] w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center active:scale-90 transition-transform"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <div className="flex-1 overflow-auto touch-pan-x touch-pan-y">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={ej.infografia_url}
+              alt={`Guía técnica de ${ej.nombre}`}
+              className="w-full min-w-[200%] object-contain"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Modal técnico (bottom sheet) */}
       {showTecnica && (
         <div
-          className="fixed inset-0 bg-black/80 z-50 flex items-end"
+          className="fixed inset-0 bg-black/80 z-[100] flex items-end"
           onClick={() => setShowTecnica(false)}
         >
           <div
