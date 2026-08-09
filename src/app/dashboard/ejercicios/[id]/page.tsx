@@ -1,60 +1,13 @@
 "use client"
 
-import { Suspense, useState } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { useQuery } from "@tanstack/react-query"
-import { ArrowLeft, Award, BookOpen, Dumbbell, Trophy } from "lucide-react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { ChevronLeft, Dumbbell, Loader2, Minus, MoreVertical, Plus, X } from "lucide-react"
 import { api } from "@/lib/api"
-import SetLogger from "@/components/entrenamiento/SetLogger"
 
-const CATEGORIA_IDS = new Set(["Pecho", "Espalda", "Hombros", "Bíceps", "Tríceps", "Piernas", "Core"])
-
-const MUSCULO_CATEGORIA = new Map<string, string>([
-  ["Pechito", "Pecho"], // legacy
-  ["Pectorales", "Pecho"],
-  ["Pectoral", "Pecho"],
-  ["Espalda", "Espalda"],
-  ["Espalda alta", "Espalda"],
-  ["Dorsales", "Espalda"],
-  ["Dorsal", "Espalda"],
-  ["Dorsal ancho", "Espalda"],
-  ["Trapecio", "Espalda"],
-  ["Trapecios", "Espalda"],
-  ["Hombros", "Hombros"],
-  ["Deltoides", "Hombros"],
-  ["Deltoide anterior", "Hombros"],
-  ["Deltoide posterior", "Hombros"],
-  ["Cuello", "Hombros"],
-  ["Bíceps", "Bíceps"],
-  ["Bíceps braquial", "Bíceps"],
-  ["Bíceps femoral", "Piernas"],
-  ["Tríceps", "Tríceps"],
-  ["Tríceps braquial", "Tríceps"],
-  ["Antebrazos", "Bíceps"],
-  ["Cuádriceps", "Piernas"],
-  ["Cuádriceps femorales", "Piernas"],
-  ["Isquiotibiales", "Piernas"],
-  ["Glúteos", "Piernas"],
-  ["Glúteo medio", "Piernas"],
-  ["Gemelos", "Piernas"],
-  ["Sóleo", "Piernas"],
-  ["Aductores", "Piernas"],
-  ["Abductores", "Piernas"],
-  ["Abdominales", "Core"],
-  ["Recto abdominal", "Core"],
-  ["Oblicuos", "Core"],
-  ["Transverso abdominal", "Core"],
-  ["Lumbar", "Core"],
-  ["Espalda baja", "Core"],
-  ["Erectores espinales", "Core"],
-])
-
-function categoriaDe(musculo?: string): string {
-  if (!musculo) return "General"
-  if (CATEGORIA_IDS.has(musculo)) return musculo
-  return MUSCULO_CATEGORIA.get(musculo) ?? "General"
-}
+const TOTAL_SERIES = 4
 
 export default function EjercicioDetallePageWrapper() {
   return (
@@ -70,7 +23,18 @@ function EjercicioDetallePage() {
   const router = useRouter()
   const id = Number(params.id)
   const descansoId = Number(searchParams.get("descanso")) || null
+  const queryClient = useQueryClient()
+
   const [vista, setVista] = useState<"animacion" | "guia">("animacion")
+  const [serieActual, setSerieActual] = useState(1)
+  const [isResting, setIsResting] = useState(false)
+  const [showTecnica, setShowTecnica] = useState(false)
+  const [peso, setPeso] = useState(0)
+  const [reps, setReps] = useState(0)
+  const [segundosRestantes, setSegundosRestantes] = useState(descansoId ?? 90)
+  const [mostrarHistorial, setMostrarHistorial] = useState(false)
+  const [errorGuardado, setErrorGuardado] = useState(false)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const { data: ej, isLoading, isError, refetch } = useQuery({
     queryKey: ["ejercicio", id],
@@ -84,47 +48,104 @@ function EjercicioDetallePage() {
     enabled: !!id,
   })
 
-  /* -------- Estado de carga -------- */
+  useEffect(() => {
+    if (!isResting) return
+    setSegundosRestantes((s) => (s > 0 ? s : 90))
+    intervalRef.current = setInterval(() => {
+      setSegundosRestantes((prev) => {
+        if (prev <= 1) {
+          if (intervalRef.current) clearInterval(intervalRef.current)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [isResting])
+
+  useEffect(() => {
+    if (segundosRestantes === 0 && isResting) {
+      finalizarDescanso()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [segundosRestantes])
+
+  const registros = progreso?.ultimos_registros ?? []
+  const ultimoRegistro = registros[registros.length - 1] ?? null
+
+  function guardarSerie() {
+    if (peso <= 0 || reps <= 0) return
+    setErrorGuardado(false)
+    mutacion.mutate()
+  }
+
+  const mutacion = useMutation({
+    mutationFn: () =>
+      api.historial.create({
+        ejercicio_id: ej?.id ?? 0,
+        peso,
+        repeticiones: reps,
+        rutina_id: null,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["progreso"] })
+      queryClient.invalidateQueries({ queryKey: ["ejercicio", "resumen"] })
+      queryClient.invalidateQueries({ queryKey: ["perfil"] })
+      api.checkin.registrar().catch(() => {})
+      setIsResting(true)
+      setErrorGuardado(false)
+    },
+    onError: () => {
+      setErrorGuardado(true)
+    },
+  })
+
+  function finalizarDescanso() {
+    setIsResting(false)
+    setSegundosRestantes(descansoId ?? 90)
+    setSerieActual((prev) => (prev < TOTAL_SERIES ? prev + 1 : 1))
+  }
+
+  const minutos = Math.floor(segundosRestantes / 60)
+  const segundos = String(segundosRestantes % 60).padStart(2, "0")
+  const tiempoFormateado = `${String(minutos).padStart(2, "0")}:${segundos}`
+
   if (isLoading) {
     return (
-      <main className="px-6 pt-6 pb-6 animate-fade-in">
-        <div className="h-12 w-12 rounded-full bg-hierro border border-hierro-border animate-pulse mb-4" />
-        <div className="h-9 bg-hierro-soft rounded-lg animate-pulse w-2/3 mb-6" />
-        <div className="h-64 bg-hierro-soft rounded-2xl border border-hierro-border animate-pulse mb-6" />
-        <div className="flex gap-2 mb-6">
-          <div className="h-8 w-24 bg-hierro-soft rounded-full animate-pulse" />
-          <div className="h-8 w-24 bg-hierro-soft rounded-full animate-pulse" />
-          <div className="h-8 w-24 bg-hierro-soft rounded-full animate-pulse" />
-        </div>
-        <div className="h-40 bg-hierro-soft rounded-2xl border border-hierro-border animate-pulse" />
+      <main className="px-6 pt-6 pb-6">
+        <div className="h-12 bg-zinc-900 rounded-xl animate-pulse mb-4" />
+        <div className="aspect-video bg-zinc-900 rounded-2xl animate-pulse mb-4" />
+        <div className="h-24 bg-zinc-900 rounded-xl animate-pulse mb-4" />
+        <div className="h-64 bg-zinc-900 rounded-2xl animate-pulse" />
       </main>
     )
   }
 
-  /* -------- Error: ID inexistente -------- */
   if (isError || !ej) {
     return (
       <main className="px-6 pt-6 pb-6">
         <div className="pt-16 flex flex-col items-center text-center">
-          <div className="w-16 h-16 rounded-full bg-hierro border border-hierro-border flex items-center justify-center mb-4">
-            <Dumbbell className="w-8 h-8 text-text-secondary/50" />
+          <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
+            <Dumbbell className="w-8 h-8 text-zinc-500" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-text-primary mb-2">
+          <h1 className="font-display text-2xl font-bold text-white mb-2">
             Ejercicio no encontrado
           </h1>
-          <p className="font-sans text-sm text-text-secondary mb-6">
+          <p className="text-sm text-zinc-400 mb-6">
             El ejercicio que buscás no existe o fue eliminado.
           </p>
           <div className="flex items-center gap-3">
             <button
               onClick={() => refetch()}
-              className="bg-primary text-text-primary font-bold rounded-xl h-12 px-6 hover:bg-primary-hover transition-colors active:scale-[0.98]"
+              className="bg-violet-600 text-white font-bold rounded-xl h-12 px-6 hover:bg-violet-500 transition-colors active:scale-[0.98]"
             >
               Reintentar
             </button>
             <Link
               href="/dashboard/rutinas"
-              className="bg-hierro border border-hierro-border text-text-primary font-semibold rounded-xl h-12 px-6 flex items-center justify-center hover:border-primary/40 transition-colors active:scale-[0.98]"
+              className="bg-zinc-800 border border-zinc-700 text-white font-semibold rounded-xl h-12 px-6 flex items-center justify-center active:scale-[0.98]"
             >
               Volver
             </Link>
@@ -134,225 +155,302 @@ function EjercicioDetallePage() {
     )
   }
 
-  const categoria = categoriaDe(ej.musculo_objetivo)
-  const tieneInfografia = Boolean(ej.infografia_url)
-
-  const registros = progreso?.ultimos_registros ?? []
-  const ultimoRegistro = registros[registros.length - 1]
-
-  const registroDeSerie = (setNumber: number) => {
-    const r = registros[setNumber - 1] ?? ultimoRegistro
-    if (!r) return { previousWeight: null, previousReps: null }
-    return { previousWeight: r.peso_kg, previousReps: r.repeticiones }
-  }
-
-  const formatearFecha = (fecha: string) => {
-    const d = new Date(fecha)
-    if (Number.isNaN(d.getTime())) return "—"
-    const dd = String(d.getDate()).padStart(2, "0")
-    const mm = String(d.getMonth() + 1).padStart(2, "0")
-    return `${dd}/${mm}/${d.getFullYear()}`
-  }
-
-  const marca = progreso?.marca_maxima_kg ?? 0
-  const registrosHistorial = registros.slice(0, 5)
+  const objetivoTexto = ultimoRegistro
+    ? `${ultimoRegistro.peso_kg} kg x ${ultimoRegistro.repeticiones} reps`
+    : "—"
 
   return (
     <>
-    <main className="px-6 pt-6 pb-6 animate-fade-in">
-      {/* -------- Header: volver + título -------- */}
-      <button
-        onClick={() => router.back()}
-        className="inline-flex items-center gap-2 font-sans text-sm font-medium text-text-secondary hover:text-text-primary transition-colors mb-4"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        Volver
-      </button>
-
-      <h1 className="font-display text-2xl font-bold text-text-primary capitalize mb-6">
-        {ej.nombre}
-      </h1>
-
-{/* -------- Toggle Animación / Guía Técnica -------- */}
-      {tieneInfografia && (
-        <div className="flex gap-2 mb-4">
-          {(["animacion", "guia"] as const).map((v) => (
-            <button
-              key={v}
-              onClick={() => setVista(v)}
-              className={`flex-1 font-sans text-sm font-semibold rounded-xl h-11 transition-colors active:scale-[0.98] ${
-                vista === v
-                  ? "bg-primary text-text-primary"
-                  : "bg-hierro border border-hierro-border text-text-secondary hover:border-primary/40"
-              }`}
-            >
-              {v === "animacion" ? "Animación" : "Guía Técnica"}
-            </button>
-          ))}
-        </div>
-      )}
-
-{/* -------- Visual 3D / animación -------- */}
-      <div className="relative w-full bg-surface border border-border rounded-2xl overflow-hidden mb-6 min-h-[220px] flex items-center justify-center">
-        {vista === "guia" && ej.infografia_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={ej.infografia_url}
-            alt={`Guía técnica de ${ej.nombre}`}
-            className="w-full h-full object-contain rounded-2xl"
-          />
-        ) : ej.gif_url ? (
-          // eslint-disable-next-line jsx-a11y/media-has-caption
-          <video
-            src={ej.gif_url}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover rounded-2xl"
-          />
-        ) : (
-          <>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(108,92,255,0.10),transparent_65%)] pointer-events-none" />
-            <div className="relative w-20 h-20 rounded-full bg-hierro border border-hierro-border flex items-center justify-center">
-              <Dumbbell className="w-9 h-9 text-primary" />
-            </div>
-            <span className="absolute bottom-3 right-3 font-sans text-[10px] text-text-secondary/60">
-              Vista animada próximamente
-            </span>
-          </>
-        )}
-      </div>
-
-      {/* -------- Metadatos (pills) -------- */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {ej.musculo_objetivo && (
-          <span className="bg-secondary/20 text-secondary font-sans text-xs font-semibold rounded-full px-3 py-1.5">
-            {ej.musculo_objetivo}
-          </span>
-        )}
-        {ej.equipo && (
-          <span className="bg-primary/20 text-primary font-sans text-xs font-semibold rounded-full px-3 py-1.5">
-            {ej.equipo}
-          </span>
-        )}
-        <span className="bg-hierro border border-hierro-border text-text-secondary font-sans text-xs font-medium rounded-full px-3 py-1.5">
-          {categoria}
-        </span>
-      </div>
-
-      {/* -------- Instrucciones -------- */}
-      <section className="bg-hierro-soft rounded-2xl p-5 border border-hierro-border">
-        <div className="flex items-center gap-2 mb-3">
-          <BookOpen className="w-4 h-4 text-primary" />
-          <h2 className="font-sans text-sm font-bold text-text-primary">
-            Instrucciones
-          </h2>
+      <main className="px-5 pt-5 pb-32">
+        {/* -------- Header minimalista -------- */}
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <button
+            onClick={() => router.back()}
+            aria-label="Volver"
+            className="w-11 h-11 rounded-full bg-zinc-800 flex items-center justify-center text-white active:scale-95 transition-transform"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <h1 className="flex-1 min-w-0 font-sans text-lg font-bold text-white text-center truncate px-2">
+            {ej.nombre}
+          </h1>
+          <button
+            aria-label="Opciones"
+            className="w-11 h-11 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 active:scale-95 transition-transform"
+          >
+            <MoreVertical className="w-5 h-5" />
+          </button>
         </div>
 
-        {ej.instrucciones ? (
-          <p className="font-sans text-sm text-text-secondary leading-relaxed whitespace-pre-line">
-            {ej.instrucciones}
-          </p>
-        ) : (
-          <div className="flex flex-col items-center text-center py-6">
-            <div className="w-12 h-12 rounded-full bg-hierro border border-hierro-border flex items-center justify-center mb-3">
-              <BookOpen className="w-6 h-6 text-text-secondary/50" />
-            </div>
-            <p className="font-sans text-sm text-text-secondary">
-              Sin instrucciones cargadas para este ejercicio.
-            </p>
-          </div>
-        )}
-      </section>
-
-      {/* -------- Registro de Series -------- */}
-      <section className="mt-6 bg-hierro-soft rounded-2xl p-5 border border-hierro-border">
-        <h2 className="font-display text-lg font-bold text-text-primary mb-1">
-          Registro de Series
-        </h2>
-        <p className="font-sans text-xs text-text-muted mb-4">
-          Cargá el peso y las repeticiones de cada serie.
-        </p>
-        <div className="divide-y divide-hierro-border/60">
-          {[1, 2, 3, 4].map((num) => (
-            <SetLogger
-              key={num}
-              setNumber={num}
-              ejercicioId={ej.id ?? 0}
-              descansoDefault={descansoId ?? 90}
-              {...registroDeSerie(num)}
+        {/* Media Card */}
+        <div className="relative rounded-2xl overflow-hidden aspect-video bg-zinc-900 mb-4 flex items-center justify-center">
+          {vista === "guia" && ej.infografia_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={ej.infografia_url}
+              alt={`Guía técnica de ${ej.nombre}`}
+              className="absolute inset-0 w-full h-full object-contain"
             />
-          ))}
-        </div>
-      </section>
-
-      {/* -------- Historial y Récords -------- */}
-      <section className="mt-6 bg-hierro-soft rounded-2xl p-5 border border-hierro-border">
-        <div className="flex items-center gap-2 mb-4">
-          <Trophy className="w-5 h-5 text-primary" />
-          <h2 className="font-display text-lg font-bold text-text-primary">
-            Historial y Récords
-          </h2>
-        </div>
-
-        {marca > 0 && (
-          <div className="flex items-center gap-3 bg-primary/10 border border-primary/30 rounded-xl px-4 py-3 mb-4">
-            <span className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
-              <Award className="w-5 h-5" />
-            </span>
-            <div className="flex-1 min-w-0">
-              <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-primary">
-                Récord Personal (PR)
-              </p>
-              <p className="font-display text-2xl font-bold text-text-primary">
-                {marca} kg
-              </p>
+          ) : ej.gif_url ? (
+            // eslint-disable-next-line jsx-a11y/media-has-caption
+            <video
+              src={ej.gif_url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-3 text-zinc-500">
+              <Dumbbell className="w-12 h-12" />
+              <span className="text-[11px]">Vista animada próximamente</span>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {registrosHistorial.length > 0 ? (
-          <div className="space-y-1.5">
-            {registrosHistorial.map((r, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between bg-surface border border-border rounded-lg px-3 py-2"
-              >
-                <span className="font-sans text-xs text-text-muted tabular-nums">
-                  {formatearFecha(r.fecha)}
-                </span>
-                <span className="font-sans text-sm font-bold text-text-primary tabular-nums">
-                  {r.peso_kg} kg
-                </span>
-                <span className="font-sans text-xs text-text-secondary tabular-nums">
-                  x {r.repeticiones}
-                </span>
+        {/* Fila 1: Animación / Técnica */}
+        <div className="flex gap-4 mb-1">
+          <button
+            onClick={() => setVista(vista === "animacion" ? "guia" : "animacion")}
+            className="flex-1 py-3 rounded-xl bg-zinc-900 border border-zinc-800 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform"
+          >
+            ▶ {vista === "animacion" ? "Animación" : "Infografía"}
+          </button>
+          <button
+            onClick={() => setShowTecnica(true)}
+            className="flex-1 py-3 rounded-xl bg-zinc-900 border border-zinc-800 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform"
+          >
+            📖 Técnica
+          </button>
+        </div>
+
+        {/* Banner IA */}
+        <div className="flex justify-between items-center bg-zinc-800/50 rounded-xl p-3 mt-3 border border-zinc-700/50">
+          <p className="text-xs text-zinc-300 pr-3">
+            ¿Necesitás ayuda con la técnica? Consultá a tu entrenador 🤖
+          </p>
+          <button
+            className="shrink-0 bg-violet-600/30 text-violet-300 border border-violet-500/30 text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-transform"
+            onClick={() => setShowTecnica(true)}
+          >
+            Preguntarle
+          </button>
+        </div>
+
+        {/* Área de Registro */}
+        {!isResting && (
+          <section className="mt-5">
+            {/* Indicador de serie */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-zinc-400 font-semibold">SERIE ACTUAL</p>
+              <p className="text-sm text-zinc-400 font-semibold">{serieActual} / {TOTAL_SERIES}</p>
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: TOTAL_SERIES }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`w-3.5 h-3.5 rounded-full ${
+                      i < serieActual ? "bg-emerald-500" : "bg-zinc-800"
+                    }`}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center text-center py-6">
-            <div className="w-12 h-12 rounded-full bg-hierro border border-hierro-border flex items-center justify-center mb-3">
-              <Dumbbell className="w-6 h-6 text-text-secondary/50" />
             </div>
-            <p className="font-sans text-sm text-text-secondary">
-              Es tu primer entrenamiento de este ejercicio. ¡Dale, subí la primera serie! 💪
-            </p>
+
+            {/* Inputs gigantes */}
+            <div className="flex items-center justify-between bg-zinc-900 rounded-2xl p-3 mb-3 border border-zinc-800">
+              <button
+                aria-label="Quitar peso"
+                onClick={() => setPeso((p) => Math.max(0, Math.round((p - 2.5) * 10) / 10))}
+                className="w-16 h-16 rounded-full bg-zinc-800 text-white flex items-center justify-center active:scale-90 transition-transform"
+              >
+                <Minus className="w-8 h-8" />
+              </button>
+              <p className="text-4xl font-bold text-white tabular-nums">
+                {peso} <span className="text-xl text-zinc-400">kg</span>
+              </p>
+              <button
+                aria-label="Sumar peso"
+                onClick={() => setPeso((p) => Math.round((p + 2.5) * 10) / 10)}
+                className="w-16 h-16 rounded-full bg-zinc-800 text-white flex items-center justify-center active:scale-90 transition-transform"
+              >
+                <Plus className="w-8 h-8" />
+              </button>
+            </div>
+            <div className="flex items-center justify-between bg-zinc-900 rounded-2xl p-4 mb-4 border border-zinc-800">
+              <button
+                aria-label="Quitar repeticiones"
+                onClick={() => setReps((r) => Math.max(0, r - 1))}
+                className="w-16 h-16 rounded-full bg-zinc-800 text-white flex items-center justify-center active:scale-90 transition-transform"
+              >
+                <Minus className="w-8 h-8" />
+              </button>
+              <p className="text-4xl font-bold text-white tabular-nums">
+                {reps} <span className="text-zinc-400">reps</span>
+              </p>
+              <button
+                aria-label="Sumar repeticiones"
+                onClick={() => setReps((r) => r + 1)}
+                className="w-16 h-16 rounded-full bg-zinc-800 text-white flex items-center justify-center active:scale-90 transition-transform"
+              >
+                <Plus className="w-8 h-8" />
+              </button>
+            </div>
+
+            {/* Historial rápido */}
+            <div className="flex items-center justify-between px-1">
+              <p className="text-xs text-zinc-500">
+                Última vez: {ultimoRegistro ? `${ultimoRegistro.peso_kg} kg x ${ultimoRegistro.repeticiones} reps` : "Sin registros"}
+              </p>
+              <button
+                onClick={() => setMostrarHistorial((m) => !m)}
+                className="text-xs text-violet-400 font-semibold"
+              >
+                Ver historial
+              </button>
+            </div>
+
+            {mostrarHistorial && registros.length > 0 && (
+              <div className="mt-3 bg-zinc-900 rounded-xl border border-zinc-800 divide-y divide-zinc-800">
+                {registros.slice(-5).reverse().map((r, i) => (
+                  <div key={i} className="flex items-center justify-between px-4 py-2.5">
+                    <span className="text-xs text-zinc-500">{r.fecha}</span>
+                    <span className="text-sm font-semibold text-white tabular-nums">
+                      {r.peso_kg} kg x {r.repeticiones}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {errorGuardado && (
+              <p className="text-xs text-red-400 text-center mt-4">
+                No se pudo guardar la serie. Intentá de nuevo.
+              </p>
+            )}
+          </section>
+        )}
+
+        {!isResting && (
+          <div className="pt-4">
+            <button
+              onClick={guardarSerie}
+              disabled={mutacion.isPending || peso <= 0 || reps <= 0}
+              className="w-full bg-violet-600 text-white font-bold text-lg py-4 rounded-2xl shadow-[0_0_15px_rgba(124,58,237,0.3)] active:scale-95 transition-transform disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
+            >
+              {mutacion.isPending ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <span>✓ COMPLETAR SERIE</span>
+              )}
+            </button>
           </div>
         )}
-      </section>
+
+        {/* Estado de descanso */}
+        {isResting && (
+          <section className="pt-6">
+            <p className="text-2xl font-bold text-white text-center">
+              ¡Serie completada! 💪
+            </p>
+            <p className="text-6xl font-mono text-violet-400 my-8 text-center tabular-nums">
+              {tiempoFormateado}
+            </p>
+
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={() => setSegundosRestantes((s) => Math.max(0, s - 30))}
+                className="flex-1 py-3 rounded-xl bg-zinc-800 text-white font-semibold active:scale-95 transition-transform"
+              >
+                -30s
+              </button>
+              <button
+                onClick={() => setSegundosRestantes((s) => s + 30)}
+                className="flex-1 py-3 rounded-xl bg-zinc-800 text-white font-semibold active:scale-95 transition-transform"
+              >
+                +30s
+              </button>
+            </div>
+
+            <button
+              onClick={finalizarDescanso}
+              className="w-full border-2 border-violet-600 text-violet-400 py-3 rounded-xl text-center font-bold active:scale-[0.98] transition-transform"
+            >
+              OMITIR DESCANSO
+            </button>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-zinc-400">
+                {serieActual < TOTAL_SERIES
+                  ? `Próxima serie: ${serieActual + 1}/${TOTAL_SERIES} - Objetivo: ${objetivoTexto}`
+                  : "¡Última serie completada!"}
+              </p>
+            </div>
+          </section>
+        )}
       </main>
 
-      {/* -------- Barra de acción rápida -------- */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface border-t border-border z-10">
-        <button
-          onClick={() => router.back()}
-          className="w-full bg-primary text-text-primary font-bold rounded-2xl h-12 flex items-center justify-center gap-2 hover:bg-primary-hover transition-colors active:scale-[0.98]"
+      {/* Modal técnico (bottom sheet) */}
+      {showTecnica && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex items-end"
+          onClick={() => setShowTecnica(false)}
         >
-          {descansoId ? "Volver a la Rutina" : "Volver"}
-        </button>
-      </div>
+          <div
+            className="bg-zinc-900 rounded-t-3xl w-full h-[75vh] p-6 overflow-y-auto animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display text-xl font-bold text-white">
+                Técnica de {ej.nombre}
+              </h2>
+              <button
+                onClick={() => setShowTecnica(false)}
+                aria-label="Cerrar"
+                className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 pb-4">
+              {ej.instrucciones ? (
+                <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+                  {ej.instrucciones}
+                </p>
+              ) : (
+                <p className="text-sm text-zinc-500">
+                  Sin instrucciones cargadas para este ejercicio.
+                </p>
+              )}
+
+              <div>
+                <h3 className="text-sm font-bold text-white mb-2">Puntos clave</h3>
+                <ul className="space-y-1.5">
+                  <li className="text-sm text-zinc-400 flex gap-2">
+                    <span className="text-violet-400">•</span> Mantené la postura y el rango completo de movimiento.
+                  </li>
+                  <li className="text-sm text-zinc-400 flex gap-2">
+                    <span className="text-violet-400">•</span> Controlá la fase negativa del movimiento.
+                  </li>
+                  <li className="text-sm text-zinc-400 flex gap-2">
+                    <span className="text-violet-400">•</span> Si falla la técnica, baja el peso.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowTecnica(false)}
+              className="w-full bg-violet-600 text-white font-bold text-base py-4 rounded-2xl active:scale-95 transition-transform"
+            >
+              ENTENDIDO
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }
