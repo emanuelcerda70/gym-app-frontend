@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { Archivo, Inter, Space_Grotesk, Sora } from "next/font/google"
+import { ClerkProvider } from "@clerk/nextjs"
 import "./globals.css"
 import Providers from "./providers"
 import RouteRecorder from "@/components/layout/RouteRecorder"
@@ -42,15 +43,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className="dark">
-      <body className="bg-[#09090B] text-[#F5F7FA] min-h-screen font-inter" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
-        <Providers>
-          <RouteRecorder />
-          {children}
-          <InstallPrompt />
-        </Providers>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="es" className="dark">
+        <body className="bg-[#09090B] text-[#F5F7FA] min-h-screen font-inter" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+          <Providers>
+            <RouteRecorder />
+            {children}
+            <InstallPrompt />
+          </Providers>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
  
