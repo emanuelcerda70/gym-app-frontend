@@ -28,16 +28,14 @@ function EjercicioDetallePage() {
   const [serieActual, setSerieActual] = useState(1)
   const [isResting, setIsResting] = useState(false)
   const [showTecnica, setShowTecnica] = useState(false)
-  const [showFullVideo, setShowFullVideo] = useState(false)
-  const [showFullImage, setShowFullImage] = useState(false)
-  const [activeMedia, setActiveMedia] = useState(0) // 0 = Video, 1 = Infografía
   const [peso, setPeso] = useState(0)
   const [reps, setReps] = useState(0)
   const [segundosRestantes, setSegundosRestantes] = useState(descansoId ?? 90)
   const [mostrarHistorial, setMostrarHistorial] = useState(false)
   const [errorGuardado, setErrorGuardado] = useState(false)
+  const [showFullVideo, setShowFullVideo] = useState(false)
+  const [showFullImage, setShowFullImage] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const carruselRef = useRef<HTMLDivElement | null>(null)
 
   const { data: ej, isLoading, isError, refetch } = useQuery({
     queryKey: ["ejercicio", id],
@@ -112,14 +110,20 @@ function EjercicioDetallePage() {
   }
 
   const minutos = Math.floor(segundosRestantes / 60)
-  const segundos = String(segundosRestantes % 60).padStart(2, "0")
-  const tiempoFormateado = `${String(minutos).padStart(2, "0")}:${segundos}`
+  const segundosString = String(segundosRestantes % 60).padStart(2, "0")
+  const tiempoFormateado = `${String(minutos).padStart(2, "0")}:${segundosString}`
+
+  const radio = 90
+  const circunferencia = 2 * Math.PI * radio
+  const duracionBase = descansoId ?? 90
+  const progresoDescanso = duracionBase > 0 ? segundosRestantes / duracionBase : 0
+  const offsetProgreso = circunferencia * (1 - Math.min(Math.max(progresoDescanso, 0), 1))
 
   if (isLoading) {
     return (
-      <main className="px-6 pt-6 pb-6">
+      <main className="px-5 pt-5 pb-6">
         <div className="h-12 bg-zinc-900 rounded-xl animate-pulse mb-4" />
-        <div className="aspect-video bg-zinc-900 rounded-2xl animate-pulse mb-4" />
+        <div className="aspect-[9/16] max-w-sm mx-auto bg-zinc-900 rounded-3xl animate-pulse mb-4" />
         <div className="h-24 bg-zinc-900 rounded-xl animate-pulse mb-4" />
         <div className="h-64 bg-zinc-900 rounded-2xl animate-pulse" />
       </main>
@@ -128,7 +132,7 @@ function EjercicioDetallePage() {
 
   if (isError || !ej) {
     return (
-      <main className="px-6 pt-6 pb-6">
+      <main className="px-5 pt-5 pb-6">
         <div className="pt-16 flex flex-col items-center text-center">
           <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
             <Dumbbell className="w-8 h-8 text-zinc-500" />
@@ -142,13 +146,13 @@ function EjercicioDetallePage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => refetch()}
-              className="bg-violet-600 text-white font-bold rounded-xl h-12 px-6 hover:bg-violet-500 transition-colors active:scale-[0.98]"
+              className="bg-violet-600 text-white font-bold rounded-2xl h-12 px-6 transition-colors active:scale-[0.98]"
             >
               Reintentar
             </button>
             <Link
               href="/dashboard/rutinas"
-              className="bg-zinc-800 border border-zinc-700 text-white font-semibold rounded-xl h-12 px-6 flex items-center justify-center active:scale-[0.98]"
+              className="bg-zinc-800 border border-zinc-700 text-white font-semibold rounded-2xl h-12 px-6 flex items-center justify-center active:scale-[0.98]"
             >
               Volver
             </Link>
@@ -158,31 +162,14 @@ function EjercicioDetallePage() {
     )
   }
 
-  const objetivoTexto = ultimoRegistro
-    ? `${ultimoRegistro.peso_kg} kg x ${ultimoRegistro.repeticiones} reps`
-    : "—"
-
   const tieneVideo = Boolean(ej.gif_url)
   const tieneImagen = Boolean(ej.infografia_url)
-  const cantidadMedia = (tieneVideo ? 1 : 0) + (tieneImagen ? 1 : 0)
-
-  function handleMediaScroll() {
-    const el = carruselRef.current
-    if (!el || el.clientWidth === 0) return
-    const idx = Math.round(el.scrollLeft / el.clientWidth)
-    setActiveMedia(Math.min(Math.max(idx, 0), cantidadMedia - 1))
-  }
-
-  function irAMedia(i: number) {
-    const el = carruselRef.current
-    if (!el) return
-    el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" })
-    setActiveMedia(i)
-  }
+  const labelTechnique = [ej.musculo_objetivo, ej.equipo].filter(Boolean).join(" · ") || "Técnica recomendada"
+  const objetivoDescanso = `${peso} kg × ${reps} reps`
 
   return (
     <>
-      <main className="px-5 pt-5 pb-32">
+      <main className="px-5 pt-5 pb-6">
         {/* -------- Header minimalista -------- */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <button
@@ -203,182 +190,140 @@ function EjercicioDetallePage() {
           </button>
         </div>
 
-        {/* Carrusel multimedia */}
-        <div className="mb-1">
-          <div
-            ref={carruselRef}
-            onScroll={handleMediaScroll}
-            className="flex w-full overflow-x-auto snap-x snap-mandatory no-scrollbar rounded-2xl"
-          >
-            <div className="relative min-w-full snap-center aspect-video bg-zinc-900 flex items-center justify-center">
-              {tieneVideo ? (
-                // eslint-disable-next-line jsx-a11y/media-has-caption
-                <video
-                  src={ej.gif_url}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              ) : (
-                <>
-                  <Dumbbell className="w-12 h-12 text-zinc-500" />
-                  <span className="absolute bottom-3 right-3 text-[11px] text-zinc-500">
-                    Vista animada próximamente
-                  </span>
-                </>
-              )}
-              {tieneVideo && (
-                <button
-                  onClick={() => setShowFullVideo(true)}
-                  aria-label="Ampliar video"
-                  className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center active:scale-95 transition-transform z-10"
-                >
-                  <Maximize2 className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-
-            {tieneImagen && (
-              <div className="relative min-w-full snap-center aspect-video bg-zinc-900 flex items-center justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={ej.infografia_url}
-                  alt={`Guía técnica de ${ej.nombre}`}
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
-                <button
-                  onClick={() => setShowFullImage(true)}
-                  aria-label="Ampliar infografía"
-                  className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center active:scale-95 transition-transform z-10"
-                >
-                  <Maximize2 className="w-5 h-5" />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {cantidadMedia > 1 && (
-            <div className="flex justify-center gap-2 mt-2">
-              {Array.from({ length: cantidadMedia }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => irAMedia(i)}
-                  aria-label={`Ir al medio ${i + 1}`}
-                  className={`w-2 h-2 rounded-full transition-opacity ${
-                    activeMedia === i ? "bg-white opacity-100" : "bg-white/30 opacity-60"
-                  }`}
-                />
-              ))}
+        {/* -------- Contenedor de video vertical 9:16 -------- */}
+        <div className="relative w-full max-w-sm mx-auto aspect-[9/16] bg-zinc-900 rounded-3xl overflow-hidden shadow-lg mb-4">
+          {tieneVideo ? (
+            // eslint-disable-next-line jsx-a11y/media-has-caption
+            <video
+              src={ej.gif_url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-contain"
+            />
+          ) : tieneImagen ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={ej.infografia_url}
+              alt={`Guía técnica de ${ej.nombre}`}
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-zinc-500">
+              <Dumbbell className="w-14 h-14" />
+              <span className="text-xs">Vista animada próximamente</span>
             </div>
           )}
-        </div>
 
-        {/* Fila 1: Animación / Infografía / Técnica */}
-        <div className="flex gap-4 mb-1">
-          <button
-            onClick={() => irAMedia(0)}
-            className="flex-1 py-3 rounded-xl bg-zinc-900 border border-zinc-800 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform"
-          >
-            ▶ Animación
-          </button>
-          {tieneImagen && (
+          {(tieneVideo || tieneImagen) && (
             <button
-              onClick={() => irAMedia(1)}
-              className="flex-1 py-3 rounded-xl bg-zinc-900 border border-zinc-800 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform"
+              onClick={() => (tieneVideo ? setShowFullVideo(true) : setShowFullImage(true))}
+              aria-label="Ampliar"
+              className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center active:scale-95 transition-transform z-10"
             >
-              🖼 Infografía
+              <Maximize2 className="w-5 h-5" />
             </button>
           )}
-          <button
-            onClick={() => setShowTecnica(true)}
-            className="flex-1 py-3 rounded-xl bg-zinc-900 border border-zinc-800 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform"
-          >
-            📖 Técnica
-          </button>
         </div>
 
-        {/* Banner IA */}
-        <div className="flex justify-between items-center bg-zinc-800/50 rounded-xl p-3 mt-3 border border-zinc-700/50">
+        {/* Texto contextual y botón técnico */}
+        <p className="text-center text-xs text-zinc-400 mb-3">{labelTechnique}</p>
+        <button
+          onClick={() => setShowTecnica(true)}
+          className="w-full py-3 rounded-2xl bg-zinc-900 border border-zinc-700 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform mb-6"
+        >
+          📖 Técnica
+        </button>
+
+        {/* -------- Banner Entrenador IA -------- */}
+        <div className="bg-zinc-800/60 border border-zinc-700 rounded-2xl p-4 mb-6 flex justify-between items-center">
           <p className="text-xs text-zinc-300 pr-3">
-            ¿Necesitás ayuda con la técnica? Consultá a tu entrenador 🤖
+            ¿Tenés dudas sobre este ejercicio? Consultá a tu entrenador 🤖
           </p>
           <button
             className="shrink-0 bg-violet-600/30 text-violet-300 border border-violet-500/30 text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-transform"
-            onClick={() => {
-              const mensajeIA =
-                "decime la tecnica correcta para realizar " + ej.nombre.toLowerCase()
-              router.push("/dashboard/chat?mensaje=" + encodeURIComponent(mensajeIA))
-            }}
+            onClick={() =>
+              router.push(
+                "/dashboard/chat?mensaje=" +
+                  encodeURIComponent("decime la tecnica correcta para realizar " + ej.nombre.toLowerCase()) +
+                  "&contexto=" +
+                  encodeURIComponent(ej.nombre) +
+                  "&serie=" +
+                  serieActual +
+                  "&peso=" +
+                  peso +
+                  "&reps=" +
+                  reps
+              )
+            }
           >
             Preguntarle
           </button>
         </div>
 
-        {/* Área de Registro */}
+        {/* -------- Área de Registro de Serie -------- */}
         {!isResting && (
-          <section className="mt-5">
-            {/* Indicador de serie */}
-            <div className="flex items-center justify-between mb-4">
+          <section className="mt-2">
+            <div className="flex items-center justify-between mb-3">
               <p className="text-sm text-zinc-400 font-semibold">SERIE ACTUAL</p>
               <p className="text-sm text-zinc-400 font-semibold">{serieActual} / {TOTAL_SERIES}</p>
             </div>
             <div className="flex items-center justify-center gap-2 mb-6">
-              <div className="flex items-center gap-1.5">
-                {Array.from({ length: TOTAL_SERIES }).map((_, i) => (
-                  <span
-                    key={i}
-                    className={`w-3.5 h-3.5 rounded-full ${
-                      i < serieActual ? "bg-emerald-500" : "bg-zinc-800"
-                    }`}
-                  />
-                ))}
-              </div>
+              {Array.from({ length: TOTAL_SERIES }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`w-3.5 h-3.5 rounded-full ${
+                    i < serieActual ? "bg-emerald-500" : "bg-zinc-800"
+                  }`}
+                />
+              ))}
             </div>
 
-            {/* Inputs gigantes */}
-            <div className="flex items-center justify-between bg-zinc-900 rounded-2xl p-3 mb-3 border border-zinc-800">
+            {/* Peso */}
+            <div className="flex items-center justify-between bg-zinc-900 rounded-3xl p-2 mb-3">
               <button
                 aria-label="Quitar peso"
                 onClick={() => setPeso((p) => Math.max(0, Math.round((p - 2.5) * 10) / 10))}
-                className="w-16 h-16 rounded-full bg-zinc-800 text-white flex items-center justify-center active:scale-90 transition-transform"
+                className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center text-3xl text-white active:scale-95 transition-transform"
               >
                 <Minus className="w-8 h-8" />
               </button>
               <p className="text-4xl font-bold text-white tabular-nums">
-                {peso} <span className="text-xl text-zinc-400">kg</span>
+                {peso} <span className="text-lg text-zinc-400 font-semibold">kg</span>
               </p>
               <button
                 aria-label="Sumar peso"
                 onClick={() => setPeso((p) => Math.round((p + 2.5) * 10) / 10)}
-                className="w-16 h-16 rounded-full bg-zinc-800 text-white flex items-center justify-center active:scale-90 transition-transform"
+                className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center text-3xl text-white active:scale-95 transition-transform"
               >
                 <Plus className="w-8 h-8" />
               </button>
             </div>
-            <div className="flex items-center justify-between bg-zinc-900 rounded-2xl p-4 mb-4 border border-zinc-800">
+
+            {/* Reps */}
+            <div className="flex items-center justify-between bg-zinc-900 rounded-3xl p-2 mb-3">
               <button
                 aria-label="Quitar repeticiones"
                 onClick={() => setReps((r) => Math.max(0, r - 1))}
-                className="w-16 h-16 rounded-full bg-zinc-800 text-white flex items-center justify-center active:scale-90 transition-transform"
+                className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center text-3xl text-white active:scale-95 transition-transform"
               >
                 <Minus className="w-8 h-8" />
               </button>
               <p className="text-4xl font-bold text-white tabular-nums">
-                {reps} <span className="text-zinc-400">reps</span>
+                {reps} <span className="text-lg text-zinc-400 font-semibold">reps</span>
               </p>
               <button
                 aria-label="Sumar repeticiones"
                 onClick={() => setReps((r) => r + 1)}
-                className="w-16 h-16 rounded-full bg-zinc-800 text-white flex items-center justify-center active:scale-90 transition-transform"
+                className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center text-3xl text-white active:scale-95 transition-transform"
               >
                 <Plus className="w-8 h-8" />
               </button>
             </div>
 
             {/* Historial rápido */}
-            <div className="flex items-center justify-between px-1">
+            <div className="flex items-center justify-between px-1 mb-4">
               <p className="text-xs text-zinc-500">
                 Última vez: {ultimoRegistro ? `${ultimoRegistro.peso_kg} kg x ${ultimoRegistro.repeticiones} reps` : "Sin registros"}
               </p>
@@ -391,7 +336,7 @@ function EjercicioDetallePage() {
             </div>
 
             {mostrarHistorial && registros.length > 0 && (
-              <div className="mt-3 bg-zinc-900 rounded-xl border border-zinc-800 divide-y divide-zinc-800">
+              <div className="mb-4 bg-zinc-900 rounded-2xl border border-zinc-800 divide-y divide-zinc-800">
                 {registros.slice(-5).reverse().map((r, i) => (
                   <div key={i} className="flex items-center justify-between px-4 py-2.5">
                     <span className="text-xs text-zinc-500">{r.fecha}</span>
@@ -404,49 +349,74 @@ function EjercicioDetallePage() {
             )}
 
             {errorGuardado && (
-              <p className="text-xs text-red-400 text-center mt-4">
+              <p className="text-xs text-red-400 text-center mb-2">
                 No se pudo guardar la serie. Intentá de nuevo.
               </p>
             )}
           </section>
         )}
 
+        {/* -------- CTA principal -------- */}
         {!isResting && (
-          <div className="pt-4">
-            <button
-              onClick={guardarSerie}
-              disabled={mutacion.isPending || peso <= 0 || reps <= 0}
-              className="w-full bg-violet-600 text-white font-bold text-lg py-4 rounded-2xl shadow-[0_0_15px_rgba(124,58,237,0.3)] active:scale-95 transition-transform disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
-            >
-              {mutacion.isPending ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <span>✓ COMPLETAR SERIE</span>
-              )}
-            </button>
-          </div>
+          <button
+            onClick={guardarSerie}
+            disabled={mutacion.isPending || peso <= 0 || reps <= 0}
+            className="w-full bg-violet-600 text-white font-black text-xl py-5 rounded-[2rem] shadow-[0_8px_30px_rgba(124,58,237,0.4)] active:scale-95 transition-all mt-4 mb-20 flex items-center justify-center gap-2 disabled:opacity-40 disabled:active:scale-100"
+          >
+            {mutacion.isPending ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <span>✓ COMPLETAR SERIE</span>
+            )}
+          </button>
         )}
 
-        {/* Estado de descanso */}
+        {/* -------- Estado de descanso -------- */}
         {isResting && (
-          <section className="pt-6">
-            <p className="text-2xl font-bold text-white text-center">
+          <section className="flex flex-col items-center justify-center pt-8 pb-16">
+            <p className="text-2xl font-bold text-white text-center mb-8">
               ¡Serie completada! 💪
             </p>
-            <p className="text-6xl font-mono text-violet-400 my-8 text-center tabular-nums">
-              {tiempoFormateado}
-            </p>
 
-            <div className="flex gap-4 mb-6">
+            {/* Temporizador circular */}
+            <div className="relative w-56 h-56 mb-8">
+              <svg viewBox="0 0 200 200" className="w-full h-full -rotate-90">
+                <circle
+                  cx="100"
+                  cy="100"
+                  r={radio}
+                  fill="none"
+                  strokeWidth="12"
+                  className="stroke-zinc-800"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r={radio}
+                  fill="none"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  strokeDasharray={circunferencia}
+                  strokeDashoffset={offsetProgreso}
+                  className="stroke-violet-400 transition-[stroke-dashoffset] duration-1000 ease-linear"
+                />
+              </svg>
+              <p className="absolute inset-0 flex items-center justify-center text-6xl font-mono text-violet-400 tabular-nums">
+                {tiempoFormateado}
+              </p>
+            </div>
+
+            {/* Controles sutiles */}
+            <div className="flex gap-6 mb-8">
               <button
                 onClick={() => setSegundosRestantes((s) => Math.max(0, s - 30))}
-                className="flex-1 py-3 rounded-xl bg-zinc-800 text-white font-semibold active:scale-95 transition-transform"
+                className="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-300 font-semibold active:scale-95 transition-transform"
               >
                 -30s
               </button>
               <button
                 onClick={() => setSegundosRestantes((s) => s + 30)}
-                className="flex-1 py-3 rounded-xl bg-zinc-800 text-white font-semibold active:scale-95 transition-transform"
+                className="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-300 font-semibold active:scale-95 transition-transform"
               >
                 +30s
               </button>
@@ -454,15 +424,15 @@ function EjercicioDetallePage() {
 
             <button
               onClick={finalizarDescanso}
-              className="w-full border-2 border-violet-600 text-violet-400 py-3 rounded-xl text-center font-bold active:scale-[0.98] transition-transform"
+              className="w-full border-2 border-violet-600 text-violet-400 py-3.5 rounded-xl text-center font-bold active:scale-[0.98] transition-transform mb-8"
             >
-              OMITIR DESCANSO
+              Omitir descanso
             </button>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-zinc-400">
+            <div className="text-center">
+              <p className="text-sm text-zinc-400 font-semibold">
                 {serieActual < TOTAL_SERIES
-                  ? `Próxima serie: ${serieActual + 1}/${TOTAL_SERIES} - Objetivo: ${objetivoTexto}`
+                  ? `PRÓXIMA SERIE ${serieActual + 1} / ${TOTAL_SERIES} - Objetivo: ${objetivoDescanso}`
                   : "¡Última serie completada!"}
               </p>
             </div>
@@ -470,7 +440,7 @@ function EjercicioDetallePage() {
         )}
       </main>
 
-      {/* Modal de video en pantalla completa */}
+      {/* -------- Modal video fullscreen -------- */}
       {showFullVideo && tieneVideo && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col">
           <button
@@ -491,7 +461,7 @@ function EjercicioDetallePage() {
         </div>
       )}
 
-      {/* Modal de infografía con zoom */}
+      {/* -------- Modal infografía fullscreen -------- */}
       {showFullImage && tieneImagen && (
         <div className="fixed inset-0 z-[120] bg-black flex items-center justify-center">
           <button
@@ -510,17 +480,17 @@ function EjercicioDetallePage() {
         </div>
       )}
 
-      {/* Modal técnico (bottom sheet) */}
+      {/* -------- Guía Técnica (bottom sheet) -------- */}
       {showTecnica && (
         <div
-          className="fixed inset-0 bg-black/80 z-[100] flex items-end"
+          className="fixed inset-0 bg-black/85 z-[100] flex items-end"
           onClick={() => setShowTecnica(false)}
         >
           <div
-            className="bg-zinc-900 rounded-t-3xl w-full h-[75vh] p-6 overflow-y-auto animate-fade-in"
+            className="bg-zinc-900 rounded-t-[2rem] w-full max-h-[85vh] p-6 overflow-y-auto animate-fade-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-5">
               <h2 className="font-display text-xl font-bold text-white">
                 Técnica de {ej.nombre}
               </h2>
@@ -533,38 +503,45 @@ function EjercicioDetallePage() {
               </button>
             </div>
 
-            <div className="space-y-4 pb-4">
-              {ej.instrucciones ? (
-                <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
-                  {ej.instrucciones}
-                </p>
-              ) : (
-                <p className="text-sm text-zinc-500">
-                  Sin instrucciones cargadas para este ejercicio.
-                </p>
-              )}
+            {ej.instrucciones && (
+              <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line mb-5">
+                {ej.instrucciones}
+              </p>
+            )}
 
-              <div>
-                <h3 className="text-sm font-bold text-white mb-2">Puntos clave</h3>
-                <ul className="space-y-1.5">
-                  <li className="text-sm text-zinc-400 flex gap-2">
-                    <span className="text-violet-400">•</span> Mantené la postura y el rango completo de movimiento.
-                  </li>
-                  <li className="text-sm text-zinc-400 flex gap-2">
-                    <span className="text-violet-400">•</span> Controlá la fase negativa del movimiento.
-                  </li>
-                  <li className="text-sm text-zinc-400 flex gap-2">
-                    <span className="text-violet-400">•</span> Si falla la técnica, baja el peso.
-                  </li>
-                </ul>
-              </div>
-            </div>
+            {/* Puntos clave */}
+            <h3 className="text-sm font-bold text-white mb-2">Puntos clave</h3>
+            <ul className="space-y-2 mb-5">
+              <li className="text-sm text-zinc-400 flex gap-2">
+                <span className="text-violet-400">•</span> Mantené la postura y el rango completo de movimiento.
+              </li>
+              <li className="text-sm text-zinc-400 flex gap-2">
+                <span className="text-violet-400">•</span> Controlá la fase negativa del movimiento.
+              </li>
+              <li className="text-sm text-zinc-400 flex gap-2">
+                <span className="text-violet-400">•</span> Exhalá en el esfuerzo e inspirá al volver.
+              </li>
+            </ul>
+
+            {/* Errores frecuentes */}
+            <h3 className="text-sm font-bold text-white mb-2">Errores frecuentes</h3>
+            <ul className="space-y-2 mb-8">
+              <li className="text-sm text-zinc-400 flex gap-2">
+                <span className="text-red-400">✗</span> Usar impulso o balancearse para levantar más peso.
+              </li>
+              <li className="text-sm text-zinc-400 flex gap-2">
+                <span className="text-red-400">✗</span> Recortar el rango para "meter más series".
+              </li>
+              <li className="text-sm text-zinc-400 flex gap-2">
+                <span className="text-red-400">✗</span> Perder la alineación de la columna en el esfuerzo.
+              </li>
+            </ul>
 
             <button
               onClick={() => setShowTecnica(false)}
               className="w-full bg-violet-600 text-white font-bold text-base py-4 rounded-2xl active:scale-95 transition-transform"
             >
-              ENTENDIDO
+              ← Entendido
             </button>
           </div>
         </div>
