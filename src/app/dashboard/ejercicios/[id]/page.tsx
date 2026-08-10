@@ -35,7 +35,22 @@ function EjercicioDetallePage() {
   const [errorGuardado, setErrorGuardado] = useState(false)
   const [showFullVideo, setShowFullVideo] = useState(false)
   const [showFullImage, setShowFullImage] = useState(false)
+  const [activeMedia, setActiveMedia] = useState(0)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const carruselRef = useRef<HTMLDivElement | null>(null)
+
+  function scrollToSlide(index: number) {
+    const el = carruselRef.current
+    if (!el) return
+    el.scrollTo({ left: index * el.clientWidth, behavior: "smooth" })
+    setActiveMedia(index)
+  }
+
+  function handleMediaScroll() {
+    const el = carruselRef.current
+    if (!el) return
+    setActiveMedia(Math.round(el.scrollLeft / el.clientWidth))
+  }
 
   const { data: ej, isLoading, isError, refetch } = useQuery({
     queryKey: ["ejercicio", id],
@@ -190,31 +205,45 @@ function EjercicioDetallePage() {
           </button>
         </div>
 
-        {/* -------- Contenedor de video vertical 9:16 -------- */}
-        <div className="relative w-full max-w-sm mx-auto aspect-[9/16] bg-zinc-900 rounded-3xl overflow-hidden shadow-lg mb-4">
-          {tieneVideo ? (
-            // eslint-disable-next-line jsx-a11y/media-has-caption
-            <video
-              src={ej.gif_url}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-contain"
-            />
-          ) : tieneImagen ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={ej.infografia_url}
-              alt={`Guía técnica de ${ej.nombre}`}
-              className="w-full h-full object-contain"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-zinc-500">
-              <Dumbbell className="w-14 h-14" />
-              <span className="text-xs">Vista animada próximamente</span>
-            </div>
-          )}
+        {/* -------- Mini-reproductor: carrusel con scroll snapping -------- */}
+        <div className="relative mb-2">
+          <div
+            ref={carruselRef}
+            onScroll={handleMediaScroll}
+            className="flex w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide h-[35vh] min-h-[250px] max-h-[350px]"
+          >
+            {tieneVideo && (
+              <div className="min-w-full snap-center flex justify-center items-center">
+                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                <video
+                  src={ej.gif_url}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="h-full aspect-[9/16] object-contain bg-zinc-900 rounded-3xl shadow-lg"
+                />
+              </div>
+            )}
+            {tieneImagen && (
+              <div className="min-w-full snap-center flex justify-center items-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={ej.infografia_url}
+                  alt={`Guía técnica de ${ej.nombre}`}
+                  className="h-full aspect-[9/16] object-contain bg-zinc-900 rounded-3xl shadow-lg"
+                />
+              </div>
+            )}
+            {!tieneVideo && !tieneImagen && (
+              <div className="min-w-full snap-center flex justify-center items-center">
+                <div className="h-full aspect-[9/16] bg-zinc-900 rounded-3xl shadow-lg flex flex-col items-center justify-center gap-3 text-zinc-500">
+                  <Dumbbell className="w-14 h-14" />
+                  <span className="text-xs">Vista animada próximamente</span>
+                </div>
+              </div>
+            )}
+          </div>
 
           {(tieneVideo || tieneImagen) && (
             <button
@@ -227,17 +256,41 @@ function EjercicioDetallePage() {
           )}
         </div>
 
+        {/* Paginación (dots) */}
+        {(tieneVideo || tieneImagen) && (
+          <div className="flex justify-center gap-2 mb-4">
+            {tieneVideo && (
+              <button
+                aria-label="Ver video"
+                onClick={() => scrollToSlide(0)}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  activeMedia === 0 ? "bg-violet-500" : "bg-zinc-800"
+                }`}
+              />
+            )}
+            {tieneImagen && (
+              <button
+                aria-label="Ver infografía"
+                onClick={() => scrollToSlide(tieneVideo ? 1 : 0)}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  activeMedia === (tieneVideo ? 1 : 0) ? "bg-violet-500" : "bg-zinc-800"
+                }`}
+              />
+            )}
+          </div>
+        )}
+
         {/* Texto contextual y botón técnico */}
-        <p className="text-center text-xs text-zinc-400 mb-3">{labelTechnique}</p>
+        <p className="text-center text-xs text-zinc-400 mb-2">{labelTechnique}</p>
         <button
           onClick={() => setShowTecnica(true)}
-          className="w-full py-3 rounded-2xl bg-zinc-900 border border-zinc-700 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform mb-6"
+          className="w-full py-2.5 rounded-2xl bg-zinc-900 border border-zinc-700 font-sans text-sm font-semibold text-white active:scale-[0.97] transition-transform mb-3"
         >
           📖 Técnica
         </button>
 
         {/* -------- Banner Entrenador IA -------- */}
-        <div className="bg-zinc-800/60 border border-zinc-700 rounded-2xl p-4 mb-6 flex justify-between items-center">
+        <div className="bg-zinc-800/60 border border-zinc-700 rounded-2xl p-3 mb-3 flex justify-between items-center">
           <p className="text-xs text-zinc-300 pr-3">
             ¿Tenés dudas sobre este ejercicio? Consultá a tu entrenador 🤖
           </p>
@@ -264,12 +317,12 @@ function EjercicioDetallePage() {
 
         {/* -------- Área de Registro de Serie -------- */}
         {!isResting && (
-          <section className="mt-2">
-            <div className="flex items-center justify-between mb-3">
+          <section className="mt-0">
+            <div className="flex items-center justify-between mb-2">
               <p className="text-sm text-zinc-400 font-semibold">SERIE ACTUAL</p>
               <p className="text-sm text-zinc-400 font-semibold">{serieActual} / {TOTAL_SERIES}</p>
             </div>
-            <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="flex items-center justify-center gap-2 mb-4">
               {Array.from({ length: TOTAL_SERIES }).map((_, i) => (
                 <span
                   key={i}
@@ -281,7 +334,7 @@ function EjercicioDetallePage() {
             </div>
 
             {/* Peso */}
-            <div className="flex items-center justify-between bg-zinc-900 rounded-3xl p-2 mb-3">
+            <div className="flex items-center justify-between bg-zinc-900 rounded-3xl p-2 mb-2">
               <button
                 aria-label="Quitar peso"
                 onClick={() => setPeso((p) => Math.max(0, Math.round((p - 2.5) * 10) / 10))}
@@ -302,7 +355,7 @@ function EjercicioDetallePage() {
             </div>
 
             {/* Reps */}
-            <div className="flex items-center justify-between bg-zinc-900 rounded-3xl p-2 mb-3">
+            <div className="flex items-center justify-between bg-zinc-900 rounded-3xl p-2 mb-2">
               <button
                 aria-label="Quitar repeticiones"
                 onClick={() => setReps((r) => Math.max(0, r - 1))}
@@ -361,7 +414,7 @@ function EjercicioDetallePage() {
           <button
             onClick={guardarSerie}
             disabled={mutacion.isPending || peso <= 0 || reps <= 0}
-            className="w-full bg-violet-600 text-white font-black text-xl py-5 rounded-[2rem] shadow-[0_8px_30px_rgba(124,58,237,0.4)] active:scale-95 transition-all mt-4 mb-20 flex items-center justify-center gap-2 disabled:opacity-40 disabled:active:scale-100"
+            className="w-full bg-violet-600 text-white font-black text-xl py-5 rounded-[2rem] shadow-[0_8px_30px_rgba(124,58,237,0.4)] active:scale-95 transition-all mt-0 mb-20 flex items-center justify-center gap-2 disabled:opacity-40 disabled:active:scale-100"
           >
             {mutacion.isPending ? (
               <Loader2 className="w-6 h-6 animate-spin" />
