@@ -530,7 +530,7 @@ function EjercicioDetallePage() {
                 <span className="text-red-400">✗</span> Usar impulso o balancearse para levantar más peso.
               </li>
               <li className="text-sm text-zinc-400 flex gap-2">
-                <span className="text-red-400">✗</span> Recortar el rango para "meter más series".
+                <span className="text-red-400">✗</span> Recortar el rango para &quot;meter más series&quot;.
               </li>
               <li className="text-sm text-zinc-400 flex gap-2">
                 <span className="text-red-400">✗</span> Perder la alineación de la columna en el esfuerzo.
