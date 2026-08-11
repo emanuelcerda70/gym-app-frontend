@@ -1,7 +1,5 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
   Bell,
@@ -25,19 +23,10 @@ import { usePerfil } from "@/hooks/usePerfil"
 const DIAS_SEMANA = 7
 
 export default function DashboardPage() {
-  const router = useRouter()
   const storeNombre = useAuthStore((s) => s.nombre)
   const { rutinaActual } = useRutinas()
   const { historial } = useCheckin()
   const { perfil, isLoading: perfilLoading } = usePerfil()
-
-  console.log("DEBUG PERFIL:", { cargando: perfilLoading, datos: perfil })
-
-  useEffect(() => {
-    if (!perfilLoading && !perfil?.objetivo) {
-      router.push("/onboarding")
-    }
-  }, [perfilLoading, perfil, router])
 
   const nombre = storeNombre || perfil?.nombre || "Atleta"
   const frecuencia = historial.data?.total_dias ?? 0

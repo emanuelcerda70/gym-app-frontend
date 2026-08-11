@@ -1,9 +1,9 @@
 {
-  "id": "/dashboard/rutinas",
+  "id": "/dashboard",
   "name": "ASCEND Training",
   "short_name": "ASCEND",
   "description": "Tu asistente inteligente de entrenamiento.",
-  "start_url": "/dashboard/rutinas",
+  "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
