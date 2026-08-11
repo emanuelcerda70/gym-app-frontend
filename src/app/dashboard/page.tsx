@@ -31,6 +31,8 @@ export default function DashboardPage() {
   const { historial } = useCheckin()
   const { perfil, isLoading: perfilLoading } = usePerfil()
 
+  console.log("DEBUG PERFIL:", { cargando: perfilLoading, datos: perfil })
+
   useEffect(() => {
     if (!perfilLoading && !perfil?.objetivo) {
       router.push("/onboarding")
