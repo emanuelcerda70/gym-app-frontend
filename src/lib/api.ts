@@ -65,6 +65,11 @@ export const api = {
         "/api/auth/login",
         { method: "POST", body: JSON.stringify(data) }
       ),
+    sync: (email: string, nombre: string = "") =>
+      request<{ access_token: string; usuario_id: number; nombre: string }>(
+        "/api/auth/sync",
+        { method: "POST", body: JSON.stringify({ email, nombre }) }
+      ),
   },
 
   perfil: {
