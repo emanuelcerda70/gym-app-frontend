@@ -1,14 +1,24 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useClerk } from "@clerk/nextjs"
 import { useAuthStore } from "@/store/authStore"
-import { useAuth } from "@/hooks/useAuth"
 import { getPrevRoute } from "@/components/layout/RouteRecorder"
 
 export default function Header({ backTo }: { backTo?: string }) {
   const router = useRouter()
   const nombre = useAuthStore((s) => s.nombre)
-  const { cerrarSesion } = useAuth()
+  const logout = useAuthStore((s) => s.logout)
+  const { signOut } = useClerk()
+
+  const cerrarSesion = async () => {
+    logout()
+    try {
+      await signOut({ redirectUrl: "/sign-in" })
+    } catch {
+      router.push("/sign-in")
+    }
+  }
 
   return (
     <header className="flex h-[60px] items-center justify-between px-5 sticky top-0 z-40 bg-carbon/85 backdrop-blur-md border-b border-hierro-border">
