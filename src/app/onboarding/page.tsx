@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import AuthGuard from "@/components/layout/AuthGuard"
 import { api } from "@/lib/api"
@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils"
 const PASO_FISICOS = 0
 const PASO_ENTRENAMIENTO = 1
 const PASO_NUTRICION = 2
+
+const STORAGE_KEY = "ascend_onboarding_estado_v1"
 
 const NIVELES = [
   { label: "Principiante", sub: "Arranco recién", value: "principiante" },
@@ -30,11 +32,17 @@ const PRESUPUESTOS = [
   { label: "Elaborado", sub: "Sin filtro", value: "alto" },
 ]
 
+const FAVORITAS_OPCIONES = ["Pollo", "Carne", "Pescado", "Huevos", "Lácteos", "Legumbres", "Pasta", "Arroz", "Verduras", "Frutas"]
+
+const RESTRICCIONES_OPCIONES = ["Lácteos", "Gluten", "Cerdo", "Mariscos", "Frutos secos", "Huevo", "Soja"]
+
 export default function OnboardingPage() {
   const router = useRouter()
 
   const [paso, setPaso] = useState(0)
   const [cargando, setCargando] = useState(false)
+  const [error, setError] = useState("")
+  const [terminado, setTerminado] = useState(false)
 
   const [peso_kg, setPesoKg] = useState("")
   const [altura_cm, setAlturaCm] = useState("")
@@ -44,11 +52,76 @@ export default function OnboardingPage() {
   const [objetivo, setObjetivo] = useState<string>("")
   const [dias_disponibles, setDiasDisponibles] = useState<number | null>(null)
 
-  const [comidas_evitar, setComidasEvitar] = useState("")
-  const [comidas_favoritas, setComidasFavoritas] = useState("")
   const [presupuesto_comida, setPresupuestoComida] = useState<string>("")
+  const [favChips, setFavChips] = useState<string[]>([])
+  const [favOtros, setFavOtros] = useState("")
+  const [favOtrosActivo, setFavOtrosActivo] = useState(false)
+  const [evChips, setEvChips] = useState<string[]>([])
+  const [evOtros, setEvOtros] = useState("")
+  const [evOtrosActivo, setEvOtrosActivo] = useState(false)
 
-  const fisicosCompletos = peso_kg.trim() !== "" && altura_cm.trim() !== "" && edad.trim() !== ""
+  // Restaurar progreso guardado en localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) return
+      const s = JSON.parse(raw)
+      if (typeof s.paso === "number") setPaso(s.paso)
+      if (typeof s.peso_kg === "string") setPesoKg(s.peso_kg)
+      if (typeof s.altura_cm === "string") setAlturaCm(s.altura_cm)
+      if (typeof s.edad === "string") setEdad(s.edad)
+      if (typeof s.nivel === "string") setNivel(s.nivel)
+      if (typeof s.objetivo === "string") setObjetivo(s.objetivo)
+      if (typeof s.dias_disponibles === "number") setDiasDisponibles(s.dias_disponibles)
+      if (typeof s.presupuesto_comida === "string") setPresupuestoComida(s.presupuesto_comida)
+      if (Array.isArray(s.favChips)) setFavChips(s.favChips)
+      if (typeof s.favOtros === "string") setFavOtros(s.favOtros)
+      if (typeof s.favOtrosActivo === "boolean") setFavOtrosActivo(s.favOtrosActivo)
+      if (Array.isArray(s.evChips)) setEvChips(s.evChips)
+      if (typeof s.evOtros === "string") setEvOtros(s.evOtros)
+      if (typeof s.evOtrosActivo === "boolean") setEvOtrosActivo(s.evOtrosActivo)
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Autoguardado ante cualquier cambio
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          paso,
+          peso_kg,
+          altura_cm,
+          edad,
+          nivel,
+          objetivo,
+          dias_disponibles,
+          presupuesto_comida,
+          favChips,
+          favOtros,
+          favOtrosActivo,
+          evChips,
+          evOtros,
+          evOtrosActivo,
+        })
+      )
+    } catch {}
+  }, [paso, peso_kg, altura_cm, edad, nivel, objetivo, dias_disponibles, presupuesto_comida, favChips, favOtros, favOtrosActivo, evChips, evOtros, evOtrosActivo])
+
+  const pesoNum = Number(peso_kg)
+  const alturaNum = Number(altura_cm)
+  const edadNum = Number(edad)
+  const fisicosCompletos =
+    peso_kg.trim() !== "" &&
+    altura_cm.trim() !== "" &&
+    edad.trim() !== "" &&
+    pesoNum >= 20 &&
+    pesoNum <= 200 &&
+    alturaNum >= 100 &&
+    alturaNum <= 250 &&
+    edadNum >= 10 &&
+    edadNum <= 100
   const entrenamientoCompleto = nivel !== "" && objetivo !== "" && dias_disponibles !== null
   const nutricionCompleta = presupuesto_comida !== ""
 
@@ -57,9 +130,27 @@ export default function OnboardingPage() {
     (paso === PASO_ENTRENAMIENTO && entrenamientoCompleto) ||
     (paso === PASO_NUTRICION && nutricionCompleta)
 
+  const armarTexto = (chips: string[], otros: string) => {
+    const partes = [...chips]
+    if (otros.trim()) partes.push(`Otros: ${otros.trim()}`)
+    return partes.length > 0 ? partes.join(", ") : null
+  }
+
+  const guardarPaso = async (parcial: Parameters<typeof api.perfil.update>[0]) => {
+    try {
+      await api.perfil.update(parcial)
+    } catch {}
+  }
+
   const siguiente = () => {
     if (!puedeSiguiente || cargando) return
-    if (paso < PASO_NUTRICION) {
+    setError("")
+    if (paso === PASO_FISICOS) {
+      guardarPaso({ peso_kg: Number(peso_kg), altura_cm: Number(altura_cm), edad: Number(edad) })
+      setPaso(paso + 1)
+      return
+    }
+    if (paso === PASO_ENTRENAMIENTO) {
       setPaso(paso + 1)
       return
     }
@@ -68,15 +159,13 @@ export default function OnboardingPage() {
 
   const atras = () => {
     if (cargando) return
-    if (paso > PASO_FISICOS) {
-      setPaso(paso - 1)
-      return
-    }
-    router.push("/dashboard")
+    setError("")
+    setPaso(paso - 1)
   }
 
   const guardarPerfil = async () => {
     setCargando(true)
+    setError("")
     try {
       await api.perfil.update({
         peso_kg: Number(peso_kg),
@@ -85,13 +174,17 @@ export default function OnboardingPage() {
         nivel,
         objetivo,
         dias_disponibles,
-        comidas_evitar: comidas_evitar.trim() || null,
-        comidas_favoritas: comidas_favoritas.trim() || null,
         presupuesto_comida,
+        comidas_favoritas: armarTexto(favChips, favOtros),
+        comidas_evitar: armarTexto(evChips, evOtros),
       })
-      router.push("/dashboard")
+      try {
+        localStorage.removeItem(STORAGE_KEY)
+      } catch {}
+      setTerminado(true)
     } catch {
       setCargando(false)
+      setError("No se pudo guardar tu perfil. Revisá la conexión e intentá de nuevo.")
     }
   }
 
@@ -99,7 +192,10 @@ export default function OnboardingPage() {
     label: string,
     value: string,
     onChange: (v: string) => void,
-    placeholder: string
+    placeholder: string,
+    min: number,
+    max: number,
+    hint: string
   ) => (
     <div>
       <label className="font-sans text-xs font-semibold text-text-secondary block mb-1.5">
@@ -108,11 +204,15 @@ export default function OnboardingPage() {
       <input
         type="number"
         inputMode="decimal"
+        min={min}
+        max={max}
+        step="0.1"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="w-full bg-surface border border-border rounded-2xl px-4 py-3.5 text-sm font-sans text-text-primary placeholder:text-text-secondary/50 outline-none focus:border-primary/50 transition-colors"
       />
+      <p className="font-sans text-[11px] text-text-secondary/60 mt-1">{hint}</p>
     </div>
   )
 
@@ -176,25 +276,85 @@ export default function OnboardingPage() {
     </div>
   )
 
-  const renderTextoLargo = (
-    label: string,
-    value: string,
-    onChange: (v: string) => void,
-    placeholder: string
+  const renderChips = (
+    opciones: string[],
+    seleccionadas: string[],
+    onToggle: (v: string) => void,
+    otrosTexto: string,
+    onOtrosTexto: (v: string) => void,
+    otrosActivo: boolean,
+    setOtrosActivo: (v: boolean) => void,
+    placeholderOtros: string
   ) => (
     <div>
-      <label className="font-sans text-xs font-semibold text-text-secondary block mb-1.5">
-        {label}
-      </label>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        rows={3}
-        className="w-full bg-surface border border-border rounded-2xl px-4 py-3.5 text-sm font-sans text-text-primary placeholder:text-text-secondary/50 outline-none focus:border-primary/50 transition-colors resize-none"
-      />
+      <div className="flex flex-wrap gap-2">
+        {opciones.map((opt) => {
+          const selected = seleccionadas.includes(opt)
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => onToggle(opt)}
+              className={cn(
+                "px-3.5 py-2 rounded-full border font-sans text-xs font-bold transition-all active:scale-[0.98]",
+                selected
+                  ? "bg-gradient-to-r from-primary to-secondary text-surface border-transparent"
+                  : "bg-surface border-border text-text-secondary hover:border-primary/40"
+              )}
+            >
+              {opt}
+            </button>
+          )
+        })}
+        <button
+          type="button"
+          onClick={() => setOtrosActivo(!otrosActivo)}
+          className={cn(
+            "px-3.5 py-2 rounded-full border font-sans text-xs font-bold transition-all active:scale-[0.98]",
+            otrosActivo
+              ? "bg-gradient-to-r from-primary to-secondary text-surface border-transparent"
+              : "bg-surface border-border text-text-secondary hover:border-primary/40"
+          )}
+        >
+          Otros…
+        </button>
+      </div>
+      {otrosActivo && (
+        <input
+          type="text"
+          value={otrosTexto}
+          onChange={(e) => onOtrosTexto(e.target.value)}
+          placeholder={placeholderOtros}
+          className="w-full mt-2.5 bg-surface border border-border rounded-2xl px-4 py-3 text-sm font-sans text-text-primary placeholder:text-text-secondary/50 outline-none focus:border-primary/50 transition-colors"
+        />
+      )}
     </div>
   )
+
+  if (terminado) {
+    return (
+      <AuthGuard>
+        <div className="min-h-screen max-w-md mx-auto px-6 py-8 flex flex-col items-center justify-center text-center animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-secondary text-surface flex items-center justify-center text-3xl font-black mb-6">
+            ✓
+          </div>
+          <h2 className="font-display text-2xl font-bold text-text-primary mb-2">
+            ¡Perfil listo!
+          </h2>
+          <p className="font-sans text-sm text-text-secondary mb-8">
+            Tu plan quedó armado a tu medida. Ya podés entrenar y chatear con tu bot.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard")}
+            className="w-full h-12 rounded-2xl font-sans text-sm font-bold text-surface bg-gradient-to-r from-primary to-secondary transition-all active:scale-[0.98]"
+          >
+            Ir al dashboard
+          </button>
+        </div>
+      </AuthGuard>
+    )
+  }
 
   return (
     <AuthGuard>
@@ -225,9 +385,9 @@ export default function OnboardingPage() {
             </p>
 
             <div className="bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 space-y-4">
-              {renderNumero("Peso (kg)", peso_kg, setPesoKg, "Ej: 78")}
-              {renderNumero("Altura (cm)", altura_cm, setAlturaCm, "Ej: 178")}
-              {renderNumero("Edad", edad, setEdad, "Ej: 25")}
+              {renderNumero("Peso", peso_kg, setPesoKg, "Ej: 78", 20, 200, "Máximo 200 kg")}
+              {renderNumero("Altura", altura_cm, setAlturaCm, "Ej: 178", 100, 250, "En centímetros (100–250)")}
+              {renderNumero("Edad", edad, setEdad, "Ej: 25", 10, 100, "Entre 10 y 100 años")}
             </div>
           </>
         )}
@@ -277,40 +437,68 @@ export default function OnboardingPage() {
               Así armamos menús que se adapten a vos.
             </p>
 
-            <div className="bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 space-y-5">
-              {renderTextoLargo(
-                "Restricciones / alergias",
-                comidas_evitar,
-                setComidasEvitar,
-                "Ej: lácteos, gluten, no como cerdo..."
-              )}
-              {renderTextoLargo(
-                "Comidas favoritas",
-                comidas_favoritas,
-                setComidasFavoritas,
-                "Ej: pollo, arroz, frutas..."
-              )}
-
+            <div className="bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 space-y-6">
               <div>
                 <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
                   Presupuesto
                 </p>
                 {renderOpciones(PRESUPUESTOS, presupuesto_comida, setPresupuestoComida)}
               </div>
+
+              <div>
+                <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
+                  Comidas favoritas <span className="font-normal text-text-secondary/60">(opcional, podés tildar varias)</span>
+                </p>
+                {renderChips(
+                  FAVORITAS_OPCIONES,
+                  favChips,
+                  (v) => setFavChips(favChips.includes(v) ? favChips.filter((x) => x !== v) : [...favChips, v]),
+                  favOtros,
+                  setFavOtros,
+                  favOtrosActivo,
+                  setFavOtrosActivo,
+                  "Ej: lasaña, pizza, helado..."
+                )}
+              </div>
+
+              <div>
+                <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
+                  Restricciones o alergias <span className="font-normal text-text-secondary/60">(opcional)</span>
+                </p>
+                {renderChips(
+                  RESTRICCIONES_OPCIONES,
+                  evChips,
+                  (v) => setEvChips(evChips.includes(v) ? evChips.filter((x) => x !== v) : [...evChips, v]),
+                  evOtros,
+                  setEvOtros,
+                  evOtrosActivo,
+                  setEvOtrosActivo,
+                  "Ej: no como pescado de río..."
+                )}
+              </div>
             </div>
           </>
         )}
 
+        {/* -------- Error -------- */}
+        {error && (
+          <div className="mt-5 px-4 py-3 rounded-2xl bg-red-500/10 border border-red-500/40 font-sans text-xs font-semibold text-red-400">
+            {error}
+          </div>
+        )}
+
         {/* -------- Navegación -------- */}
         <div className="mt-auto pt-8 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={atras}
-            disabled={cargando}
-            className="h-12 px-6 rounded-2xl bg-surface border border-border font-sans text-sm font-semibold text-text-secondary hover:border-primary/40 transition-colors active:scale-[0.98] disabled:opacity-60"
-          >
-            Atrás
-          </button>
+          {paso > PASO_FISICOS && (
+            <button
+              type="button"
+              onClick={atras}
+              disabled={cargando}
+              className="h-12 px-6 rounded-2xl bg-surface border border-border font-sans text-sm font-semibold text-text-secondary hover:border-primary/40 transition-colors active:scale-[0.98] disabled:opacity-60"
+            >
+              Atrás
+            </button>
+          )}
           <button
             type="button"
             onClick={siguiente}
