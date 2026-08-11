@@ -3,240 +3,328 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import AuthGuard from "@/components/layout/AuthGuard"
-import Button from "@/components/ui/Button"
-import Input from "@/components/ui/Input"
-import Fueguito from "@/components/ui/Fueguito"
-import { usePerfil } from "@/hooks/usePerfil"
+import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 
-type Option = { label: string; sub?: string; value: string }
+const PASO_FISICOS = 0
+const PASO_ENTRENAMIENTO = 1
+const PASO_NUTRICION = 2
 
-const PASOS: {
-  key: string
-  titulo: string
-  subtitulo: string
-  options: Option[]
-}[] = [
-  {
-    key: "objetivo",
-    titulo: "¿Qué buscás?",
-    subtitulo: "El plan se arma alrededor de tu objetivo.",
-    options: [
-      { label: "Ganar músculo y fuerza", sub: "Hipertrofia", value: "ganar_musculo_fuerza" },
-      { label: "Bajar de peso", sub: "Definición", value: "perder_peso" },
-      { label: "Salud y agilidad", sub: "Movimiento y bienestar", value: "salud_agilidad" },
-    ],
-  },
-  {
-    key: "nivel",
-    titulo: "¿Cuánta cancha tenés?",
-    subtitulo: "Nivel de experiencia, sin vueltas.",
-    options: [
-      { label: "Arranco recién", sub: "Principiante", value: "principiante" },
-      { label: "Ya le vengo dando", sub: "Intermedio", value: "intermedio" },
-      { label: "Soy un animal", sub: "Avanzado", value: "avanzado" },
-    ],
-  },
-  {
-    key: "dias_disponibles",
-    titulo: "¿Cuántos días le podés meter?",
-    subtitulo: "Menos humo, más constancia.",
-    options: [
-      { label: "2 días", sub: "Justo y necesario", value: "2" },
-      { label: "3 días", sub: "El clásico", value: "3" },
-      { label: "4 días", sub: "Ritmo serio", value: "4" },
-      { label: "5+ días", sub: "Vivís en el gym", value: "5" },
-    ],
-  },
-  {
-    key: "presupuesto",
-    titulo: "¿Cómo venís con la comida?",
-    subtitulo: "Así el plan te arma menús que no rompan el bolsillo.",
-    options: [
-      { label: "Soy de ir a lo seguro", sub: "Económico", value: "bajo" },
-      { label: "Tengo margen", sub: "Medio", value: "medio" },
-      { label: "Dale sin filtro", sub: "Alto", value: "alto" },
-      { label: "No me fijo", sub: "No tengo presupuesto", value: "ninguno" },
-    ],
-  },
+const NIVELES = [
+  { label: "Principiante", sub: "Arranco recién", value: "principiante" },
+  { label: "Intermedio", sub: "Ya le vengo dando", value: "intermedio" },
+  { label: "Avanzado", sub: "Soy un animal", value: "avanzado" },
 ]
 
-const ETAPAS = 6 // bienvenida + 4 quiz + datos
+const OBJETIVOS = [
+  { label: "Ganar masa muscular", sub: "Hipertrofia", value: "ganar_musculo_fuerza" },
+  { label: "Perder grasa corporal", sub: "Definición", value: "perder_peso" },
+  { label: "Salud", sub: "Movimiento y bienestar", value: "salud_agilidad" },
+]
+
+const DIAS_OPCIONES = [1, 2, 3, 4, 5, 6, 7]
+
+const PRESUPUESTOS = [
+  { label: "Económico", sub: "Bolsillo cuidado", value: "bajo" },
+  { label: "Práctico", sub: "Balance justo", value: "medio" },
+  { label: "Elaborado", sub: "Sin filtro", value: "alto" },
+]
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const { actualizar } = usePerfil()
 
-  const [etapa, setEtapa] = useState(0)
-  const [respuestas, setRespuestas] = useState<Record<string, string>>({})
-  const [fisicos, setFisicos] = useState({ edad: "", peso_kg: "", altura_cm: "" })
+  const [paso, setPaso] = useState(0)
   const [cargando, setCargando] = useState(false)
 
-  const quizIndex = etapa - 1
-  const paso = PASOS[quizIndex]
+  const [peso_kg, setPesoKg] = useState("")
+  const [altura_cm, setAlturaCm] = useState("")
+  const [edad, setEdad] = useState("")
 
-  const seleccionar = (value: string) => {
-    setRespuestas((prev) => ({ ...prev, [paso.key]: value }))
-    if (etapa < 4) setEtapa(etapa + 1)
-  }
+  const [nivel, setNivel] = useState<"principiante" | "intermedio" | "avanzado" | "">("")
+  const [objetivo, setObjetivo] = useState<string>("")
+  const [dias_disponibles, setDiasDisponibles] = useState<number | null>(null)
 
-  const puedeGuardar =
-    fisicos.edad && fisicos.peso_kg && fisicos.altura_cm
+  const [comidas_evitar, setComidasEvitar] = useState("")
+  const [comidas_favoritas, setComidasFavoritas] = useState("")
+  const [presupuesto_comida, setPresupuestoComida] = useState<string>("")
 
-  const finalizar = async () => {
-    if (!puedeGuardar || cargando) return
-    setCargando(true)
-    setEtapa(6)
-    try {
-      await actualizar({
-        objetivo: respuestas.objetivo,
-        nivel: respuestas.nivel,
-        dias_disponibles: Number(respuestas.dias_disponibles),
-        presupuesto_comida: respuestas.presupuesto === "ninguno" ? null : respuestas.presupuesto || null,
-        edad: Number(fisicos.edad),
-        peso_kg: Number(fisicos.peso_kg),
-        altura_cm: Number(fisicos.altura_cm),
-      })
-    } catch {
-      setEtapa(5)
-      setCargando(false)
+  const fisicosCompletos = peso_kg.trim() !== "" && altura_cm.trim() !== "" && edad.trim() !== ""
+  const entrenamientoCompleto = nivel !== "" && objetivo !== "" && dias_disponibles !== null
+  const nutricionCompleta = presupuesto_comida !== ""
+
+  const puedeSiguiente =
+    (paso === PASO_FISICOS && fisicosCompletos) ||
+    (paso === PASO_ENTRENAMIENTO && entrenamientoCompleto) ||
+    (paso === PASO_NUTRICION && nutricionCompleta)
+
+  const siguiente = () => {
+    if (!puedeSiguiente || cargando) return
+    if (paso < PASO_NUTRICION) {
+      setPaso(paso + 1)
       return
     }
-    setTimeout(() => router.push("/home"), 2000)
+    guardarPerfil()
   }
+
+  const atras = () => {
+    if (cargando) return
+    if (paso > PASO_FISICOS) {
+      setPaso(paso - 1)
+      return
+    }
+    router.push("/dashboard")
+  }
+
+  const guardarPerfil = async () => {
+    setCargando(true)
+    try {
+      await api.perfil.update({
+        peso_kg: Number(peso_kg),
+        altura_cm: Number(altura_cm),
+        edad: Number(edad),
+        nivel,
+        objetivo,
+        dias_disponibles,
+        comidas_evitar: comidas_evitar.trim() || null,
+        comidas_favoritas: comidas_favoritas.trim() || null,
+        presupuesto_comida,
+      })
+      router.push("/dashboard")
+    } catch {
+      setCargando(false)
+    }
+  }
+
+  const renderNumero = (
+    label: string,
+    value: string,
+    onChange: (v: string) => void,
+    placeholder: string
+  ) => (
+    <div>
+      <label className="font-sans text-xs font-semibold text-text-secondary block mb-1.5">
+        {label}
+      </label>
+      <input
+        type="number"
+        inputMode="decimal"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full bg-surface border border-border rounded-2xl px-4 py-3.5 text-sm font-sans text-text-primary placeholder:text-text-secondary/50 outline-none focus:border-primary/50 transition-colors"
+      />
+    </div>
+  )
+
+  const renderOpciones = (
+    opciones: { label: string; sub: string; value: string }[],
+    seleccionado: string,
+    onSelect: (v: string) => void
+  ) => (
+    <div className="space-y-2.5">
+      {opciones.map((opt) => {
+        const selected = seleccionado === opt.value
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onSelect(opt.value)}
+            className={cn(
+              "w-full text-left px-4 py-4 rounded-2xl border transition-all active:scale-[0.98]",
+              selected
+                ? "border-primary/60 bg-primary/10"
+                : "bg-surface border-border hover:border-primary/40"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className={cn("font-sans text-sm font-bold", selected ? "text-text-primary" : "text-text-primary")}>
+                {opt.label}
+              </span>
+              {selected && (
+                <span className="w-5 h-5 rounded-full bg-gradient-to-r from-primary to-secondary text-surface flex items-center justify-center text-[11px] font-black">
+                  ✓
+                </span>
+              )}
+            </div>
+            <p className="font-sans text-xs mt-0.5 text-text-secondary">{opt.sub}</p>
+          </button>
+        )
+      })}
+    </div>
+  )
+
+  const renderDias = (seleccionado: number | null, onSelect: (v: number) => void) => (
+    <div className="grid grid-cols-7 gap-1.5">
+      {DIAS_OPCIONES.map((d) => {
+        const selected = seleccionado === d
+        return (
+          <button
+            key={d}
+            type="button"
+            onClick={() => onSelect(d)}
+            className={cn(
+              "h-12 rounded-2xl font-sans text-sm font-bold transition-all active:scale-[0.98]",
+              selected
+                ? "bg-gradient-to-r from-primary to-secondary text-surface"
+                : "bg-surface border border-border text-text-secondary hover:border-primary/40"
+            )}
+          >
+            {d}
+          </button>
+        )
+      })}
+    </div>
+  )
+
+  const renderTextoLargo = (
+    label: string,
+    value: string,
+    onChange: (v: string) => void,
+    placeholder: string
+  ) => (
+    <div>
+      <label className="font-sans text-xs font-semibold text-text-secondary block mb-1.5">
+        {label}
+      </label>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={3}
+        className="w-full bg-surface border border-border rounded-2xl px-4 py-3.5 text-sm font-sans text-text-primary placeholder:text-text-secondary/50 outline-none focus:border-primary/50 transition-colors resize-none"
+      />
+    </div>
+  )
 
   return (
     <AuthGuard>
-      <div className="min-h-screen px-6 py-8 flex flex-col max-w-md mx-auto animate-fade-in">
-        {/* Bienvenida */}
-        {etapa === 0 && (
-          <div className="flex-1 flex flex-col justify-center items-center text-center">
-            <Fueguito racha={3} size={88} className="mb-6" />
-            <div className="flex items-baseline gap-1 mb-3">
-              <span className="font-display-expanded text-4xl tracking-tight">ASCEND</span>
-              <span className="w-2 h-2 rounded-full bg-ember inline-block" />
-            </div>
-            <h1 className="text-2xl font-bold mb-2">Tu Súper Entrenador IA</h1>
-            <p className="text-sm text-ceniza leading-relaxed mb-8">
-              Te arma la rutina, te hace seguimiento de cargas y mantiene viva tu racha.
-              Sin vueltas, sin planillas.
+      <div className="min-h-screen max-w-md mx-auto px-6 py-8 flex flex-col animate-fade-in">
+        {/* -------- Indicador de progreso -------- */}
+        <div className="flex gap-1.5 mb-8">
+          {[PASO_FISICOS, PASO_ENTRENAMIENTO, PASO_NUTRICION].map((i) => (
+            <div
+              key={i}
+              className={cn(
+                "h-1.5 flex-1 rounded-full transition-colors",
+                i <= paso
+                  ? "bg-gradient-to-r from-primary to-secondary"
+                  : "bg-hierro-soft border border-hierro-border"
+              )}
+            />
+          ))}
+        </div>
+
+        {/* -------- Paso 1: Fisionomía -------- */}
+        {paso === PASO_FISICOS && (
+          <>
+            <h2 className="font-display text-2xl font-bold text-text-primary mb-1">
+              Tu fisionomía
+            </h2>
+            <p className="font-sans text-sm text-text-secondary mb-6">
+              Así el plan te queda a medida.
             </p>
-            <Button className="!px-10 !py-3.5" onClick={() => setEtapa(1)}>
-              Empecemos
-            </Button>
-          </div>
-        )}
 
-        {/* Quiz */}
-        {etapa >= 1 && etapa <= 4 && (
-          <>
-            {/* Brazas de progreso */}
-            <div className="flex gap-1.5 mb-8">
-              {Array.from({ length: ETAPAS }, (_, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "h-1.5 flex-1 rounded-full transition-colors",
-                    i <= etapa ? "bg-gradient-to-r from-ember to-brasa" : "bg-hierro-soft border border-hierro-border"
-                  )}
-                />
-              ))}
-            </div>
-
-            <h2 className="text-xl font-bold mb-1">{paso.titulo}</h2>
-            <p className="text-sm text-ceniza mb-6">{paso.subtitulo}</p>
-
-            <div className="space-y-3">
-              {paso.options.map((opt) => {
-                const selected = respuestas[paso.key] === opt.value
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => seleccionar(opt.value)}
-                    className={cn(
-                      "w-full text-left px-4 py-4 rounded-md border transition-all active:scale-[0.98]",
-                      selected
-                        ? "border-ember/60 bg-ember/10"
-                        : "border-hierro-border bg-hierro-soft hover:border-hierro"
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={cn("text-sm font-bold", selected ? "text-hueso" : "text-ceniza")}>
-                        {opt.label}
-                      </span>
-                      {selected && (
-                        <span className="w-5 h-5 rounded-full bg-ember text-carbon flex items-center justify-center text-[11px] font-black">
-                          ✓
-                        </span>
-                      )}
-                    </div>
-                    {opt.sub && (
-                      <p className={cn("text-xs mt-0.5", selected ? "text-ember-soft" : "text-ceniza-dim")}>
-                        {opt.sub}
-                      </p>
-                    )}
-                  </button>
-                )
-              })}
+            <div className="bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 space-y-4">
+              {renderNumero("Peso (kg)", peso_kg, setPesoKg, "Ej: 78")}
+              {renderNumero("Altura (cm)", altura_cm, setAlturaCm, "Ej: 178")}
+              {renderNumero("Edad", edad, setEdad, "Ej: 25")}
             </div>
           </>
         )}
 
-        {/* Datos físicos */}
-        {etapa === 5 && (
+        {/* -------- Paso 2: Entrenamiento -------- */}
+        {paso === PASO_ENTRENAMIENTO && (
           <>
-            <div className="flex gap-1.5 mb-8">
-              {Array.from({ length: ETAPAS }, (_, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "h-1.5 flex-1 rounded-full transition-colors",
-                    i <= etapa ? "bg-gradient-to-r from-ember to-brasa" : "bg-hierro-soft border border-hierro-border"
-                  )}
-                />
-              ))}
-            </div>
+            <h2 className="font-display text-2xl font-bold text-text-primary mb-1">
+              Tu entrenamiento
+            </h2>
+            <p className="font-sans text-sm text-text-secondary mb-6">
+              Contame tu experiencia y objetivos.
+            </p>
 
-            <h2 className="text-xl font-bold mb-1">Tus datos físicos</h2>
-            <p className="text-sm text-ceniza mb-6">Así el plan te queda a medida.</p>
-
-            <div className="space-y-3">
+            <div className="bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 space-y-6">
               <div>
-                <label className="text-xs text-ceniza block mb-1.5">Edad</label>
-                <Input type="number" inputMode="numeric" placeholder="Ej: 25" value={fisicos.edad} onChange={(e) => setFisicos({ ...fisicos, edad: e.target.value })} />
+                <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
+                  Nivel de experiencia
+                </p>
+                {renderOpciones(NIVELES, nivel, (v) => setNivel(v as typeof nivel))}
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-ceniza block mb-1.5">Peso (kg)</label>
-                  <Input type="number" inputMode="decimal" placeholder="Ej: 78" value={fisicos.peso_kg} onChange={(e) => setFisicos({ ...fisicos, peso_kg: e.target.value })} />
-                </div>
-                <div>
-                  <label className="text-xs text-ceniza block mb-1.5">Altura (cm)</label>
-                  <Input type="number" inputMode="decimal" placeholder="Ej: 178" value={fisicos.altura_cm} onChange={(e) => setFisicos({ ...fisicos, altura_cm: e.target.value })} />
-                </div>
-              </div>
-            </div>
 
-            <div className="mt-auto pt-10">
-              <Button fullWidth className="!py-3.5" disabled={!puedeGuardar} onClick={finalizar}>
-                Armar mi plan
-              </Button>
+              <div>
+                <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
+                  Objetivo
+                </p>
+                {renderOpciones(OBJETIVOS, objetivo, setObjetivo)}
+              </div>
+
+              <div>
+                <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
+                  Días disponibles por semana
+                </p>
+                {renderDias(dias_disponibles, setDiasDisponibles)}
+              </div>
             </div>
           </>
         )}
-        {/* Armando tu plan */}
-        {etapa === 6 && (
-          <div className="flex-1 flex flex-col items-center justify-center text-center">
-            <Fueguito racha={3} size={80} flare className="mb-6" />
-            <h2 className="text-xl font-bold mb-2">Armando tu plan...</h2>
-            <p className="text-sm text-ceniza mb-8">El Súper Entrenador está preparando todo.</p>
-            <div className="w-40 h-1.5 bg-hierro-soft rounded-full overflow-hidden relative">
-              <div className="absolute inset-y-0 w-1/2 bg-gradient-to-r from-ember to-brasa rounded-full animate-shimmer" />
+
+        {/* -------- Paso 3: Nutrición -------- */}
+        {paso === PASO_NUTRICION && (
+          <>
+            <h2 className="font-display text-2xl font-bold text-text-primary mb-1">
+              Tu nutrición
+            </h2>
+            <p className="font-sans text-sm text-text-secondary mb-6">
+              Así armamos menús que se adapten a vos.
+            </p>
+
+            <div className="bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 space-y-5">
+              {renderTextoLargo(
+                "Restricciones / alergias",
+                comidas_evitar,
+                setComidasEvitar,
+                "Ej: lácteos, gluten, no como cerdo..."
+              )}
+              {renderTextoLargo(
+                "Comidas favoritas",
+                comidas_favoritas,
+                setComidasFavoritas,
+                "Ej: pollo, arroz, frutas..."
+              )}
+
+              <div>
+                <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
+                  Presupuesto
+                </p>
+                {renderOpciones(PRESUPUESTOS, presupuesto_comida, setPresupuestoComida)}
+              </div>
             </div>
-          </div>
+          </>
         )}
+
+        {/* -------- Navegación -------- */}
+        <div className="mt-auto pt-8 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={atras}
+            disabled={cargando}
+            className="h-12 px-6 rounded-2xl bg-surface border border-border font-sans text-sm font-semibold text-text-secondary hover:border-primary/40 transition-colors active:scale-[0.98] disabled:opacity-60"
+          >
+            Atrás
+          </button>
+          <button
+            type="button"
+            onClick={siguiente}
+            disabled={!puedeSiguiente || cargando}
+            className={cn(
+              "flex-1 h-12 rounded-2xl font-sans text-sm font-bold text-surface transition-all active:scale-[0.98]",
+              "bg-gradient-to-r from-primary to-secondary",
+              "disabled:opacity-40 disabled:active:scale-100"
+            )}
+          >
+            {cargando ? "Guardando..." : paso === PASO_NUTRICION ? "¡Listo!" : "Siguiente"}
+          </button>
+        </div>
       </div>
     </AuthGuard>
   )
 }
- 
