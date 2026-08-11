@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 import { getMascotAvatar } from "@/utils/mascot"
 import { usePerfil } from "@/hooks/usePerfil"
 import type { MensajeHistorial } from "@/types"
+import ReactMarkdown from "react-markdown"
 
 interface ChatMsg extends MensajeHistorial {
   imagen?: string | null
@@ -275,7 +276,25 @@ export default function ChatPageInner() {
                 />
               </div>
               <div className="bg-hierro-soft border border-hierro-border rounded-2xl rounded-tl-sm p-3 text-text-primary text-sm font-sans max-w-[85%]">
-                {msg.content}
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => (
+                      <p className="my-1 first:mt-0 last:mb-0">{children}</p>
+                    ),
+                    strong: ({ children }) => (
+                      <strong className="font-bold text-text-primary">{children}</strong>
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="list-disc pl-5 my-1 space-y-0.5">{children}</ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol className="list-decimal pl-5 my-1 space-y-0.5">{children}</ol>
+                    ),
+                    li: ({ children }) => <li>{children}</li>,
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
               </div>
             </div>
           )
