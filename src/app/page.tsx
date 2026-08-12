@@ -46,7 +46,7 @@ export default function HomePage() {
       {/* Contenido posicionado sobre el fondo */}
       <div className="relative z-10 flex h-full flex-col animate-fade-in">
         {/* Tarjetas de beneficios */}
-        <div className="flex flex-1 items-end px-6 -mb-5">
+        <div className="flex flex-1 items-end px-6 mb-2.5">
           <ul className="w-full max-w-sm mx-auto space-y-3">
             {CARACTERISTICAS.map(({ icon: Icon, titulo, sub }) => (
               <li
