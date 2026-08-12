@@ -45,29 +45,6 @@ export default function HomePage() {
 
       {/* Contenido posicionado sobre el fondo */}
       <div className="relative z-10 flex h-full flex-col animate-fade-in">
-        {/* Logo centrado en la parte superior */}
-        <header className="flex justify-center px-6 pt-10">
-          <div className="flex flex-col items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo-ascend.png"
-              alt="ASCEND"
-              className="h-12 w-auto drop-shadow-[0_0_20px_rgba(108,92,255,0.45)]"
-            />
-          </div>
-        </header>
-
-        {/* Título principal */}
-        <div className="flex flex-col items-center px-6 text-center mt-8">
-          <h1 className="font-display text-4xl font-black tracking-tighter text-hueso drop-shadow-[0_2px_24px_rgba(0,0,0,0.6)]">
-            Entrená mejor.
-            <br />
-            Superá tus límites.
-            <br />
-            Alcanzá tu cima.
-          </h1>
-        </div>
-
         {/* Tarjetas de beneficios */}
         <div className="flex flex-1 items-center px-6">
           <ul className="w-full max-w-sm mx-auto space-y-3">

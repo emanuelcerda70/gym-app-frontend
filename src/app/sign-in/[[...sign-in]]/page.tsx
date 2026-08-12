@@ -15,8 +15,8 @@ export default function SignInPage() {
       {/* Gradiente oscuro inferior para legibilidad */}
       <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/80 to-transparent" />
 
-      {/* Overlay con blur sutil */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
+      {/* Overlay con blur fuerte */}
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-[12px]" />
 
       {/* -------- Contenido centrado -------- */}
       <div className="relative z-20 flex min-h-screen flex-col items-center justify-center px-4 py-8">
