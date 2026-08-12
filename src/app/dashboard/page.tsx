@@ -47,16 +47,20 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <button
-            aria-label="Notificaciones"
-            className="w-10 h-10 rounded-full bg-hierro border border-hierro-border flex items-center justify-center text-text-secondary"
-          >
-            <Bell className="w-5 h-5" />
-          </button>
-          <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary">
-            <User className="w-5 h-5" />
+            <button
+              aria-label="Notificaciones"
+              className="w-10 h-10 rounded-full bg-hierro border border-hierro-border flex items-center justify-center text-text-secondary"
+            >
+              <Bell className="w-5 h-5" />
+            </button>
+            <Link
+              href="/dashboard/perfil"
+              aria-label="Mi perfil"
+              className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary transition-transform active:scale-95"
+            >
+              <User className="w-5 h-5" />
+            </Link>
           </div>
-        </div>
       </header>
 
       {/* Hero Card - Racha Actual */}
