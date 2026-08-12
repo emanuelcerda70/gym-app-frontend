@@ -195,7 +195,7 @@ export default function OnboardingPage() {
     placeholder: string,
     min: number,
     max: number,
-    hint: string
+    hint?: string
   ) => (
     <div>
       <label className="font-sans text-xs font-semibold text-text-secondary block mb-1.5">
@@ -212,7 +212,7 @@ export default function OnboardingPage() {
         placeholder={placeholder}
         className="w-full bg-surface border border-border rounded-2xl px-4 py-3.5 text-sm font-sans text-text-primary placeholder:text-text-secondary/50 outline-none focus:border-primary/50 transition-colors"
       />
-      <p className="font-sans text-[11px] text-text-secondary/60 mt-1">{hint}</p>
+      {hint && <p className="font-sans text-[11px] text-text-secondary/60 mt-1">{hint}</p>}
     </div>
   )
 
@@ -385,9 +385,9 @@ export default function OnboardingPage() {
             </p>
 
             <div className="bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 space-y-4">
-              {renderNumero("Peso", peso_kg, setPesoKg, "Ej: 78", 20, 200, "Máximo 200 kg")}
-              {renderNumero("Altura", altura_cm, setAlturaCm, "Ej: 178", 100, 250, "En centímetros (100–250)")}
-              {renderNumero("Edad", edad, setEdad, "Ej: 25", 10, 100, "Entre 10 y 100 años")}
+              {renderNumero("Peso", peso_kg, setPesoKg, "Ej: 78", 20, 200)}
+              {renderNumero("Altura", altura_cm, setAlturaCm, "Ej: 178", 100, 250, "Ej: 178 cm")}
+              {renderNumero("Edad", edad, setEdad, "Ej: 25", 10, 100)}
             </div>
           </>
         )}
