@@ -12,6 +12,8 @@ const PASO_NUTRICION = 2
 
 const STORAGE_KEY = "ascend_onboarding_estado_v1"
 
+const NOMBRES_PASOS = ["Tu perfil", "Entrenamiento", "Nutrición"]
+
 const NIVELES = [
   { label: "Principiante", sub: "Arranco recién", value: "principiante" },
   { label: "Intermedio", sub: "Ya le vengo dando", value: "intermedio" },
@@ -26,6 +28,16 @@ const OBJETIVOS = [
 
 const DIAS_OPCIONES = [1, 2, 3, 4, 5, 6, 7]
 
+const DIAS_FEEDBACK: Record<number, string> = {
+  1: "Un buen inicio para construir el hábito.",
+  2: "Un buen inicio para construir el hábito.",
+  3: "Ideal para progresar de forma constante.",
+  4: "Ideal para progresar de forma constante.",
+  5: "Ritmo intenso, ¡a full!",
+  6: "Ritmo intenso, ¡a full!",
+  7: "Ritmo intenso, ¡a full!",
+}
+
 const PRESUPUESTOS = [
   { label: "Económico", sub: "Bolsillo cuidado", value: "bajo" },
   { label: "Práctico", sub: "Balance justo", value: "medio" },
@@ -36,6 +48,17 @@ const FAVORITAS_OPCIONES = ["Pollo", "Carne", "Pescado", "Huevos", "Lácteos", "
 
 const RESTRICCIONES_OPCIONES = ["Lácteos", "Gluten", "Cerdo", "Mariscos", "Frutos secos", "Huevo", "Soja"]
 
+const NIVEL_LABEL: Record<string, string> = { principiante: "Principiante", intermedio: "Intermedio", avanzado: "Avanzado" }
+const OBJETIVO_LABEL: Record<string, string> = {
+  ganar_musculo_fuerza: "Hipertrofia",
+  perder_peso: "Definición",
+  salud_agilidad: "Salud",
+}
+const PRESUPUESTO_LABEL: Record<string, string> = { bajo: "Económica", medio: "Práctica", alto: "Elaborada" }
+
+const sanitizarNumero = (v: string, maxLargo: number) =>
+  v.replace(",", ".").replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1").slice(0, maxLargo)
+
 export default function OnboardingPage() {
   const router = useRouter()
 
@@ -43,6 +66,7 @@ export default function OnboardingPage() {
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState("")
   const [terminado, setTerminado] = useState(false)
+  const [restaurado, setRestaurado] = useState(false)
 
   const [peso_kg, setPesoKg] = useState("")
   const [altura_cm, setAlturaCm] = useState("")
@@ -59,6 +83,7 @@ export default function OnboardingPage() {
   const [evChips, setEvChips] = useState<string[]>([])
   const [evOtros, setEvOtros] = useState("")
   const [evOtrosActivo, setEvOtrosActivo] = useState(false)
+  const [evNinguna, setEvNinguna] = useState(false)
 
   // Restaurar progreso guardado en localStorage
   useEffect(() => {
@@ -66,20 +91,23 @@ export default function OnboardingPage() {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) return
       const s = JSON.parse(raw)
-      if (typeof s.paso === "number") setPaso(s.paso)
-      if (typeof s.peso_kg === "string") setPesoKg(s.peso_kg)
-      if (typeof s.altura_cm === "string") setAlturaCm(s.altura_cm)
-      if (typeof s.edad === "string") setEdad(s.edad)
-      if (typeof s.nivel === "string") setNivel(s.nivel)
-      if (typeof s.objetivo === "string") setObjetivo(s.objetivo)
-      if (typeof s.dias_disponibles === "number") setDiasDisponibles(s.dias_disponibles)
-      if (typeof s.presupuesto_comida === "string") setPresupuestoComida(s.presupuesto_comida)
-      if (Array.isArray(s.favChips)) setFavChips(s.favChips)
-      if (typeof s.favOtros === "string") setFavOtros(s.favOtros)
-      if (typeof s.favOtrosActivo === "boolean") setFavOtrosActivo(s.favOtrosActivo)
-      if (Array.isArray(s.evChips)) setEvChips(s.evChips)
-      if (typeof s.evOtros === "string") setEvOtros(s.evOtros)
-      if (typeof s.evOtrosActivo === "boolean") setEvOtrosActivo(s.evOtrosActivo)
+      let huboDatos = false
+      if (typeof s.paso === "number") { setPaso(s.paso); huboDatos = true }
+      if (typeof s.peso_kg === "string") { setPesoKg(s.peso_kg); huboDatos = true }
+      if (typeof s.altura_cm === "string") { setAlturaCm(s.altura_cm); huboDatos = true }
+      if (typeof s.edad === "string") { setEdad(s.edad); huboDatos = true }
+      if (typeof s.nivel === "string") { setNivel(s.nivel); huboDatos = true }
+      if (typeof s.objetivo === "string") { setObjetivo(s.objetivo); huboDatos = true }
+      if (typeof s.dias_disponibles === "number") { setDiasDisponibles(s.dias_disponibles); huboDatos = true }
+      if (typeof s.presupuesto_comida === "string") { setPresupuestoComida(s.presupuesto_comida); huboDatos = true }
+      if (Array.isArray(s.favChips)) { setFavChips(s.favChips); huboDatos = true }
+      if (typeof s.favOtros === "string") { setFavOtros(s.favOtros); huboDatos = true }
+      if (typeof s.favOtrosActivo === "boolean") { setFavOtrosActivo(s.favOtrosActivo); huboDatos = true }
+      if (Array.isArray(s.evChips)) { setEvChips(s.evChips); huboDatos = true }
+      if (typeof s.evOtros === "string") { setEvOtros(s.evOtros); huboDatos = true }
+      if (typeof s.evOtrosActivo === "boolean") { setEvOtrosActivo(s.evOtrosActivo); huboDatos = true }
+      if (typeof s.evNinguna === "boolean") { setEvNinguna(s.evNinguna); huboDatos = true }
+      if (huboDatos) setRestaurado(true)
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -104,10 +132,11 @@ export default function OnboardingPage() {
           evChips,
           evOtros,
           evOtrosActivo,
+          evNinguna,
         })
       )
     } catch {}
-  }, [paso, peso_kg, altura_cm, edad, nivel, objetivo, dias_disponibles, presupuesto_comida, favChips, favOtros, favOtrosActivo, evChips, evOtros, evOtrosActivo])
+  }, [paso, peso_kg, altura_cm, edad, nivel, objetivo, dias_disponibles, presupuesto_comida, favChips, favOtros, favOtrosActivo, evChips, evOtros, evOtrosActivo, evNinguna])
 
   const pesoNum = Number(peso_kg)
   const alturaNum = Number(altura_cm)
@@ -130,6 +159,29 @@ export default function OnboardingPage() {
     (paso === PASO_ENTRENAMIENTO && entrenamientoCompleto) ||
     (paso === PASO_NUTRICION && nutricionCompleta)
 
+  const mensajeFaltante = (): string => {
+    if (paso === PASO_FISICOS) {
+      if (peso_kg.trim() === "" || !Number.isFinite(pesoNum) || pesoNum < 20 || pesoNum > 200)
+        return "Ingresá tu peso (entre 20 y 200 kg) para continuar."
+      if (altura_cm.trim() === "" || !Number.isFinite(alturaNum) || alturaNum < 100 || alturaNum > 250)
+        return "Ingresá tu altura (entre 100 y 250 cm) para continuar."
+      if (edad.trim() === "" || !Number.isFinite(edadNum) || edadNum < 10 || edadNum > 100)
+        return "Completá tu edad (entre 10 y 100 años) para continuar."
+      return ""
+    }
+    if (paso === PASO_ENTRENAMIENTO) {
+      if (nivel === "") return "Elegí tu nivel de experiencia para continuar."
+      if (objetivo === "") return "Elegí tu objetivo para continuar."
+      if (dias_disponibles === null) return "Elegí cuántos días podés entrenar para continuar."
+      return ""
+    }
+    if (paso === PASO_NUTRICION) {
+      if (presupuesto_comida === "") return "Elegí tu presupuesto para continuar."
+      return ""
+    }
+    return ""
+  }
+
   const armarTexto = (chips: string[], otros: string) => {
     const partes = [...chips]
     if (otros.trim()) partes.push(`Otros: ${otros.trim()}`)
@@ -143,7 +195,12 @@ export default function OnboardingPage() {
   }
 
   const siguiente = () => {
-    if (!puedeSiguiente || cargando) return
+    if (cargando) return
+    const faltante = mensajeFaltante()
+    if (faltante) {
+      setError(faltante)
+      return
+    }
     setError("")
     if (paso === PASO_FISICOS) {
       guardarPaso({ peso_kg: Number(peso_kg), altura_cm: Number(altura_cm), edad: Number(edad) })
@@ -176,7 +233,7 @@ export default function OnboardingPage() {
         dias_disponibles,
         presupuesto_comida,
         comidas_favoritas: armarTexto(favChips, favOtros),
-        comidas_evitar: armarTexto(evChips, evOtros),
+        comidas_evitar: evNinguna ? null : armarTexto(evChips, evOtros),
       })
       try {
         localStorage.removeItem(STORAGE_KEY)
@@ -188,31 +245,38 @@ export default function OnboardingPage() {
     }
   }
 
+  const toggleRestriccion = (v: string) => {
+    setEvNinguna(false)
+    setEvChips(evChips.includes(v) ? evChips.filter((x) => x !== v) : [...evChips, v])
+  }
+
   const renderNumero = (
     label: string,
     value: string,
     onChange: (v: string) => void,
     placeholder: string,
-    min: number,
-    max: number,
-    hint?: string
+    maxLargo: number,
+    unidad: string,
+    autoFocus?: boolean
   ) => (
     <div>
       <label className="font-sans text-xs font-semibold text-text-secondary block mb-1.5">
         {label}
       </label>
-      <input
-        type="number"
-        inputMode="decimal"
-        min={min}
-        max={max}
-        step="0.1"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full bg-surface border border-border rounded-2xl px-4 py-3.5 text-sm font-sans text-text-primary placeholder:text-text-secondary/50 outline-none focus:border-primary/50 transition-colors"
-      />
-      {hint && <p className="font-sans text-[11px] text-text-secondary/60 mt-1">{hint}</p>}
+      <div className="relative">
+        <input
+          type="text"
+          inputMode="decimal"
+          autoFocus={autoFocus}
+          value={value}
+          onChange={(e) => onChange(sanitizarNumero(e.target.value, maxLargo))}
+          placeholder={placeholder}
+          className="w-full bg-surface border border-border rounded-2xl pl-4 pr-14 py-3.5 text-sm font-sans text-text-primary placeholder:text-text-secondary/50 outline-none focus:border-primary/50 transition-colors"
+        />
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 font-sans text-sm font-semibold text-text-secondary/80 pointer-events-none">
+          {unidad}
+        </span>
+      </div>
     </div>
   )
 
@@ -237,7 +301,7 @@ export default function OnboardingPage() {
             )}
           >
             <div className="flex items-center justify-between">
-              <span className={cn("font-sans text-sm font-bold", selected ? "text-text-primary" : "text-text-primary")}>
+              <span className="font-sans text-sm font-bold text-text-primary">
                 {opt.label}
               </span>
               {selected && (
@@ -254,25 +318,32 @@ export default function OnboardingPage() {
   )
 
   const renderDias = (seleccionado: number | null, onSelect: (v: number) => void) => (
-    <div className="grid grid-cols-7 gap-1.5">
-      {DIAS_OPCIONES.map((d) => {
-        const selected = seleccionado === d
-        return (
-          <button
-            key={d}
-            type="button"
-            onClick={() => onSelect(d)}
-            className={cn(
-              "h-12 rounded-2xl font-sans text-sm font-bold transition-all active:scale-[0.98]",
-              selected
-                ? "bg-gradient-to-r from-primary to-secondary text-surface"
-                : "bg-surface border border-border text-text-secondary hover:border-primary/40"
-            )}
-          >
-            {d}
-          </button>
-        )
-      })}
+    <div>
+      <div className="grid grid-cols-7 gap-1.5">
+        {DIAS_OPCIONES.map((d) => {
+          const selected = seleccionado === d
+          return (
+            <button
+              key={d}
+              type="button"
+              onClick={() => onSelect(d)}
+              className={cn(
+                "h-12 rounded-2xl font-sans text-sm font-bold transition-all active:scale-[0.98]",
+                selected
+                  ? "bg-gradient-to-r from-primary to-secondary text-surface"
+                  : "bg-surface border border-border text-text-secondary hover:border-primary/40"
+              )}
+            >
+              {d}
+            </button>
+          )
+        })}
+      </div>
+      {seleccionado !== null && (
+        <p className="font-sans text-xs text-text-secondary mt-2 animate-fade-in">
+          {seleccionado} {seleccionado === 1 ? "día" : "días"} por semana — {DIAS_FEEDBACK[seleccionado]}
+        </p>
+      )}
     </div>
   )
 
@@ -284,42 +355,61 @@ export default function OnboardingPage() {
     onOtrosTexto: (v: string) => void,
     otrosActivo: boolean,
     setOtrosActivo: (v: boolean) => void,
-    placeholderOtros: string
+    placeholderOtros: string,
+    deshabilitadas: boolean,
+    ninguna: boolean,
+    onNinguna: () => void
   ) => (
     <div>
       <div className="flex flex-wrap gap-2">
-        {opciones.map((opt) => {
-          const selected = seleccionadas.includes(opt)
-          return (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => onToggle(opt)}
-              className={cn(
-                "px-3.5 py-2 rounded-full border font-sans text-xs font-bold transition-all active:scale-[0.98]",
-                selected
-                  ? "bg-gradient-to-r from-primary to-secondary text-surface border-transparent"
-                  : "bg-surface border-border text-text-secondary hover:border-primary/40"
-              )}
-            >
-              {opt}
-            </button>
-          )
-        })}
         <button
           type="button"
-          onClick={() => setOtrosActivo(!otrosActivo)}
+          onClick={onNinguna}
           className={cn(
             "px-3.5 py-2 rounded-full border font-sans text-xs font-bold transition-all active:scale-[0.98]",
-            otrosActivo
+            ninguna
               ? "bg-gradient-to-r from-primary to-secondary text-surface border-transparent"
               : "bg-surface border-border text-text-secondary hover:border-primary/40"
           )}
         >
-          Otros…
+          Ninguna
         </button>
+        {!ninguna &&
+          opciones.map((opt) => {
+            const selected = seleccionadas.includes(opt)
+            return (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => onToggle(opt)}
+                disabled={deshabilitadas}
+                className={cn(
+                  "px-3.5 py-2 rounded-full border font-sans text-xs font-bold transition-all active:scale-[0.98] disabled:opacity-40",
+                  selected
+                    ? "bg-gradient-to-r from-primary to-secondary text-surface border-transparent"
+                    : "bg-surface border-border text-text-secondary hover:border-primary/40"
+                )}
+              >
+                {opt}
+              </button>
+            )
+          })}
+        {!ninguna && (
+          <button
+            type="button"
+            onClick={() => setOtrosActivo(!otrosActivo)}
+            className={cn(
+              "px-3.5 py-2 rounded-full border font-sans text-xs font-bold transition-all active:scale-[0.98]",
+              otrosActivo
+                ? "bg-gradient-to-r from-primary to-secondary text-surface border-transparent"
+                : "bg-surface border-border text-text-secondary hover:border-primary/40"
+            )}
+          >
+            Otros…
+          </button>
+        )}
       </div>
-      {otrosActivo && (
+      {otrosActivo && !ninguna && (
         <input
           type="text"
           value={otrosTexto}
@@ -339,17 +429,34 @@ export default function OnboardingPage() {
             ✓
           </div>
           <h2 className="font-display text-2xl font-bold text-text-primary mb-2">
-            ¡Perfil listo!
+            Tu perfil está listo
           </h2>
           <p className="font-sans text-sm text-text-secondary mb-8">
-            Tu plan quedó armado a tu medida. Ya podés entrenar y chatear con tu bot.
+            Ya tenemos todo lo necesario para personalizar ASCEND.
           </p>
+
+          <div className="w-full bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 mb-8 text-left space-y-3">
+            <p className="label-caps">Tu perfil</p>
+            <div className="font-sans text-sm text-text-primary">
+              <span className="text-text-secondary">Nivel:</span> {nivel ? NIVEL_LABEL[nivel] : "—"}
+            </div>
+            <div className="font-sans text-sm text-text-primary">
+              <span className="text-text-secondary">Ritmo:</span> {dias_disponibles} {dias_disponibles === 1 ? "día" : "días"} por semana
+            </div>
+            <div className="font-sans text-sm text-text-primary">
+              <span className="text-text-secondary">Objetivo:</span> {objetivo ? OBJETIVO_LABEL[objetivo] : "—"}
+            </div>
+            <div className="font-sans text-sm text-text-primary">
+              <span className="text-text-secondary">Nutrición:</span> {presupuesto_comida ? PRESUPUESTO_LABEL[presupuesto_comida] : "—"}
+            </div>
+          </div>
+
           <button
             type="button"
             onClick={() => router.push("/dashboard")}
             className="w-full h-12 rounded-2xl font-sans text-sm font-bold text-surface bg-gradient-to-r from-primary to-secondary transition-all active:scale-[0.98]"
           >
-            Ir al dashboard
+            Crear mi experiencia →
           </button>
         </div>
       </AuthGuard>
@@ -360,34 +467,44 @@ export default function OnboardingPage() {
     <AuthGuard>
       <div className="min-h-screen max-w-md mx-auto px-6 py-8 flex flex-col animate-fade-in">
         {/* -------- Indicador de progreso -------- */}
-        <div className="flex gap-1.5 mb-8">
-          {[PASO_FISICOS, PASO_ENTRENAMIENTO, PASO_NUTRICION].map((i) => (
-            <div
-              key={i}
-              className={cn(
-                "h-1.5 flex-1 rounded-full transition-colors",
-                i <= paso
-                  ? "bg-gradient-to-r from-primary to-secondary"
-                  : "bg-hierro-soft border border-hierro-border"
-              )}
-            />
-          ))}
+        <div className="mb-2">
+          <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
+            Paso {paso + 1} de 3 · {NOMBRES_PASOS[paso]}
+          </p>
+          <div className="flex gap-1.5">
+            {[PASO_FISICOS, PASO_ENTRENAMIENTO, PASO_NUTRICION].map((i) => (
+              <div
+                key={i}
+                className={cn(
+                  "h-1.5 flex-1 rounded-full transition-colors",
+                  i <= paso
+                    ? "bg-gradient-to-r from-primary to-secondary"
+                    : "bg-hierro-soft border border-hierro-border"
+                )}
+              />
+            ))}
+          </div>
+          {restaurado && (
+            <p className="font-sans text-[11px] text-success/80 mt-2">
+              ✓ Tus datos están guardados
+            </p>
+          )}
         </div>
 
         {/* -------- Paso 1: Fisionomía -------- */}
         {paso === PASO_FISICOS && (
           <>
             <h2 className="font-display text-2xl font-bold text-text-primary mb-1">
-              Tu fisionomía
+              Empecemos por vos
             </h2>
             <p className="font-sans text-sm text-text-secondary mb-6">
-              Así el plan te queda a medida.
+              Unos datos básicos y adaptamos ASCEND a vos.
             </p>
 
             <div className="bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 space-y-4">
-              {renderNumero("Peso", peso_kg, setPesoKg, "Ej: 78", 20, 200)}
-              {renderNumero("Altura", altura_cm, setAlturaCm, "Ej: 178", 100, 250, "Ej: 178 cm")}
-              {renderNumero("Edad", edad, setEdad, "Ej: 25", 10, 100)}
+              {renderNumero("Peso", peso_kg, setPesoKg, "78", 6, "kg", true)}
+              {renderNumero("Altura", altura_cm, setAlturaCm, "178", 6, "cm")}
+              {renderNumero("Edad", edad, setEdad, "25", 3, "años")}
             </div>
           </>
         )}
@@ -396,32 +513,35 @@ export default function OnboardingPage() {
         {paso === PASO_ENTRENAMIENTO && (
           <>
             <h2 className="font-display text-2xl font-bold text-text-primary mb-1">
-              Tu entrenamiento
+              ¿Qué querés conseguir?
             </h2>
             <p className="font-sans text-sm text-text-secondary mb-6">
-              Contame tu experiencia y objetivos.
+              Elegí tu objetivo y nosotros hacemos el resto.
             </p>
 
             <div className="bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 space-y-6">
               <div>
                 <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
-                  Nivel de experiencia
+                  Tu nivel de experiencia
                 </p>
                 {renderOpciones(NIVELES, nivel, (v) => setNivel(v as typeof nivel))}
               </div>
 
               <div>
                 <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
-                  Objetivo
+                  Tu objetivo
                 </p>
                 {renderOpciones(OBJETIVOS, objetivo, setObjetivo)}
               </div>
 
               <div>
                 <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
-                  Días disponibles por semana
+                  ¿Cuántos días podés entrenar?
                 </p>
                 {renderDias(dias_disponibles, setDiasDisponibles)}
+                <p className="font-sans text-[11px] text-text-secondary/60 mt-1.5">
+                  Podés cambiarlo más adelante.
+                </p>
               </div>
             </div>
           </>
@@ -431,7 +551,7 @@ export default function OnboardingPage() {
         {paso === PASO_NUTRICION && (
           <>
             <h2 className="font-display text-2xl font-bold text-text-primary mb-1">
-              Tu nutrición
+              Hagamos que tu alimentación acompañe tu objetivo
             </h2>
             <p className="font-sans text-sm text-text-secondary mb-6">
               Así armamos menús que se adapten a vos.
@@ -440,14 +560,14 @@ export default function OnboardingPage() {
             <div className="bg-white/5 backdrop-blur-md border border-border rounded-3xl p-5 space-y-6">
               <div>
                 <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
-                  Presupuesto
+                  ¿Cómo querés organizar tus comidas?
                 </p>
                 {renderOpciones(PRESUPUESTOS, presupuesto_comida, setPresupuestoComida)}
               </div>
 
               <div>
                 <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
-                  Comidas favoritas <span className="font-normal text-text-secondary/60">(opcional, podés tildar varias)</span>
+                  ¿Qué te gusta comer? <span className="font-normal text-text-secondary/60">Seleccioná todas las que correspondan</span>
                 </p>
                 {renderChips(
                   FAVORITAS_OPCIONES,
@@ -457,25 +577,40 @@ export default function OnboardingPage() {
                   setFavOtros,
                   favOtrosActivo,
                   setFavOtrosActivo,
-                  "Ej: lasaña, pizza, helado..."
+                  "Ej: lasaña, pizza, helado...",
+                  false,
+                  false,
+                  () => {}
                 )}
               </div>
 
               <div>
                 <p className="font-sans text-xs font-semibold text-text-secondary mb-2">
-                  Restricciones o alergias <span className="font-normal text-text-secondary/60">(opcional)</span>
+                  ¿Hay algo que prefieras evitar? <span className="font-normal text-text-secondary/60">Seleccioná todas las que correspondan</span>
                 </p>
                 {renderChips(
                   RESTRICCIONES_OPCIONES,
                   evChips,
-                  (v) => setEvChips(evChips.includes(v) ? evChips.filter((x) => x !== v) : [...evChips, v]),
+                  toggleRestriccion,
                   evOtros,
                   setEvOtros,
                   evOtrosActivo,
                   setEvOtrosActivo,
-                  "Ej: no como pescado de río..."
+                  "Ej: no como pescado de río...",
+                  evNinguna,
+                  evNinguna,
+                  () => {
+                    setEvChips([])
+                    setEvOtros("")
+                    setEvOtrosActivo(false)
+                    setEvNinguna(true)
+                  }
                 )}
               </div>
+
+              <p className="font-sans text-[11px] text-text-secondary/60">
+                Podés modificar estas preferencias cuando quieras.
+              </p>
             </div>
           </>
         )}
@@ -496,20 +631,25 @@ export default function OnboardingPage() {
               disabled={cargando}
               className="h-12 px-6 rounded-2xl bg-surface border border-border font-sans text-sm font-semibold text-text-secondary hover:border-primary/40 transition-colors active:scale-[0.98] disabled:opacity-60"
             >
-              Atrás
+              ← Atrás
             </button>
           )}
           <button
             type="button"
             onClick={siguiente}
-            disabled={!puedeSiguiente || cargando}
+            disabled={cargando}
             className={cn(
-              "flex-1 h-12 rounded-2xl font-sans text-sm font-bold text-surface transition-all active:scale-[0.98]",
-              "bg-gradient-to-r from-primary to-secondary",
-              "disabled:opacity-40 disabled:active:scale-100"
+              "flex-1 h-12 rounded-2xl font-sans text-sm font-bold transition-all active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100",
+              puedeSiguiente
+                ? "bg-gradient-to-r from-primary to-secondary text-surface"
+                : "bg-hierro-soft border border-hierro-border text-text-secondary"
             )}
           >
-            {cargando ? "Guardando..." : paso === PASO_NUTRICION ? "¡Listo!" : "Siguiente"}
+            {cargando
+              ? "Creando tu plan..."
+              : paso === PASO_NUTRICION
+                ? "Crear mi plan →"
+                : "Continuar →"}
           </button>
         </div>
       </div>
