@@ -31,7 +31,7 @@ export default function HomePage() {
   }, [showAuth, router])
 
   return (
-    <main className="h-screen w-full relative bg-surface overflow-hidden bg-[url('/bg-onboarding.png')] bg-cover bg-center">
+    <main className="h-screen w-full relative bg-surface overflow-hidden bg-[url('/ascend-bg.png')] bg-cover bg-center">
       {/* ESTADO 1: Splash de bienvenida */}
       {!showAuth && (
         <div className="relative z-10 flex h-full flex-col animate-fade-in">
