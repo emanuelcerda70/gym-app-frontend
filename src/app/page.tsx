@@ -6,10 +6,8 @@ import { useAuth } from "@clerk/nextjs"
 import Link from "next/link"
 import Image from "next/image"
 import {
-  Flame,
   Sparkles,
   Smartphone,
-  ShieldCheck,
   CheckCircle2,
   ArrowRight,
   Play,
@@ -22,7 +20,9 @@ import {
   MessageCircle,
   TrendingUp,
   XCircle,
-  HelpCircle,
+  Compass,
+  Layers,
+  Award,
 } from "lucide-react"
 
 export default function HomePage() {
@@ -38,11 +38,11 @@ export default function HomePage() {
     }
   }, [isLoaded, isSignedIn, router])
 
-  // Enlace directo a WhatsApp de prospección
+  // Enlace directo a WhatsApp comercial oficial
   const whatsappUrl =
     "https://wa.me/5492994017688?text=" +
     encodeURIComponent(
-      "Hola Emanuel! Vi la web de ASCEND y quiero coordinar los 14 días de prueba gratis para mi gimnasio."
+      "Hola Emanuel! Vi la web de ASCEND y quiero coordinar la prueba piloto de 14 días para mi gimnasio."
     )
 
   return (
@@ -50,36 +50,36 @@ export default function HomePage() {
       {/* ========================================================= */}
       {/* 1. NAVBAR HEADER */}
       {/* ========================================================= */}
-      <header className="sticky top-0 z-40 bg-[#09090B]/85 backdrop-blur-xl border-b border-[#2B2B36]">
+      <header className="sticky top-0 z-40 bg-[#09090B]/90 backdrop-blur-xl border-b border-[#2B2B36]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="relative w-9 h-9">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9">
               <Image
-                src="/icon.svg"
-                alt="Logo ASCEND"
+                src="/logo-ascend.png"
+                alt="ASCEND"
                 fill
                 className="object-contain transition-transform group-hover:scale-105"
                 priority
               />
             </div>
-            <span className="font-display font-extrabold text-xl tracking-wider text-white">
+            <span className="font-display font-bold text-lg sm:text-xl tracking-wider text-white">
               ASCEND
             </span>
           </Link>
 
           {/* Enlaces Desktop */}
           <nav className="hidden md:flex items-center gap-8 text-sm text-[#9CA3AF]">
-            <a href="#demo" className="hover:text-white transition-colors">
-              La App
+            <a href="#experiencia" className="hover:text-white transition-colors">
+              La Experiencia
             </a>
-            <a href="#problema" className="hover:text-white transition-colors">
-              Papel vs App
+            <a href="#transformacion" className="hover:text-white transition-colors">
+              Papel vs ASCEND
             </a>
             <a href="#pilares" className="hover:text-white transition-colors">
-              Características
+              Pilares
             </a>
             <a href="#precios" className="hover:text-white transition-colors">
-              Precios
+              Planes
             </a>
             <a href="#instalacion" className="hover:text-white transition-colors">
               Instalación
@@ -90,7 +90,7 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="bg-[#1C1C22] border border-[#2B2B36] hover:border-[#6C5CFF]/60 hover:text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl transition-all active:scale-95"
+              className="bg-[#1C1C24] border border-[#2B2B36] hover:border-[#6C5CFF] text-[#F5F7FA] text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl transition-all active:scale-95"
             >
               Ingresar a la App
             </Link>
@@ -101,31 +101,31 @@ export default function HomePage() {
       {/* ========================================================= */}
       {/* 2. HERO SECTION */}
       {/* ========================================================= */}
-      <section className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 px-4 overflow-hidden">
-        {/* Glows de fondo */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#6C5CFF]/15 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] bg-[#FF4D00]/10 rounded-full blur-[120px] pointer-events-none" />
+      <section className="relative pt-14 pb-16 sm:pt-24 sm:pb-28 px-4 overflow-hidden">
+        {/* Glows de fondo con la paleta oficial (Violeta y Cian) */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-[#6C5CFF]/12 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/3 right-1/4 w-[350px] h-[350px] bg-[#00D4FF]/10 rounded-full blur-[130px] pointer-events-none" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#14141A] border border-[#2B2B36] text-xs font-semibold text-[#00D4FF] mb-6 shadow-inner">
-            <span className="w-2 h-2 rounded-full bg-[#00D4FF] animate-pulse" />
-            SISTEMA OPERATIVO PARA GIMNASIOS & ATLETAS
+          {/* Badge Oficial */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#14141A] border border-[#2B2B36] text-xs font-semibold text-[#00D4FF] mb-6 shadow-sm">
+            <Compass className="w-3.5 h-3.5 text-[#00D4FF]" />
+            DE LA INCERTIDUMBRE A LA AUTONOMÍA
           </div>
 
           {/* Título Principal */}
           <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1] mb-6">
-            El fin de la rutina <br className="hidden sm:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF4D00] via-[#FF7A1F] to-[#FFB300]">
-              en papel
+            Nunca más volver a sentirte{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C5CFF] via-[#8B7DFF] to-[#00D4FF]">
+              perdido al entrenar.
             </span>
           </h1>
 
-          {/* Subtítulo */}
+          {/* Subtítulo alineado a la Visión de Producto */}
           <p className="text-base sm:text-xl text-[#9CA3AF] max-w-2xl mx-auto leading-relaxed mb-8">
-            Reemplazá las hojitas arrugadas por una app en el celular con{" "}
-            <span className="text-white font-medium">videos 3D de cada máquina</span>, sobrecarga progresiva y un{" "}
-            <span className="text-white font-medium">coach con inteligencia artificial</span>. Tus alumnos nunca más se sienten perdidos.
+            El sistema de acompañamiento inteligente que reemplaza las rutinas de papel por{" "}
+            <span className="text-white font-medium">videos anatómicos 3D</span>, progresión real de cargas y un{" "}
+            <span className="text-white font-medium">coach con inteligencia artificial</span>. Entrená. Progresá. Ascendé.
           </p>
 
           {/* Botones de Acción */}
@@ -134,28 +134,28 @@ export default function HomePage() {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#6C5CFF] to-[#8B7DFF] hover:from-[#5C4CEF] hover:to-[#7A6DF0] text-white font-bold text-sm sm:text-base px-7 py-3.5 rounded-xl shadow-lg shadow-[#6C5CFF]/25 transition-all active:scale-[0.98]"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#6C5CFF] to-[#00D4FF] hover:opacity-95 text-white font-bold text-sm sm:text-base px-7 py-3.5 rounded-xl shadow-lg shadow-[#6C5CFF]/20 transition-all active:scale-[0.98]"
             >
               <MessageCircle className="w-5 h-5" />
               Solicitar Piloto de 14 Días Gratis
             </a>
 
             <a
-              href="#demo"
+              href="#experiencia"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#14141A] border border-[#2B2B36] hover:border-[#6C5CFF] text-[#F5F7FA] font-medium text-sm sm:text-base px-6 py-3.5 rounded-xl transition-all active:scale-[0.98]"
             >
               <Play className="w-4 h-4 text-[#00D4FF]" />
-              Ver Demo de la App
+              Ver Experiencia en Sala
             </a>
           </div>
 
-          {/* Garantías / Sellos */}
+          {/* Sellos de Confianza */}
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-[#7A8090]">
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#00E676]" /> 14 días sin costo ni tarjeta
+              <CheckCircle2 className="w-4 h-4 text-[#00E676]" /> Piloto sin costo para tu gimnasio
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#00E676]" /> Carga de máquinas incluida
+              <CheckCircle2 className="w-4 h-4 text-[#00E676]" /> Configuración de máquinas incluida
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-[#00E676]" /> Soporte presencial en el Alto Valle
@@ -165,19 +165,19 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================= */}
-      {/* 3. SIMULADOR MÓVIL EN VIVO (MOCKUP INTERACTIVO) */}
+      {/* 3. SIMULADOR MÓVIL EN VIVO (EXPERIENCIA ASCEND) */}
       {/* ========================================================= */}
-      <section id="demo" className="py-12 sm:py-20 px-4 bg-[#09090B]">
+      <section id="experiencia" className="py-12 sm:py-20 px-4 bg-[#09090B]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
-            <span className="text-xs uppercase tracking-widest text-[#6C5CFF] font-bold">
-              Experiencia en Sala
+            <span className="text-xs uppercase tracking-widest text-[#00D4FF] font-bold">
+              Claridad en Cada Movimiento
             </span>
             <h2 className="font-display text-2xl sm:text-4xl font-extrabold mt-1 text-white">
-              Así entrena un alumno con ASCEND
+              Siempre saber cuál es el siguiente paso
             </h2>
             <p className="text-sm text-[#9CA3AF] mt-2 max-w-lg mx-auto">
-              Cada máquina tiene su animación 3D explicativa y el registro de cargas para no estancarse.
+              Cada ejercicio cuenta con su biomecánica en video 3D, objetivo muscular y registro exacto de progresión.
             </p>
           </div>
 
@@ -191,17 +191,17 @@ export default function HomePage() {
                   <p className="text-xs font-bold text-white leading-tight">
                     Gimnasio Titán • Cipolletti
                   </p>
-                  <p className="text-[10px] text-[#7A8090]">Lunes de Empuje (Pecho & Tríceps)</p>
+                  <p className="text-[10px] text-[#7A8090]">Sesión: Empuje e Hipertrofia</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1 bg-[#1C1C22] border border-[#2B2B36] px-2.5 py-1 rounded-full text-xs font-bold text-[#FF7A1F]">
-                <Flame className="w-3.5 h-3.5 fill-[#FF7A1F]" />
-                18 días
+              <div className="flex items-center gap-1 bg-[#1C1C24] border border-[#2B2B36] px-2.5 py-1 rounded-full text-xs font-bold text-[#00D4FF]">
+                <TrendingUp className="w-3.5 h-3.5 text-[#00D4FF]" />
+                Nivel 25
               </div>
             </div>
 
             {/* Video 3D en Vivo */}
-            <div className="relative rounded-2xl overflow-hidden bg-black border border-[#2B2B36] aspect-[9/10] mb-4">
+            <div className="relative rounded-2xl overflow-hidden bg-[#0B0B0F] border border-[#2B2B36] aspect-[9/10] mb-4">
               <video
                 src="/animaciones/press-banca.mp4"
                 autoPlay
@@ -220,7 +220,7 @@ export default function HomePage() {
             </div>
 
             {/* Registro de Cargas & Series */}
-            <div className="bg-[#1C1C22] border border-[#2B2B36] rounded-2xl p-3 mb-3">
+            <div className="bg-[#1C1C24] border border-[#2B2B36] rounded-2xl p-3 mb-3">
               <div className="flex items-center justify-between text-xs mb-2">
                 <span className="text-[#9CA3AF] font-medium">Series Realizadas</span>
                 <span className="text-[#00E676] font-bold">3 de 4 completadas</span>
@@ -243,11 +243,11 @@ export default function HomePage() {
 
             {/* Asistente IA Bubble */}
             <div className="bg-gradient-to-r from-[#6C5CFF]/15 to-[#00D4FF]/10 border border-[#6C5CFF]/30 rounded-2xl p-3 flex items-start gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-[#6C5CFF] flex items-center justify-center text-white shrink-0 mt-0.5">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#6C5CFF] to-[#00D4FF] flex items-center justify-center text-white shrink-0 mt-0.5">
                 <Sparkles className="w-4 h-4" />
               </div>
               <div className="text-xs">
-                <p className="font-bold text-white">Súper Entrenador IA</p>
+                <p className="font-bold text-white">Entrenador Inteligente ASCEND</p>
                 <p className="text-[#9CA3AF] text-[11px] mt-0.5 leading-snug">
                   &quot;Excelente progresión. Mantené los codos a 45° respecto al torso para proteger tus hombros en la última serie.&quot;
                 </p>
@@ -258,19 +258,19 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================= */}
-      {/* 4. PAPEL VS. ASCEND (COMPARATIVA DE DOLOR) */}
+      {/* 4. PAPEL VS. ASCEND (TRANSFORMACIÓN BUSCADA) */}
       {/* ========================================================= */}
-      <section id="problema" className="py-16 sm:py-24 px-4 bg-[#14141A]/50 border-y border-[#2B2B36]">
+      <section id="transformacion" className="py-16 sm:py-24 px-4 bg-[#14141A]/50 border-y border-[#2B2B36]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-xs uppercase tracking-widest text-[#FF4D00] font-bold">
-              La Realidad en el Salón
+            <span className="text-xs uppercase tracking-widest text-[#6C5CFF] font-bold">
+              Transformación en Sala
             </span>
             <h2 className="font-display text-3xl sm:text-5xl font-extrabold mt-1 text-white">
-              ¿Por qué los alumnos abandonan el gimnasio?
+              De la incertidumbre a la confianza
             </h2>
             <p className="text-sm sm:text-base text-[#9CA3AF] mt-2 max-w-xl mx-auto">
-              El 60% de los principiantes deja de ir en el segundo mes porque se sienten perdidos, no entienden las máquinas y no ven progreso.
+              Cuando un alumno entra al gimnasio y no sabe qué hacer, la frustración provoca abandono. ASCEND transforma su experiencia completa.
             </p>
           </div>
 
@@ -283,7 +283,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h3 className="font-display text-lg font-bold text-white">La Rutina Tradicional en Papel</h3>
-                  <p className="text-xs text-red-400/80">Desorganización y deserción</p>
+                  <p className="text-xs text-red-400/80">Confusión y abandono a los 30 días</p>
                 </div>
               </div>
 
@@ -298,7 +298,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-red-400 font-bold shrink-0">✕</span>
-                  El profesor de sala gasta el 80% de su tiempo explicando siempre cómo se usa la misma máquina.
+                  El profesor de sala repite 50 veces por día cómo se usa la misma polea.
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-red-400 font-bold shrink-0">✕</span>
@@ -306,43 +306,43 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-red-400 font-bold shrink-0">✕</span>
-                  Cero motivación cuando la disciplina decae.
+                  Depende 100% de la motivación pasajera en vez de construir un proceso.
                 </li>
               </ul>
             </div>
 
             {/* Card 2: ASCEND */}
-            <div className="bg-gradient-to-b from-[#1C1C22] to-[#14141A] border border-[#6C5CFF]/40 rounded-3xl p-6 sm:p-8 relative shadow-xl shadow-[#6C5CFF]/10">
+            <div className="bg-gradient-to-b from-[#1C1C24] to-[#14141A] border border-[#6C5CFF]/40 rounded-3xl p-6 sm:p-8 relative shadow-xl shadow-[#6C5CFF]/10">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-[#6C5CFF]/20 border border-[#6C5CFF]/40 flex items-center justify-center text-[#6C5CFF]">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="font-display text-lg font-bold text-white">Con ASCEND en el Gimnasio</h3>
-                  <p className="text-xs text-[#00E676]">Autonomía, técnica y retención</p>
+                  <p className="text-xs text-[#00E676]">Autonomía, aprendizaje y constancia</p>
                 </div>
               </div>
 
               <ul className="space-y-3.5 text-sm text-[#F5F7FA]">
                 <li className="flex items-start gap-2.5">
                   <span className="text-[#00E676] font-bold shrink-0">✓</span>
-                  Video 3D anatómico e infografía de cada máquina en un toque.
+                  Animaciones 3D e infografías biomecánicas con la técnica precisa.
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-[#00E676] font-bold shrink-0">✓</span>
-                  Registro instantáneo de kilos y repeticiones para ver la mejora semanal.
+                  Sobrecarga progresiva: el alumno sabe exactamente qué peso le toca hoy.
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-[#00E676] font-bold shrink-0">✓</span>
-                  Entrenador con IA para responder dudas de postura y pesos sugeridos.
+                  Coach con IA que adapta ejercicios y resuelve dudas sin juzgar.
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-[#00E676] font-bold shrink-0">✓</span>
-                  Rachas y mascota evolutiva que convierten el entrenamiento en un juego adictivo.
+                  Evolución medible que convierte el entrenamiento en parte de su identidad.
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-[#00E676] font-bold shrink-0">✓</span>
-                  Tus profesores quedan libres para corregir postura y fidelizar a los clientes.
+                  Los profesores quedan libres para corregir técnica y conectar con la gente.
                 </li>
               </ul>
             </div>
@@ -351,19 +351,19 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================= */}
-      {/* 5. LOS 4 PILARES DE ASCEND */}
+      {/* 5. LOS 4 PILARES OFICIALES DE ASCEND */}
       {/* ========================================================= */}
       <section id="pilares" className="py-16 sm:py-24 px-4 bg-[#09090B]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <span className="text-xs uppercase tracking-widest text-[#00D4FF] font-bold">
-              Diseñada para la Sala de Musculación
+              Principios de Producto
             </span>
             <h2 className="font-display text-3xl sm:text-5xl font-extrabold mt-1 text-white">
-              Tecnología que realmente se usa
+              Diseñada para la claridad y el progreso
             </h2>
             <p className="text-sm sm:text-base text-[#9CA3AF] mt-2 max-w-xl mx-auto">
-              No es una planilla de Excel disfrazada de app. Es un sistema integral pensado para el sudor, el hierro y la constancia.
+              Tecnología rigurosa basada en ciencia del entrenamiento, sin agresividad ni recompensas vacías.
             </p>
           </div>
 
@@ -374,10 +374,10 @@ export default function HomePage() {
                 <Dumbbell className="w-5 h-5" />
               </div>
               <h3 className="font-display font-bold text-base text-white mb-2">
-                33+ Videos 3D de Máquinas
+                33+ Videos 3D Anatómicos
               </h3>
               <p className="text-xs text-[#9CA3AF] leading-relaxed">
-                Animaciones anatómicas que muestran qué músculos trabajan y cuál es la técnica correcta.
+                Muestra de forma clara la biomecánica, las fases del movimiento y el músculo principal trabajado.
               </p>
             </div>
 
@@ -387,23 +387,23 @@ export default function HomePage() {
                 <Sparkles className="w-5 h-5" />
               </div>
               <h3 className="font-display font-bold text-base text-white mb-2">
-                Coach con Inteligencia Artificial
+                Mentor de Entrenamiento IA
               </h3>
               <p className="text-xs text-[#9CA3AF] leading-relaxed">
-                Basado en biomecánica y ciencia del entrenamiento. Responde dudas y adapta ejercicios al instante.
+                Acompañamiento profesional y sereno. Adapta el plan ante imprevistos y responde con evidencia científica.
               </p>
             </div>
 
             {/* Pilar 3 */}
-            <div className="bg-[#14141A] border border-[#2B2B36] rounded-2xl p-5 hover:border-[#FF4D00]/60 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#FF4D00]/15 border border-[#FF4D00]/30 flex items-center justify-center text-[#FF7A1F] mb-4">
-                <Flame className="w-5 h-5 fill-[#FF7A1F]" />
+            <div className="bg-[#14141A] border border-[#2B2B36] rounded-2xl p-5 hover:border-[#6C5CFF]/60 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6C5CFF]/20 to-[#00D4FF]/20 border border-[#6C5CFF]/40 flex items-center justify-center text-white mb-4">
+                <TrendingUp className="w-5 h-5 text-[#00D4FF]" />
               </div>
               <h3 className="font-display font-bold text-base text-white mb-2">
-                Gamificación y Rachas
+                Evolución de Niveles
               </h3>
               <p className="text-xs text-[#9CA3AF] leading-relaxed">
-                Mascota evolutiva de nivel 1 a 100. El alumno compite contra sí mismo para no perder su fueguito.
+                Un sistema de progreso que reconoce la constancia y celebra la regularidad sin generar culpas.
               </p>
             </div>
 
@@ -416,7 +416,7 @@ export default function HomePage() {
                 Modo 100% Offline (PWA)
               </h3>
               <p className="text-xs text-[#9CA3AF] leading-relaxed">
-                ¿Mala señal o sin WiFi en el galpón? La app guarda las series en el teléfono y sincroniza al salir.
+                Resistente a la mala señal en salones cerrados. Las cargas se guardan en el teléfono y sincronizan después.
               </p>
             </div>
           </div>
@@ -430,13 +430,13 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-[#00E676] font-bold">
-              Inversión Transparente
+              Propuesta Comercial
             </span>
             <h2 className="font-display text-3xl sm:text-5xl font-extrabold mt-1 text-white">
               Planes para Gimnasios
             </h2>
             <p className="text-sm sm:text-base text-[#9CA3AF] mt-2">
-              Un único valor fijo. Sin costos por cantidad de alumnos ni comisiones ocultas.
+              Un único valor fijo para toda tu sede. Sin comisiones por alumno ni costos ocultos.
             </p>
 
             {/* Switch de Moneda */}
@@ -461,10 +461,10 @@ export default function HomePage() {
           </div>
 
           {/* Tarjeta Principal de Precio */}
-          <div className="bg-gradient-to-b from-[#1C1C22] to-[#14141A] border-2 border-[#6C5CFF] rounded-3xl p-6 sm:p-10 shadow-2xl shadow-[#6C5CFF]/15 relative">
-            {/* Tag destacado */}
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FF4D00] to-[#FF7A1F] text-white text-[11px] font-extrabold uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
-              14 Días de Prueba Gratis
+          <div className="bg-gradient-to-b from-[#1C1C24] to-[#14141A] border-2 border-[#6C5CFF] rounded-3xl p-6 sm:p-10 shadow-2xl shadow-[#6C5CFF]/15 relative">
+            {/* Tag destacado oficial */}
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#6C5CFF] to-[#00D4FF] text-white text-[11px] font-extrabold uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
+              14 Días de Piloto Gratis
             </div>
 
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-[#2B2B36]">
@@ -500,23 +500,23 @@ export default function HomePage() {
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Carga y relevamiento de tus máquinas</span>
+                <span>Relevamiento y carga de tus máquinas</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Carteles QR listos para recepción y sala</span>
+                <span>Cartelería QR lista para recepción</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Radar de alumnos inactivos (alerta de deserción)</span>
+                <span>Radar de inactividad de alumnos</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>33 animaciones 3D y 15 infografías biomecánicas</span>
+                <span>Catálogo de 33 videos 3D e infografías</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Soporte técnico directo en el Alto Valle</span>
+                <span>Soporte presencial en el Alto Valle</span>
               </div>
             </div>
 
@@ -525,14 +525,14 @@ export default function HomePage() {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2 bg-[#6C5CFF] hover:bg-[#5C4CEF] text-white font-bold text-base py-4 rounded-xl shadow-lg shadow-[#6C5CFF]/30 transition-all active:scale-[0.99]"
+              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#6C5CFF] to-[#00D4FF] hover:opacity-95 text-white font-bold text-base py-4 rounded-xl shadow-lg shadow-[#6C5CFF]/30 transition-all active:scale-[0.99]"
             >
               <MessageCircle className="w-5 h-5" />
               Comenzar Prueba de 14 Días sin Costo
             </a>
 
             <p className="text-center text-xs text-[#7A8090] mt-3">
-              Te lo instalamos en 24 horas. Si al día 14 no convence a tus alumnos, no pagás nada.
+              Instalación y puesta en marcha en 24 horas. Sin tarjetas ni compromisos.
             </p>
           </div>
         </div>
@@ -545,13 +545,13 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-[#6C5CFF] font-bold">
-              Cero Descargas Pesadas
+              Tecnología Ligera
             </span>
             <h2 className="font-display text-2xl sm:text-4xl font-extrabold mt-1 text-white">
-              ¿Cómo la instalan los alumnos?
+              ¿Cómo acceden los alumnos?
             </h2>
             <p className="text-sm text-[#9CA3AF] mt-2">
-              ASCEND es una PWA (Progressive Web App): no ocupa memoria en el teléfono ni requiere descargar 200 MB de la tienda.
+              ASCEND es una PWA (Progressive Web App): no satura la memoria del celular ni requiere descargas pesadas de la tienda.
             </p>
 
             {/* Selector iPhone vs Android */}
@@ -583,19 +583,19 @@ export default function HomePage() {
           <div className="bg-[#14141A] border border-[#2B2B36] rounded-3xl p-6 sm:p-8">
             {tabPlataforma === "ios" ? (
               <div className="space-y-4">
-                <div className="flex items-start gap-4 p-3.5 bg-[#1C1C22] rounded-2xl border border-[#2B2B36]">
+                <div className="flex items-start gap-4 p-3.5 bg-[#1C1C24] rounded-2xl border border-[#2B2B36]">
                   <div className="w-8 h-8 rounded-xl bg-[#6C5CFF]/20 text-[#6C5CFF] font-bold flex items-center justify-center shrink-0">
                     1
                   </div>
                   <div className="text-sm">
                     <p className="font-bold text-white">Abrí ascend.com.ar en Safari</p>
                     <p className="text-xs text-[#9CA3AF] mt-0.5">
-                      Escaneá el código QR del mostrador con la cámara de tu iPhone.
+                      Escaneá el cartel QR del mostrador con la cámara de tu iPhone.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 p-3.5 bg-[#1C1C22] rounded-2xl border border-[#2B2B36]">
+                <div className="flex items-start gap-4 p-3.5 bg-[#1C1C24] rounded-2xl border border-[#2B2B36]">
                   <div className="w-8 h-8 rounded-xl bg-[#6C5CFF]/20 text-[#6C5CFF] font-bold flex items-center justify-center shrink-0">
                     <Share2 className="w-4 h-4" />
                   </div>
@@ -607,40 +607,40 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 p-3.5 bg-[#1C1C22] rounded-2xl border border-[#2B2B36]">
+                <div className="flex items-start gap-4 p-3.5 bg-[#1C1C24] rounded-2xl border border-[#2B2B36]">
                   <div className="w-8 h-8 rounded-xl bg-[#6C5CFF]/20 text-[#6C5CFF] font-bold flex items-center justify-center shrink-0">
                     <PlusSquare className="w-4 h-4" />
                   </div>
                   <div className="text-sm">
                     <p className="font-bold text-white">Elegí &quot;Agregar a pantalla de inicio&quot;</p>
                     <p className="text-xs text-[#9CA3AF] mt-0.5">
-                      ¡Listo! Te queda el icono de ASCEND en la pantalla como cualquier app.
+                      ¡Listo! Te queda el icono de ASCEND en tu pantalla como cualquier app.
                     </p>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-start gap-4 p-3.5 bg-[#1C1C22] rounded-2xl border border-[#2B2B36]">
+                <div className="flex items-start gap-4 p-3.5 bg-[#1C1C24] rounded-2xl border border-[#2B2B36]">
                   <div className="w-8 h-8 rounded-xl bg-[#6C5CFF]/20 text-[#6C5CFF] font-bold flex items-center justify-center shrink-0">
                     1
                   </div>
                   <div className="text-sm">
                     <p className="font-bold text-white">Abrí ascend.com.ar en Chrome</p>
                     <p className="text-xs text-[#9CA3AF] mt-0.5">
-                      Escaneá el QR de la recepción o entrá desde el navegador.
+                      Escaneá el cartel QR de la recepción o entrá desde el navegador.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 p-3.5 bg-[#1C1C22] rounded-2xl border border-[#2B2B36]">
+                <div className="flex items-start gap-4 p-3.5 bg-[#1C1C24] rounded-2xl border border-[#2B2B36]">
                   <div className="w-8 h-8 rounded-xl bg-[#6C5CFF]/20 text-[#6C5CFF] font-bold flex items-center justify-center shrink-0">
                     2
                   </div>
                   <div className="text-sm">
-                    <p className="font-bold text-white">Tocá el botón flotante &quot;Instalar App&quot;</p>
+                    <p className="font-bold text-white">Tocá el aviso &quot;Instalar App&quot;</p>
                     <p className="text-xs text-[#9CA3AF] mt-0.5">
-                      Aparece automáticamente abajo en la pantalla al ingresar a la web.
+                      Aparece automáticamente abajo en la pantalla al ingresar.
                     </p>
                   </div>
                 </div>
@@ -655,12 +655,12 @@ export default function HomePage() {
       {/* ========================================================= */}
       <footer className="border-t border-[#2B2B36] bg-[#09090B] py-12 px-4 text-xs text-[#7A8090]">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <div className="relative w-7 h-7">
-              <Image src="/icon.svg" alt="ASCEND" fill className="object-contain" />
+              <Image src="/logo-ascend.png" alt="ASCEND" fill className="object-contain" />
             </div>
             <span className="font-display font-bold text-sm text-white">ASCEND</span>
-            <span>— Tecnología de entrenamiento para el Alto Valle</span>
+            <span>— Entrená. Progresá. Ascendé.</span>
           </div>
 
           <div className="flex items-center gap-6">
