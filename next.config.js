@@ -23,10 +23,19 @@ const withPWA = require("@ducanh2912/next-pwa").default({
       {
         urlPattern: ({ url }) =>
           url.pathname.startsWith("/sign-in") ||
-          url.pathname.startsWith("/sign-up") ||
-          url.pathname.startsWith("/dashboard"),
+          url.pathname.startsWith("/sign-up"),
         handler: "NetworkOnly",
         method: "GET",
+      },
+      {
+        urlPattern: ({ url }) => url.pathname.startsWith("/dashboard"),
+        handler: "NetworkFirst",
+        method: "GET",
+        options: {
+          cacheName: "dashboard-pages",
+          networkTimeoutSeconds: 3,
+          cacheableResponse: { statuses: [0, 200] },
+        },
       },
     ],
   },
