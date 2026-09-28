@@ -203,7 +203,7 @@ export default function HomePage() {
             {/* Video 3D en Vivo */}
             <div className="relative rounded-2xl overflow-hidden bg-[#0B0B0F] border border-[#2B2B36] aspect-[9/10] mb-4">
               <video
-                src="/animaciones/press-banca.mp4"
+                src="https://res.cloudinary.com/ydo2ah5k/video/upload/v1790636662/ascend/ejercicios/press-banca.mp4"
                 autoPlay
                 loop
                 muted
