@@ -622,7 +622,7 @@ export default function HomePage() {
                 <Dumbbell className="w-5 h-5" />
               </div>
               <h3 className="font-display font-bold text-base text-white mb-2">
-                64 Videos 3D Anatómicos
+                Videos 3D de cada Máquina
               </h3>
               <p className="text-xs text-[#9CA3AF] leading-relaxed">
                 Muestra de forma clara la biomecánica, las fases del movimiento y el músculo principal trabajado.
@@ -763,7 +763,7 @@ export default function HomePage() {
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>64 Videos 3D anátomicos e infografías</span>
+                <span>Videos 3D anatómicos e infografías</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
