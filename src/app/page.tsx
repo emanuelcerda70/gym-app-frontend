@@ -23,12 +23,80 @@ import {
   Compass,
   Layers,
   Award,
+  Bot,
+  Cpu,
+  Database,
+  ShieldCheck,
+  Camera,
 } from "lucide-react"
+
+const CASOS_IA = [
+  {
+    id: 0,
+    etiqueta: "Creación Activa de Rutinas",
+    icono: Sparkles,
+    pregunta: "Armame una rutina de hipertrofia de 4 días enfocada en empuje y tracción.",
+    respuesta:
+      "¡Perfecto! Analicé el equipamiento relevado de tu sede (banco plano, poleas dobles y mancuernas) y tu nivel actual. Diseñé una rutina dividida en Torso/Pierna con descansos de 90s.",
+    accionEspecial: {
+      titulo: "Function Calling Activo • Guardado en Base de Datos",
+      detalle: "4 sesiones creadas en tu cuenta con 16 ejercicios reales, series y descansos ya listos.",
+      badge: "✓ Guardada en PostgreSQL",
+      color: "border-[#00E676]/40 bg-[#00E676]/10 text-[#00E676]",
+    },
+    superpoder: "No te tira un texto para copiar: escribe la rutina estructurada directamente en tu perfil.",
+  },
+  {
+    id: 1,
+    etiqueta: "Sobrecarga & Memoria de Cargas (PRs)",
+    icono: TrendingUp,
+    pregunta: "Mi récord en Press de Banca es 60 kg, ¿con qué peso arranco hoy?",
+    respuesta:
+      "Revisando tus récords históricos: tu 1RM registrado es 60 kg. Hoy corresponde trabajar al 75-80% de intensidad: 2 series de aproximación (30 kg y 45 kg) y luego 3 series efectivas de 8 repeticiones con 47.5 a 50 kg.",
+    accionEspecial: {
+      titulo: "Lectura de Récords Reales (PRs)",
+      detalle: "Cálculo matemático exacto de porcentajes de fatiga y sobrecarga sin que tengas que calcular nada.",
+      badge: "✓ Algoritmo de Progresión",
+      color: "border-[#00D4FF]/40 bg-[#00D4FF]/10 text-[#00D4FF]",
+    },
+    superpoder: "El socio nunca entrena a ciegas: el bot sabe exactamente cuánto levantó en cada sesión.",
+  },
+  {
+    id: 2,
+    etiqueta: "Sustitución Articular en Sala",
+    icono: Dumbbell,
+    pregunta: "La polea de Jalón al Pecho está ocupada, ¿qué ejercicio hago?",
+    respuesta:
+      "Podés sustituirlo de inmediato por Remo con Mancuerna apoyado en banco a 30° o Remo Pendlay. Ambos respetan el mismo vector de tracción dorsal y mantendrás el estímulo programado para hoy.",
+    accionEspecial: {
+      titulo: "Restricción Quirúrgica al Gimnasio",
+      detalle: "Tiene estrictamente prohibido inventar aparatos que tu gimnasio no tenga. Todo adaptado a tu sala.",
+      badge: "✓ Validado con Inventario",
+      color: "border-[#6C5CFF]/40 bg-[#6C5CFF]/10 text-[#8B7DFF]",
+    },
+    superpoder: "Cero alumnos parados esperando una máquina: alternativas biomecánicas al instante.",
+  },
+  {
+    id: 3,
+    etiqueta: "Visión Multimodal & Nutrición",
+    icono: Camera,
+    pregunta: "[Foto de plato] ¿Este almuerzo post-entreno me sirve para ganar masa muscular?",
+    respuesta:
+      "Excelente elección: detecto ~35g de proteína magra (pechuga de pollo), ~50g de carbohidratos complejos (arroz) y fibra vegetal. Cumple con la síntesis proteica de tu ventana de recuperación.",
+    accionEspecial: {
+      titulo: "Análisis Fotográfico Multimodal",
+      detalle: "El socio puede enviar fotos de platos, máquinas o etiquetas para recibir feedback en segundos.",
+      badge: "✓ Computer Vision Activa",
+      color: "border-purple-500/40 bg-purple-500/10 text-purple-300",
+    },
+    superpoder: "Acompañamiento 360° para el socio tanto adentro de la sala como en su vida diaria.",
+  },
+]
 
 export default function HomePage() {
   const router = useRouter()
   const { isLoaded, isSignedIn } = useAuth()
-  const [monedaUSD, setMonedaUSD] = useState(true)
+  const [casoIA, setCasoIA] = useState<number>(0)
   const [tabPlataforma, setTabPlataforma] = useState<"ios" | "android">("ios")
 
   // Si ya está autenticado, va directo al dashboard
@@ -68,12 +136,16 @@ export default function HomePage() {
           </Link>
 
           {/* Enlaces Desktop */}
-          <nav className="hidden md:flex items-center gap-8 text-sm text-[#9CA3AF]">
+          <nav className="hidden md:flex items-center gap-7 text-sm text-[#9CA3AF]">
             <a href="#experiencia" className="hover:text-white transition-colors">
               La Experiencia
             </a>
             <a href="#transformacion" className="hover:text-white transition-colors">
               Papel vs ASCEND
+            </a>
+            <a href="#ia-pionera" className="text-[#00D4FF] hover:text-white font-semibold transition-colors flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#00D4FF]" />
+              IA Pionera
             </a>
             <a href="#pilares" className="hover:text-white transition-colors">
               Pilares
@@ -109,8 +181,8 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto text-center relative z-10">
           {/* Badge Oficial */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#14141A] border border-[#2B2B36] text-xs font-semibold text-[#00D4FF] mb-6 shadow-sm">
-            <Compass className="w-3.5 h-3.5 text-[#00D4FF]" />
-            DE LA INCERTIDUMBRE A LA AUTONOMÍA
+            <Sparkles className="w-3.5 h-3.5 text-[#00D4FF]" />
+            PIONEROS EN INTELIGENCIA ARTIFICIAL APLICADA A SALAS DE GIMNASIO
           </div>
 
           {/* Título Principal */}
@@ -123,9 +195,10 @@ export default function HomePage() {
 
           {/* Subtítulo alineado a la Visión de Producto */}
           <p className="text-base sm:text-xl text-[#9CA3AF] max-w-2xl mx-auto leading-relaxed mb-8">
-            El sistema de acompañamiento inteligente que reemplaza las rutinas de papel por{" "}
-            <span className="text-white font-medium">videos anatómicos 3D</span>, progresión real de cargas y un{" "}
-            <span className="text-white font-medium">coach con inteligencia artificial</span>. Entrená. Progresá. Ascendé.
+            La primera plataforma para gimnasios que integra un{" "}
+            <span className="text-white font-medium">Asistente con Inteligencia Artificial biomecánica</span>,
+            videos anatómicos 3D de cada máquina y registro de cargas en tiempo real. 
+            Sin rutinas de papel, sin profesores sobrecargados y sin socios abandonando al segundo mes.
           </p>
 
           {/* Botones de Acción */}
@@ -351,7 +424,182 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================= */}
-      {/* 5. LOS 4 PILARES OFICIALES DE ASCEND */}
+      {/* 5. TECNOLOGÍA PIONERA: ASISTENTE CON IA BIOMECÁNICA */}
+      {/* ========================================================= */}
+      <section id="ia-pionera" className="py-20 sm:py-28 px-4 bg-gradient-to-b from-[#09090B] via-[#0E0E14] to-[#09090B] relative overflow-hidden">
+        {/* Glows ambientales violeta y cian */}
+        <div className="absolute top-1/2 left-0 w-96 h-96 bg-[#6C5CFF]/10 rounded-full blur-[150px] pointer-events-none" />
+        <div className="absolute top-1/2 right-0 w-96 h-96 bg-[#00D4FF]/10 rounded-full blur-[150px] pointer-events-none" />
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#14141A] border border-[#6C5CFF]/40 text-xs font-bold text-[#00D4FF] mb-4 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-[#00D4FF]" />
+              TECNOLOGÍA PIONERA • GOOGLE GEMINI + PINECONE VECTOR DB
+            </div>
+            <h2 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight max-w-3xl mx-auto">
+              El primer cerebro de IA que{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C5CFF] via-[#8B7DFF] to-[#00D4FF]">
+                entiende tu gimnasio y tus máquinas
+              </span>
+            </h2>
+            <p className="text-sm sm:text-base text-[#9CA3AF] mt-4 max-w-2xl mx-auto leading-relaxed">
+              No es un chatbot genérico que copia y pega respuestas de internet. Es un mentor de sala
+              entrenado con literatura biomecánica real, memoria de cargas históricas (PRs) y conexión directa a la base de datos de tu sede.
+            </p>
+          </div>
+
+          {/* Grid de los 4 Superpoderes de la IA */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-14">
+            {/* Superpoder 1 */}
+            <div className="bg-[#14141A] border border-[#2B2B36] hover:border-[#6C5CFF]/60 rounded-2xl p-5 transition-all group">
+              <div className="w-10 h-10 rounded-xl bg-[#6C5CFF]/15 border border-[#6C5CFF]/30 flex items-center justify-center text-[#6C5CFF] mb-4 group-hover:scale-105 transition-transform">
+                <Database className="w-5 h-5 text-[#8B7DFF]" />
+              </div>
+              <h3 className="font-display font-bold text-base text-white mb-2">
+                Function Calling en DB
+              </h3>
+              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                Cuando el socio pide una rutina, la IA no responde con texto plano: <strong className="text-white">escribe y guarda la rutina directamente en la base de datos</strong> de su cuenta con ejercicios, series y descansos.
+              </p>
+            </div>
+
+            {/* Superpoder 2 */}
+            <div className="bg-[#14141A] border border-[#2B2B36] hover:border-[#00D4FF]/60 rounded-2xl p-5 transition-all group">
+              <div className="w-10 h-10 rounded-xl bg-[#00D4FF]/15 border border-[#00D4FF]/30 flex items-center justify-center text-[#00D4FF] mb-4 group-hover:scale-105 transition-transform">
+                <TrendingUp className="w-5 h-5 text-[#00D4FF]" />
+              </div>
+              <h3 className="font-display font-bold text-base text-white mb-2">
+                Memoria de Cargas (PRs)
+              </h3>
+              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                Conoce los récords históricos de cada socio. Calcula series al <strong className="text-white">75-80% del 1RM</strong> para garantizar sobrecarga progresiva sin fatiga excesiva ni riesgo de lesión.
+              </p>
+            </div>
+
+            {/* Superpoder 3 */}
+            <div className="bg-[#14141A] border border-[#2B2B36] hover:border-[#00E676]/60 rounded-2xl p-5 transition-all group">
+              <div className="w-10 h-10 rounded-xl bg-[#00E676]/15 border border-[#00E676]/30 flex items-center justify-center text-[#00E676] mb-4 group-hover:scale-105 transition-transform">
+                <ShieldCheck className="w-5 h-5 text-[#00E676]" />
+              </div>
+              <h3 className="font-display font-bold text-base text-white mb-2">
+                Restricción a tu Inventario
+              </h3>
+              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                Cero alucinaciones. La IA tiene <strong className="text-white">prohibido recomendar aparatos inexistentes</strong> en tu sala. Todo se adapta con precisión a las máquinas relevadas en tu gimnasio.
+              </p>
+            </div>
+
+            {/* Superpoder 4 */}
+            <div className="bg-[#14141A] border border-[#2B2B36] hover:border-purple-500/60 rounded-2xl p-5 transition-all group">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-105 transition-transform">
+                <Cpu className="w-5 h-5 text-purple-400" />
+              </div>
+              <h3 className="font-display font-bold text-base text-white mb-2">
+                RAG Biomecánico + Visión
+              </h3>
+              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                Conectado a bases vectoriales Pinecone con manuales de anatomía articular y capaz de procesar imágenes de comidas o posturas con visión multimodal.
+              </p>
+            </div>
+          </div>
+
+          {/* Simulador Interactivo de Casos Reales */}
+          <div className="bg-[#14141A] border border-[#2B2B36] rounded-3xl p-6 sm:p-10 shadow-2xl relative">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-[#2B2B36] mb-6">
+              <div>
+                <span className="text-[11px] uppercase tracking-wider text-[#00D4FF] font-bold">
+                  Simulador en Vivo de la Inteligencia Artificial
+                </span>
+                <h3 className="font-display text-xl sm:text-2xl font-bold text-white mt-0.5">
+                  Mirá cómo resuelve dudas reales de tus alumnos
+                </h3>
+              </div>
+
+              {/* Botones de Casos */}
+              <div className="flex flex-wrap gap-2">
+                {CASOS_IA.map((caso, idx) => {
+                  const Icono = caso.icono
+                  const activo = casoIA === idx
+                  return (
+                    <button
+                      key={caso.id}
+                      onClick={() => setCasoIA(idx)}
+                      className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all ${
+                        activo
+                          ? "bg-[#6C5CFF] text-white border-[#6C5CFF] shadow-md shadow-[#6C5CFF]/30"
+                          : "bg-[#1C1C24] text-[#9CA3AF] border-[#2B2B36] hover:text-white hover:border-[#6C5CFF]/40"
+                      }`}
+                    >
+                      <Icono className="w-3.5 h-3.5" />
+                      {caso.etiqueta}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Ventana de Conversación Interactiva */}
+            <div className="bg-[#0D0D12] border border-[#2B2B36] rounded-2xl p-4 sm:p-6 space-y-4">
+              {/* Mensaje del Alumno */}
+              <div className="flex items-start gap-3 justify-end">
+                <div className="bg-[#1C1C24] border border-[#2B2B36] text-white text-xs sm:text-sm px-4 py-3 rounded-2xl rounded-tr-none max-w-lg">
+                  <p className="font-semibold text-[10px] text-[#9CA3AF] mb-1">Alumno en Sala</p>
+                  {CASOS_IA[casoIA].pregunta}
+                </div>
+                <div className="w-8 h-8 rounded-full bg-[#2B2B36] flex items-center justify-center text-xs font-bold text-white shrink-0 mt-1">
+                  A
+                </div>
+              </div>
+
+              {/* Respuesta del Bot ASCEND */}
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6C5CFF] to-[#00D4FF] flex items-center justify-center text-white shrink-0 mt-1 shadow-md shadow-[#6C5CFF]/30">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
+                <div className="space-y-3 max-w-xl">
+                  <div className="bg-[#14141A] border border-[#6C5CFF]/30 text-[#F5F7FA] text-xs sm:text-sm px-4 py-3.5 rounded-2xl rounded-tl-none">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="font-display font-bold text-xs text-[#00D4FF]">
+                        Asistente Biomecánico ASCEND
+                      </span>
+                      <span className="text-[10px] bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/20 px-2 py-0.5 rounded-full font-medium">
+                        Respuesta en 0.4s
+                      </span>
+                    </div>
+                    <p className="leading-relaxed text-[#D1D5DB]">
+                      {CASOS_IA[casoIA].respuesta}
+                    </p>
+                  </div>
+
+                  {/* Tarjeta de Acción Técnica en Segundo Plano */}
+                  <div className={`border rounded-xl p-3 text-xs ${CASOS_IA[casoIA].accionEspecial.color}`}>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="font-bold flex items-center gap-1.5">
+                        <Cpu className="w-3.5 h-3.5" />
+                        {CASOS_IA[casoIA].accionEspecial.titulo}
+                      </span>
+                      <span className="font-extrabold text-[10px] px-2 py-0.5 rounded-md bg-black/30">
+                        {CASOS_IA[casoIA].accionEspecial.badge}
+                      </span>
+                    </div>
+                    <p className="opacity-90 leading-relaxed">
+                      {CASOS_IA[casoIA].accionEspecial.detalle}
+                    </p>
+                  </div>
+
+                  <p className="text-[11px] text-[#7A8090] italic">
+                    💡 <strong>Impacto comercial:</strong> {CASOS_IA[casoIA].superpoder}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================= */}
+      {/* 6. LOS PILARES OFICIALES DE ASCEND */}
       {/* ========================================================= */}
       <section id="pilares" className="py-16 sm:py-24 px-4 bg-[#09090B]">
         <div className="max-w-5xl mx-auto">
@@ -374,7 +622,7 @@ export default function HomePage() {
                 <Dumbbell className="w-5 h-5" />
               </div>
               <h3 className="font-display font-bold text-base text-white mb-2">
-                33+ Videos 3D Anatómicos
+                64 Videos 3D Anatómicos
               </h3>
               <p className="text-xs text-[#9CA3AF] leading-relaxed">
                 Muestra de forma clara la biomecánica, las fases del movimiento y el músculo principal trabajado.
@@ -439,24 +687,10 @@ export default function HomePage() {
               Un único valor fijo para toda tu sede. Sin comisiones por alumno ni costos ocultos.
             </p>
 
-            {/* Switch de Moneda */}
-            <div className="inline-flex items-center bg-[#14141A] border border-[#2B2B36] rounded-xl p-1 mt-6">
-              <button
-                onClick={() => setMonedaUSD(true)}
-                className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
-                  monedaUSD ? "bg-[#6C5CFF] text-white shadow-sm" : "text-[#7A8090] hover:text-white"
-                }`}
-              >
-                Dólares (USD)
-              </button>
-              <button
-                onClick={() => setMonedaUSD(false)}
-                className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
-                  !monedaUSD ? "bg-[#6C5CFF] text-white shadow-sm" : "text-[#7A8090] hover:text-white"
-                }`}
-              >
-                Pesos Argentinos (ARS)
-              </button>
+            {/* Precios Fijos y Transparentes */}
+            <div className="inline-flex items-center gap-2 bg-[#14141A] border border-[#2B2B36] px-4 py-2 rounded-xl mt-6 text-xs text-[#9CA3AF]">
+              <span className="w-2 h-2 rounded-full bg-[#00E676]" />
+              Tarifa plana institucional • Sin costos por socio adicional
             </div>
           </div>
 
@@ -473,22 +707,39 @@ export default function HomePage() {
                   Plan Gimnasio Oficial
                 </h3>
                 <p className="text-xs sm:text-sm text-[#9CA3AF] mt-1">
-                  Acceso completo para tu gimnasio, profesores y todos tus alumnos.
+                  Acceso completo para tu gimnasio, profesores de turno y todos tus alumnos.
                 </p>
               </div>
 
               <div className="text-center md:text-right">
                 <div className="flex items-baseline justify-center md:justify-end gap-1.5">
                   <span className="font-display text-4xl sm:text-5xl font-black text-white">
-                    {monedaUSD ? "$100" : "$140.000"}
+                    $100
                   </span>
                   <span className="text-sm font-semibold text-[#9CA3AF]">
-                    {monedaUSD ? "USD / mes" : "ARS / mes"}
+                    USD / mes
                   </span>
                 </div>
-                <p className="text-xs text-[#00E676] font-medium mt-1">
-                  O {monedaUSD ? "$1.080 USD / año" : "anual con 10% de descuento"}
-                </p>
+                <div className="inline-flex items-center gap-1.5 bg-[#09090B] border border-[#00E676]/30 px-3 py-1 rounded-full text-xs text-[#00E676] font-semibold mt-2">
+                  <span>Plan Anual: <strong>$1.080 USD / año</strong> (10% OFF directo)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Aclaración destacada de modalidad de pago */}
+            <div className="bg-[#0D0D12] border border-[#6C5CFF]/30 rounded-2xl p-4 my-6">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-[#6C5CFF]/20 text-[#00D4FF] flex items-center justify-center shrink-0 mt-0.5">
+                  <Zap className="w-4 h-4 text-[#00D4FF]" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                    Modalidad de Pago Simple y Transparente
+                  </p>
+                  <p className="text-xs text-[#9CA3AF] mt-1 leading-relaxed">
+                    El valor de suscripción es de <strong className="text-white">100 USD mensuales</strong> (o 1.080 USD anuales). Podés abonarlo por <span className="text-white font-medium">transferencia a cuenta en dólares (USD)</span> o en <span className="text-[#00D4FF] font-semibold">pesos argentinos (ARS) cotizados al valor del dólar blue del día</span> de pago.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -500,23 +751,31 @@ export default function HomePage() {
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Relevamiento y carga de tus máquinas</span>
+                <span>Relevamiento y carga del parque de máquinas</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Cartelería QR lista para recepción</span>
+                <span>Cartelería QR lista para el mostrador</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Radar de inactividad de alumnos</span>
+                <span>Radar de inactividad para retener socios</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Catálogo de 33 videos 3D e infografías</span>
+                <span>64 Videos 3D anátomicos e infografías</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Soporte técnico directo para todo el país</span>
+                <span>Asistente con IA biomecánica 24/7 en sala</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#00E676] shrink-0" />
+                <span>Modo 100% Offline (PWA) sin caídas de red</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#00E676] shrink-0" />
+                <span>Soporte técnico directo en toda la Argentina</span>
               </div>
             </div>
 
@@ -532,7 +791,7 @@ export default function HomePage() {
             </a>
 
             <p className="text-center text-xs text-[#7A8090] mt-3">
-              Instalación y puesta en marcha en 24 horas. Sin tarjetas ni compromisos.
+              Instalación y relevamiento en 24 horas. Sin tarjetas ni compromisos.
             </p>
           </div>
         </div>
