@@ -106,12 +106,20 @@ export default function HomePage() {
     }
   }, [isLoaded, isSignedIn, router])
 
-  // Enlace directo a WhatsApp comercial oficial
-  const whatsappUrl =
+  // Enlaces directos a WhatsApp según perfil
+  const whatsappUrlGym =
     "https://wa.me/5492994017688?text=" +
     encodeURIComponent(
       "Hola Emanuel! Vi la web de ASCEND y quiero coordinar la prueba piloto de 14 días para mi gimnasio."
     )
+
+  const whatsappUrlAtleta =
+    "https://wa.me/5492994017688?text=" +
+    encodeURIComponent(
+      "Hola Emanuel! Vi la web de ASCEND y quiero suscribirme al Plan Atleta ($10 USD) para entrenar por mi cuenta."
+    )
+
+  const whatsappUrl = whatsappUrlGym
 
   return (
     <div className="min-h-screen bg-[#09090B] text-[#F5F7FA] font-sans selection:bg-[#6C5CFF]/30 selection:text-white">
@@ -672,127 +680,204 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================= */}
-      {/* 6. PRECIOS & PROPUESTA PARA GIMNASIOS (B2B) */}
+      {/* 6. PLANES & SUSCRIPCIONES (ATLETA Y GIMNASIO) */}
       {/* ========================================================= */}
       <section id="precios" className="py-16 sm:py-24 px-4 bg-[#14141A]/40 border-t border-[#2B2B36]">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
             <span className="text-xs uppercase tracking-widest text-[#00E676] font-bold">
-              Propuesta Comercial
+              Planes y Suscripciones
             </span>
             <h2 className="font-display text-3xl sm:text-5xl font-extrabold mt-1 text-white">
-              Planes para Gimnasios
+              Elegí cómo querés entrenar
             </h2>
-            <p className="text-sm sm:text-base text-[#9CA3AF] mt-2">
-              Un único valor fijo para toda tu sede. Sin comisiones por alumno ni costos ocultos.
+            <p className="text-sm sm:text-base text-[#9CA3AF] mt-2 max-w-xl mx-auto">
+              Acceso individual para atletas que entrenan por su cuenta o equipamiento integral para salas de musculación de todo el país.
             </p>
 
-            {/* Precios Fijos y Transparentes */}
-            <div className="inline-flex items-center gap-2 bg-[#14141A] border border-[#2B2B36] px-4 py-2 rounded-xl mt-6 text-xs text-[#9CA3AF]">
+            <div className="inline-flex items-center gap-2 bg-[#14141A] border border-[#2B2B36] px-4 py-2 rounded-xl mt-5 text-xs text-[#9CA3AF]">
               <span className="w-2 h-2 rounded-full bg-[#00E676]" />
-              Tarifa plana institucional • Sin costos por socio adicional
+              Abonable en USD vía transferencia o en pesos (ARS) al valor del dólar blue del día
             </div>
           </div>
 
-          {/* Tarjeta Principal de Precio */}
-          <div className="bg-gradient-to-b from-[#1C1C24] to-[#14141A] border-2 border-[#6C5CFF] rounded-3xl p-6 sm:p-10 shadow-2xl shadow-[#6C5CFF]/15 relative">
-            {/* Tag destacado oficial */}
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#6C5CFF] to-[#00D4FF] text-white text-[11px] font-extrabold uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
-              14 Días de Piloto Gratis
-            </div>
-
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-[#2B2B36]">
+          <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+            {/* TARJETA 1: PLAN ATLETA PARTICULAR */}
+            <div className="bg-[#14141A] border border-[#2B2B36] hover:border-[#6C5CFF]/60 rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all">
               <div>
-                <h3 className="font-display text-2xl font-extrabold text-white">
-                  Plan Gimnasio Oficial
-                </h3>
-                <p className="text-xs sm:text-sm text-[#9CA3AF] mt-1">
-                  Acceso completo para tu gimnasio, profesores de turno y todos tus alumnos.
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1C1C24] border border-[#2B2B36] text-[11px] font-bold text-[#00D4FF] mb-4">
+                  <Dumbbell className="w-3.5 h-3.5 text-[#00D4FF]" />
+                  ATLETA INDIVIDUAL
+                </div>
+
+                <div className="flex items-baseline justify-between gap-4 pb-6 border-b border-[#2B2B36]">
+                  <div>
+                    <h3 className="font-display text-2xl font-extrabold text-white">
+                      Plan Atleta
+                    </h3>
+                    <p className="text-xs text-[#9CA3AF] mt-1">
+                      Para entrenar por tu cuenta en cualquier gimnasio del país.
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-baseline justify-end gap-1">
+                      <span className="font-display text-4xl font-black text-white">$10</span>
+                      <span className="text-xs font-semibold text-[#9CA3AF]">USD / mes</span>
+                    </div>
+                    <span className="text-[10px] text-[#00D4FF]">O en pesos al blue del día</span>
+                  </div>
+                </div>
+
+                {/* Checklist Atleta */}
+                <div className="space-y-3.5 my-6 text-sm text-[#F5F7FA]">
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Acceso libre para entrenar en cualquier gimnasio o box</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Asistente con IA en <strong>Entrenamiento & Nutrición 24/7</strong></span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Catálogo de videos 3D de cada máquina en sala</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Registro de cargas, series y cálculo automático de 1RM</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Análisis fotográfico de platos de comida por IA</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Modo 100% Offline (PWA) sin cortes por baja señal</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <a
+                  href={whatsappUrlAtleta}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#1C1C24] hover:bg-[#2B2B36] border border-[#6C5CFF]/50 text-white font-bold text-sm py-3.5 rounded-xl transition-all active:scale-[0.99]"
+                >
+                  <MessageCircle className="w-4 h-4 text-[#00D4FF]" />
+                  Suscribirme al Plan Atleta ($10 USD)
+                </a>
+                <p className="text-center text-[11px] text-[#7A8090] mt-2">
+                  Transferencia directa • Activación inmediata de tu cuenta
                 </p>
               </div>
-
-              <div className="text-center md:text-right">
-                <div className="flex items-baseline justify-center md:justify-end gap-1.5">
-                  <span className="font-display text-4xl sm:text-5xl font-black text-white">
-                    $100
-                  </span>
-                  <span className="text-sm font-semibold text-[#9CA3AF]">
-                    USD / mes
-                  </span>
-                </div>
-                <div className="inline-flex items-center gap-1.5 bg-[#09090B] border border-[#00E676]/30 px-3 py-1 rounded-full text-xs text-[#00E676] font-semibold mt-2">
-                  <span>Plan Anual: <strong>$1.080 USD / año</strong> (10% OFF directo)</span>
-                </div>
-              </div>
             </div>
 
-            {/* Aclaración destacada de modalidad de pago */}
-            <div className="bg-[#0D0D12] border border-[#6C5CFF]/30 rounded-2xl p-4 my-6">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-[#6C5CFF]/20 text-[#00D4FF] flex items-center justify-center shrink-0 mt-0.5">
-                  <Zap className="w-4 h-4 text-[#00D4FF]" />
+            {/* TARJETA 2: PLAN GIMNASIO OFICIAL (DESTACADA B2B) */}
+            <div className="bg-gradient-to-b from-[#1C1C24] to-[#14141A] border-2 border-[#6C5CFF] rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-2xl shadow-[#6C5CFF]/20 relative">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#6C5CFF] to-[#00D4FF] text-white text-[11px] font-extrabold uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
+                14 Días de Piloto Gratis
+              </div>
+
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#6C5CFF]/15 border border-[#6C5CFF]/40 text-[11px] font-bold text-[#8B7DFF] mb-4">
+                  <Award className="w-3.5 h-3.5 text-[#00D4FF]" />
+                  SEDE COMPLETA
                 </div>
-                <div>
-                  <p className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-                    Modalidad de Pago Simple y Transparente
-                  </p>
-                  <p className="text-xs text-[#9CA3AF] mt-1 leading-relaxed">
-                    El valor de suscripción es de <strong className="text-white">100 USD mensuales</strong> (o 1.080 USD anuales). Podés abonarlo por <span className="text-white font-medium">transferencia a cuenta en dólares (USD)</span> o en <span className="text-[#00D4FF] font-semibold">pesos argentinos (ARS) cotizados al valor del dólar blue del día</span> de pago.
-                  </p>
+
+                <div className="flex items-baseline justify-between gap-4 pb-6 border-b border-[#2B2B36]">
+                  <div>
+                    <h3 className="font-display text-2xl font-extrabold text-white">
+                      Plan Gimnasio Oficial
+                    </h3>
+                    <p className="text-xs text-[#9CA3AF] mt-1">
+                      Acceso completo para tu gimnasio, profesores y todos tus alumnos.
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-baseline justify-end gap-1">
+                      <span className="font-display text-4xl font-black text-white">$100</span>
+                      <span className="text-xs font-semibold text-[#9CA3AF]">USD / mes</span>
+                    </div>
+                    <div className="inline-flex items-center gap-1 bg-[#09090B] border border-[#00E676]/30 px-2 py-0.5 rounded-md text-[10px] text-[#00E676] font-semibold mt-1">
+                      <span>Anual: $1.080 USD (10% OFF)</span>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Checklist Gimnasio */}
+                <div className="space-y-3.5 my-6 text-sm text-[#F5F7FA]">
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span><strong>Alumnos ilimitados</strong> en tu sede (tarifa plana)</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Relevamiento y carga del parque de máquinas propio</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Cartelería QR lista para recepción y mostrador</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Radar de inactividad para retener socios y evitar bajas</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Videos 3D e infografías anatómicas de tus máquinas</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Asistente con IA biomecánica para todos tus alumnos</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+                    <span>Soporte técnico directo y puesta en marcha en toda la Argentina</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <a
+                  href={whatsappUrlGym}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#6C5CFF] to-[#00D4FF] hover:opacity-95 text-white font-bold text-sm sm:text-base py-3.5 rounded-xl shadow-lg shadow-[#6C5CFF]/30 transition-all active:scale-[0.99]"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Comenzar Prueba de 14 Días sin Costo
+                </a>
+                <p className="text-center text-[11px] text-[#7A8090] mt-2">
+                  Relevamiento y puesta en marcha en 24h • Sin tarjetas
+                </p>
               </div>
             </div>
+          </div>
 
-            {/* Checklist de lo que incluye */}
-            <div className="grid sm:grid-cols-2 gap-3.5 my-8 text-sm text-[#F5F7FA]">
-              <div className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Alumnos ilimitados en tu sede</span>
+          {/* Banner Caballo de Troya (Socio conecta con Gym) */}
+          <div className="mt-10 bg-[#14141A] border border-[#2B2B36] rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-[#6C5CFF]/20 text-[#00D4FF] flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-[#00D4FF]" />
               </div>
-              <div className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Relevamiento y carga del parque de máquinas</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Cartelería QR lista para el mostrador</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Radar de inactividad para retener socios</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Videos 3D anatómicos e infografías</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Asistente con IA biomecánica 24/7 en sala</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Modo 100% Offline (PWA) sin caídas de red</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#00E676] shrink-0" />
-                <span>Soporte técnico directo en toda la Argentina</span>
+              <div>
+                <p className="text-sm font-bold text-white">
+                  ¿Entrenás en un gimnasio y querés que lo tengan gratis para todos?
+                </p>
+                <p className="text-xs text-[#9CA3AF] mt-0.5">
+                  Pasale nuestro contacto al dueño o encargado de tu sala. Cuando tu gimnasio se suma, el acceso es 100% libre para todos los socios.
+                </p>
               </div>
             </div>
-
-            {/* Botón WhatsApp de Cierre */}
             <a
-              href={whatsappUrl}
+              href={whatsappUrlGym}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#6C5CFF] to-[#00D4FF] hover:opacity-95 text-white font-bold text-base py-4 rounded-xl shadow-lg shadow-[#6C5CFF]/30 transition-all active:scale-[0.99]"
+              className="shrink-0 text-xs font-bold text-[#00D4FF] hover:text-white border border-[#00D4FF]/40 hover:border-[#00D4FF] px-4 py-2 rounded-xl transition-all"
             >
-              <MessageCircle className="w-5 h-5" />
-              Comenzar Prueba de 14 Días sin Costo
+              Recomendar a mi Gym →
             </a>
-
-            <p className="text-center text-xs text-[#7A8090] mt-3">
-              Instalación y relevamiento en 24 horas. Sin tarjetas ni compromisos.
-            </p>
           </div>
         </div>
       </section>
