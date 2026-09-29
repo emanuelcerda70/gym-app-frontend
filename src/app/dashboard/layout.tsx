@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import BottomNav from "@/components/layout/BottomNav"
 import RestBar from "@/components/entrenamiento/RestBar"
 import ClerkSync from "@/components/auth/ClerkSync"
+import SubscriptionGate from "@/components/auth/SubscriptionGate"
 import { usePerfil } from "@/hooks/usePerfil"
 import { useAuthStore } from "@/store/authStore"
 
@@ -22,11 +23,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [perfilLoading, perfil, router, token])
 
   return (
-    <div className="min-h-screen bg-surface">
-      <ClerkSync />
-      <RestBar />
-      <div className="pb-24">{children}</div>
-      <BottomNav />
-    </div>
+    <SubscriptionGate>
+      <div className="min-h-screen bg-surface">
+        <ClerkSync />
+        <RestBar />
+        <div className="pb-24">{children}</div>
+        <BottomNav />
+      </div>
+    </SubscriptionGate>
   )
 }

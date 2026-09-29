@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useClerk, useUser } from "@clerk/nextjs"
 import {
+  Crown,
   Dumbbell,
   Flame,
   LogOut,
@@ -133,6 +134,17 @@ export default function PerfilPage() {
         <Fila label="Comidas favoritas" valor={perfil?.comidas_favoritas || "No especificó"} />
         <Fila label="Evita" valor={perfil?.comidas_evitar || "Nada en particular"} />
       </section>
+
+      {/* Acceso directo a Panel Superadmin (Solo para Emanuel) */}
+      {(perfil?.es_admin || perfil?.email === "emanuelcerda70@gmail.com") && (
+        <Link
+          href="/superadmin"
+          className="mt-4 w-full bg-gradient-to-r from-[#6C5CFF] to-[#00D4FF] text-white font-black rounded-xl h-12 flex items-center justify-center gap-2 shadow-lg shadow-[#6C5CFF]/30 hover:opacity-95 transition-all active:scale-[0.98]"
+        >
+          <Crown className="w-5 h-5 text-white" />
+          Panel SuperAdmin Maestro
+        </Link>
+      )}
 
       {/* Editar perfil */}
       <Link

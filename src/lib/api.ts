@@ -137,4 +137,26 @@ export const api = {
         body: JSON.stringify(data),
       }),
   },
+
+  admin: {
+    metricas: () =>
+      request<import("@/types").MetricasAdmin>("/api/admin/metricas"),
+    usuarios: () =>
+      request<import("@/types").UsuarioAdmin[]>("/api/admin/usuarios"),
+    activar: (usuarioId: number, dias: number = 30) =>
+      request<{ mensaje: string; estado_suscripcion: string; fecha_vencimiento: string }>(
+        `/api/admin/usuarios/${usuarioId}/activar`,
+        { method: "POST", body: JSON.stringify({ dias }) }
+      ),
+    suspender: (usuarioId: number) =>
+      request<{ mensaje: string; estado_suscripcion: string }>(
+        `/api/admin/usuarios/${usuarioId}/suspender`,
+        { method: "POST" }
+      ),
+    eliminar: (usuarioId: number) =>
+      request<{ mensaje: string }>(
+        `/api/admin/usuarios/${usuarioId}`,
+        { method: "DELETE" }
+      ),
+  },
 }

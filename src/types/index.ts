@@ -30,6 +30,36 @@ export interface Perfil {
   comidas_favoritas: string | null
   comidas_evitar: string | null
   racha_actual_dias: number
+  rol?: string
+  es_admin?: boolean
+  estado_suscripcion?: "activo" | "prueba" | "inactivo"
+  fecha_alta?: string | null
+  fecha_vencimiento?: string | null
+  dias_restantes?: number
+}
+
+export interface UsuarioAdmin {
+  id: number
+  nombre: string
+  email: string
+  rol: string
+  estado_suscripcion: "activo" | "prueba" | "inactivo"
+  fecha_alta: string | null
+  fecha_vencimiento: string | null
+  dias_restantes: number
+  gimnasio_id: number
+  gimnasio_nombre: string
+  racha_actual_dias: number
+  ultimo_entrenamiento: string | null
+  objetivo: string | null
+}
+
+export interface MetricasAdmin {
+  total_usuarios: number
+  activos: number
+  en_prueba: number
+  inactivos: number
+  total_gimnasios: number
 }
 
 export interface PerfilUpdate {
