@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 72">
-  <rect width="64" height="72" rx="14" fill="#0B0B0F"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#09090B"/>
   <defs>
-    <linearGradient id="g" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="#FF4D00"/>
-      <stop offset="70%" stop-color="#FF7A1F"/>
-      <stop offset="100%" stop-color="#FFB300"/>
+    <linearGradient id="ascendGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#00D4FF"/>
+      <stop offset="100%" stop-color="#6C5CFF"/>
     </linearGradient>
   </defs>
-  <path d="M32,5 C45,19 54,28 54,45 C54,57 44,67 32,67 C20,67 10,57 10,45 C10,32 19,23 28,17 C28,25 31,28 34,28 C31,22 31,14 32,5 Z" fill="url(#g)"/>
+  <g transform="translate(86, 95) scale(1.15)">
+    <polygon points="150,1 1,263 45,263 107,204 110,203 120,214 152,174 159,180 184,215 194,203 251,263 297,263 241,164 234,187 232,184 238,124 212,148 189,176 150,140 120,183 113,175 78,203 151,78 189,146 204,132 192,118 214,116" fill="url(#ascendGrad)"/>
+  </g>
 </svg>
- 
