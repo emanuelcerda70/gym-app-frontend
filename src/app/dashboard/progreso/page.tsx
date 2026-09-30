@@ -11,6 +11,7 @@ import {
   TrendingUp,
 } from "lucide-react"
 import { usePerfil } from "@/hooks/usePerfil"
+import { useCheckin } from "@/hooks/useCheckin"
 import { getMascotAvatar } from "@/utils/mascot"
 
 const BARRAS_FUERZA = [34, 48, 41, 58, 52, 66, 60, 74, 69, 82, 77, 92]
@@ -72,8 +73,11 @@ function ProgressCard({
 }
 
 export default function ProgresoPage() {
-  const { perfil, isLoading } = usePerfil()
+  const { perfil, isLoading: perfilLoading } = usePerfil()
+  const { historial } = useCheckin()
   const racha = perfil?.racha_actual_dias ?? 0
+  const totalSesiones = historial.data?.total_dias ?? 0
+  const volumenTotalKg = totalSesiones > 0 ? totalSesiones * 450 : 0
 
   return (
     <main className="px-6 pt-6 pb-6">
@@ -98,7 +102,7 @@ export default function ProgresoPage() {
           </div>
           <div>
             <p className="font-sans text-xs text-text-secondary">Constancia</p>
-            {isLoading ? (
+            {perfilLoading ? (
               <p className="font-sans text-sm text-text-secondary">
                 Cargando tu racha...
               </p>
@@ -132,18 +136,26 @@ export default function ProgresoPage() {
         <ProgressCard
           icon={CalendarCheck}
           label="Entrenamientos este mes"
-          value="12"
-          contexto="Este mes vas imparable"
-          tendencia="+8%"
-          sparkline={SPARK_ALTURAS}
+          value={historial.isLoading ? "--" : String(totalSesiones)}
+          contexto={
+            totalSesiones > 0
+              ? `${totalSesiones} ${totalSesiones === 1 ? "sesión completada" : "sesiones completadas"}`
+              : "Comenzá hoy tu primer día"
+          }
+          tendencia={totalSesiones > 0 ? `+${totalSesiones}` : undefined}
+          sparkline={totalSesiones > 0 ? SPARK_ALTURAS : undefined}
         />
         <ProgressCard
           icon={Dumbbell}
           label="Volumen total"
-          value="4,500 kg"
-          contexto="Acumulado en la temporada"
-          tendencia="+12%"
-          sparkline={[...SPARK_ALTURAS].reverse()}
+          value={historial.isLoading ? "--" : `${volumenTotalKg.toLocaleString()} kg`}
+          contexto={
+            volumenTotalKg > 0
+              ? "Estimado en tus entrenamientos"
+              : "Sin series registradas todavía"
+          }
+          tendencia={volumenTotalKg > 0 ? "+100%" : undefined}
+          sparkline={volumenTotalKg > 0 ? [...SPARK_ALTURAS].reverse() : undefined}
         />
       </div>
 
@@ -161,21 +173,35 @@ export default function ProgresoPage() {
             </button>
           </div>
 
-          {/* Barras con degradado vertical */}
-          <div className="flex items-end gap-1.5 h-24 mb-3">
-            {BARRAS_FUERZA.map((h, i) => (
-              <div
-                key={i}
-                style={{ height: `${h}%` }}
-                className="flex-1 rounded-t-md bg-gradient-to-t from-primary/20 to-secondary"
-              />
-            ))}
-          </div>
+          {totalSesiones > 0 ? (
+            <>
+              {/* Barras con degradado vertical */}
+              <div className="flex items-end gap-1.5 h-24 mb-3">
+                {BARRAS_FUERZA.map((h, i) => (
+                  <div
+                    key={i}
+                    style={{ height: `${h}%` }}
+                    className="flex-1 rounded-t-md bg-gradient-to-t from-primary/20 to-secondary"
+                  />
+                ))}
+              </div>
 
-          <p className="font-sans text-sm text-text-secondary leading-relaxed">
-            Tendencia positiva en fuerza durante las últimas 4 semanas. Seguí
-            así y los próximos rondos lo van a reflejar.
-          </p>
+              <p className="font-sans text-sm text-text-secondary leading-relaxed">
+                Tendencia positiva en fuerza durante las últimas semanas. Seguí
+                así y tus marcas seguirán subiendo.
+              </p>
+            </>
+          ) : (
+            <div className="py-6 text-center">
+              <Dumbbell className="w-8 h-8 text-text-secondary/40 mx-auto mb-2" />
+              <p className="font-sans text-sm font-semibold text-text-primary mb-1">
+                Aún no hay series registradas
+              </p>
+              <p className="font-sans text-xs text-text-secondary max-w-xs mx-auto">
+                Anotá tus cargas y repeticiones en cada ejercicio para ver la curva real de tu progreso y sobrecarga progresiva.
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </main>

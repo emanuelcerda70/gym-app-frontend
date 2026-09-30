@@ -33,6 +33,13 @@ export default function DashboardPage() {
   const racha = perfil?.racha_actual_dias ?? 0
   const rutina = rutinaActual.data
   const duracionEstimada = rutina ? rutina.ejercicios.length * 12 : 0
+  const caloriasSemana = frecuencia > 0 ? frecuencia * 350 : 0
+  const logrosCompletados =
+    (racha > 0 ? 1 : 0) +
+    (frecuencia >= 1 ? 1 : 0) +
+    (frecuencia >= 3 ? 1 : 0) +
+    (racha >= 7 ? 1 : 0) +
+    (racha >= 30 ? 1 : 0)
 
   return (
     <main className="px-6 pb-6">
@@ -134,7 +141,7 @@ export default function DashboardPage() {
           <Flame className="w-5 h-5 text-secondary mb-3" />
           <p className="label-caps">Calorías esta semana</p>
           <p className="font-display text-2xl font-bold text-text-primary mt-1">
-            2.450 kcal
+            {historial.isLoading ? "--" : `${caloriasSemana} kcal`}
           </p>
           <div className="flex gap-1 mt-3">
             {Array.from({ length: DIAS_SEMANA }, (_, i) => (
@@ -142,7 +149,7 @@ export default function DashboardPage() {
                 key={i}
                 className={cn(
                   "flex-1 h-1 rounded-full transition-colors",
-                  i < 4
+                  i < frecuencia
                     ? "bg-gradient-to-r from-primary to-secondary"
                     : "bg-surface-light border border-hierro-border"
                 )}
@@ -222,10 +229,10 @@ export default function DashboardPage() {
             </div>
             <p className="label-caps">Progreso</p>
             <p className="font-display text-lg font-bold text-text-primary mt-1">
-              +10kg en Press
+              {frecuencia > 0 ? `${frecuencia} ${frecuencia === 1 ? "sesión" : "sesiones"}` : "Sin registros"}
             </p>
             <p className="font-sans text-xs text-text-secondary mt-1">
-              Este mes subiste tu mejor marca.
+              {frecuencia > 0 ? "Completaste entrenamientos esta semana." : "Registrá tu primera serie para ver récords."}
             </p>
           </div>
 
@@ -235,10 +242,10 @@ export default function DashboardPage() {
             </div>
             <p className="label-caps">Logros</p>
             <p className="font-display text-lg font-bold text-text-primary mt-1">
-              3 de 5
+              {logrosCompletados} de 5
             </p>
             <p className="font-sans text-xs text-text-secondary mt-1">
-              Desbloqueaste logros esta semana.
+              {logrosCompletados > 0 ? "¡Vas desbloqueando insignias!" : "Comenzá tu racha para desbloquear logros."}
             </p>
           </div>
 
@@ -279,7 +286,9 @@ export default function DashboardPage() {
                 </span>
               </div>
               <p className="font-sans text-xs text-text-secondary mt-0.5">
-                Hoy aumenta el peso en Press Banca.
+                {rutina
+                  ? `Listo para entrenar ${rutina.nombre_rutina}.`
+                  : "Hablá con el asistente para diseñar tu primera rutina."}
               </p>
             </div>
           </div>
