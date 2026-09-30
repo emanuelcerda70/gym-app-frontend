@@ -23,13 +23,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [perfilLoading, perfil, router, token])
 
   return (
-    <SubscriptionGate>
-      <div className="min-h-screen bg-surface">
-        <ClerkSync />
-        <RestBar />
-        <div className="pb-24">{children}</div>
-        <BottomNav />
-      </div>
-    </SubscriptionGate>
+    <>
+      <ClerkSync />
+      <SubscriptionGate>
+        <div className="min-h-screen bg-surface">
+          <RestBar />
+          <div className="pb-24">{children}</div>
+          <BottomNav />
+        </div>
+      </SubscriptionGate>
+    </>
   )
 }

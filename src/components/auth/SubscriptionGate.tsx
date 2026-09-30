@@ -1,9 +1,10 @@
 "use client"
 
 import { usePerfil } from "@/hooks/usePerfil"
-import { useClerk } from "@clerk/nextjs"
+import { useClerk, useUser } from "@clerk/nextjs"
 import { Sparkles, ShieldAlert, MessageCircle, LogOut, CheckCircle2, Crown, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { useState, useEffect } from "react"
 
 interface SubscriptionGateProps {
   children: React.ReactNode
@@ -12,26 +13,27 @@ interface SubscriptionGateProps {
 export default function SubscriptionGate({ children }: SubscriptionGateProps) {
   const { perfil, isLoading } = usePerfil()
   const { signOut } = useClerk()
+  const { isLoaded: userLoaded, user } = useUser()
+  const [demoraServidor, setDemoraServidor] = useState(false)
 
-  // Pantalla de carga mientras se verifica el perfil
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center p-4">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/logo-ascend.png"
-          alt="ASCEND"
-          className="w-16 h-16 animate-pulse drop-shadow-[0_0_25px_rgba(108,92,255,0.6)]"
-        />
-        <p className="mt-4 text-xs font-bold uppercase tracking-widest text-[#7A8090]">
-          Sincronizando estado de cuenta...
-        </p>
-      </div>
-    )
-  }
+  // Detectar si el servidor tarda en responder (típico cold-start de Render)
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    if (isLoading) {
+      timer = setTimeout(() => {
+        setDemoraServidor(true)
+      }, 5000)
+    } else {
+      setDemoraServidor(false)
+    }
+    return () => clearTimeout(timer)
+  }, [isLoading])
 
-  // Bypass completo e irrestricto para Emanuel / Superadmin
+  // 1. Bypass completo e inmediato para Emanuel / Superadmin
+  // ¡Se valida directo desde Clerk para que Emanuel NUNCA quede trabado esperando al backend!
+  const emailClerk = user?.primaryEmailAddress?.emailAddress?.toLowerCase() || ""
   const esSuperAdmin =
+    emailClerk === "emanuelcerda70@gmail.com" ||
     perfil?.es_admin ||
     perfil?.rol === "admin" ||
     (perfil?.email && perfil.email.toLowerCase() === "emanuelcerda70@gmail.com")
@@ -54,6 +56,37 @@ export default function SubscriptionGate({ children }: SubscriptionGateProps) {
         </div>
         {children}
       </>
+    )
+  }
+
+  // 2. Pantalla de carga mientras se verifica el perfil
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center p-6 text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo-ascend.png"
+          alt="ASCEND"
+          className="w-16 h-16 animate-pulse drop-shadow-[0_0_25px_rgba(108,92,255,0.6)]"
+        />
+        <p className="mt-4 text-xs font-bold uppercase tracking-widest text-[#7A8090]">
+          Sincronizando estado de cuenta...
+        </p>
+        {demoraServidor && (
+          <div className="mt-4 max-w-xs bg-[#14141A] border border-[#2B2B36] rounded-xl p-3 text-xs text-[#9CA3AF]">
+            <p className="text-white font-semibold mb-1">Reactivando servidor en la nube</p>
+            <p className="text-[11px] text-[#7A8090]">
+              El backend se está iniciando tras un reposo automático. Tomará solo unos segundos más...
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 text-[10px] text-[#00D4FF] hover:underline font-bold"
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
+      </div>
     )
   }
 
