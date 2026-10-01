@@ -65,11 +65,24 @@ export const api = {
         "/api/auth/login",
         { method: "POST", body: JSON.stringify(data) }
       ),
-    sync: (email: string, nombre: string = "") =>
-      request<{ access_token: string; usuario_id: number; nombre: string }>(
+    sync: async (email: string = "", nombre: string = "") => {
+      // Priorizar el BFF seguro de Next.js que valida criptográficamente la sesión Clerk en el servidor
+      try {
+        const res = await fetch("/api/backend-sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        })
+        if (res.ok) {
+          return (await res.json()) as { access_token: string; usuario_id: number; nombre: string }
+        }
+      } catch {
+        // Fallback en caso de entorno fuera del navegador
+      }
+      return request<{ access_token: string; usuario_id: number; nombre: string }>(
         "/api/auth/sync",
         { method: "POST", body: JSON.stringify({ email, nombre }) }
-      ),
+      )
+    },
   },
 
   perfil: {
